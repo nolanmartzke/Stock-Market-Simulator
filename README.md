@@ -12,13 +12,14 @@ Also, be sure to check out the Wiki for information on how to maintain your team
 
 <!--A one paragraph summary of what the software will do.-->
 
-This is an example paragraph written in markdown. You can use *italics*, **bold**, and other formatting options. You can also <u>use inline html</u> to format your text. The example sections included in this document are not necessarily all the sections you will want, and it is possible that you won't use all the one's provided. It is your responsibility to create a document that adequately conveys all the information about your project specifications and requirements.
+For this project our team will be creating a map that tracks the stock market and allows users to buy, sell, and otherwise interact with this market. It will include actual stock data scraped (preferably in real time). It will make use of a database to store client/user data, including account names and passwords. 
 
 Please view this file's source to see `<!--comments-->` with guidance on how you might use the different sections of this document. 
 
 ### Customer
+<!--A bri description of the customer for this software, both in general (the population who might eventually use such a system) and specifically for this document (the customer(s) who informed this document). Every project will have a customer from the CS506 instructional staff. Requirements should not be derived simply from discussion among team members. Ideally your customer should not only talk to you about requirements but also be excited later in the semes
 
-<!--A brief description of the customer for this software, both in general (the population who might eventually use such a system) and specifically for this document (the customer(s) who informed this document). Every project will have a customer from the CS506 instructional staff. Requirements should not be derived simply from discussion among team members. Ideally your customer should not only talk to you about requirements but also be excited later in the semester to use the system.-->
+The customers for this application will be users interested in investing in the stock market. This will include people that are invested in keeping up to date with stock market fluctuations and individuals that invest in certain stocks. 
 
 ### Specification
 
