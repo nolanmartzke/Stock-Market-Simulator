@@ -1,2 +1,19 @@
 .DS_Store
 *.zip
+
+# macOS
+.DS_Store
+
+# Node / Vite
+node_modules/
+dist/
+
+# Java (if used)
+target/
+build/
+*.class
+
+# Logs & env
+*.log
+.env*
+
