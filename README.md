@@ -17,7 +17,7 @@ For this project our team will be creating a map that tracks the stock market an
 Please view this file's source to see `<!--comments-->` with guidance on how you might use the different sections of this document. 
 
 ### Customer
-<!--A bri description of the customer for this software, both in general (the population who might eventually use such a system) and specifically for this document (the customer(s) who informed this document). Every project will have a customer from the CS506 instructional staff. Requirements should not be derived simply from discussion among team members. Ideally your customer should not only talk to you about requirements but also be excited later in the semes
+<!--A bri description of the customer for this software, both in general (the population who might eventually use such a system) and specifically for this document (the customer(s) who informed this document). Every project will have a customer from the CS506 instructional staff. Requirements should not be derived simply from discussion among team members. Ideally your customer should not only talk to you about requirements but also be excited later in the semes-->
 
 The customers for this application will be users interested in investing in the stock market. This will include people that are invested in keeping up to date with stock market fluctuations and individuals that invest in certain stocks. 
 
