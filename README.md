@@ -6,7 +6,7 @@ Also, be sure to check out the Wiki for information on how to maintain your team
 
 ## TeamName
 
-<!--The name of your team.-->
+Team 8
 
 ### Project Abstract
 
