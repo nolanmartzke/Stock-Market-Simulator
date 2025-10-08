@@ -1,16 +1,14 @@
-import { useState } from 'react'
 import './App.css'
+import React from 'react'
+import NavBar from './components/NavBar'
+import Home from './pages/Home'
 
-function App() {
-  const [count, setCount] = useState(0)
-
+export default function App() {
   return (
-    <>
-      <div>
-        <h1>Hello World</h1>
-      </div>
-    </>
+
+    <div className="app-root">
+      <NavBar />
+      <Home />
+    </div>
   )
 }
-
-export default App
