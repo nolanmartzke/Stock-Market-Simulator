@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { signUp } from './api/AuthAPI';
 
 function SignUp() {
     const [username, setUsername] = useState('');
@@ -11,6 +12,14 @@ function SignUp() {
         setRePassword('');
         setPassword('');
         // No action on submit for now
+
+        signUp(username, password)
+            .then(response => {
+                console.log("Sign-up successful:", response.data);
+            })
+            .catch(error => {
+                console.error("Sign-up error:", error.response ? error.response.data : error.message);
+            });
     };
 
     return (
