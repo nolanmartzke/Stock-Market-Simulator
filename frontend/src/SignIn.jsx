@@ -1,4 +1,5 @@
 import React, { useState } from 'react';
+import { signIn } from './api/AuthAPI';
 
 const SignIn = () => {
     const [username, setUsername] = useState('');
@@ -8,6 +9,14 @@ const SignIn = () => {
         e.preventDefault();
         setUsername('');
         setPassword('');
+
+        signIn(username, password)
+            .then(response => {
+                console.log("Sign-in successful:", response.data);
+            })
+            .catch(error => {
+                console.error("Sign-in error:", error.response ? error.response.data : error.message);
+            });
     };
 
     return (
