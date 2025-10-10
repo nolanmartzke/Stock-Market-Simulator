@@ -5,7 +5,8 @@ import NavBar from "./components/NavBar";
 import Home from "./pages/Home";
 import SignUp from "./pages/SignUp";
 import SignIn from "./pages/SignIn";
-import AccountPage from "./pages/AccountPage";
+import Account from "./pages/Account";
+import ProtectedRoute from "./components/ProtectedRoute";
 
 
 export default function App() {
@@ -18,7 +19,7 @@ export default function App() {
             <Route path="/" element={<Home />} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/signin" element={<SignIn />} />
-            <Route path="/dashboard" element={<AccountPage />} />
+            <Route path="/account" element={<ProtectedRoute><Account /></ProtectedRoute>} />
           </Routes>
         </div>
       </div>

@@ -1,7 +1,7 @@
 import React, { useState } from "react";
 import { UserPlus, User, Lock, Shield } from "lucide-react";
 import { signUp } from '../api/AuthAPI';
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
 
 function SignUp() {
@@ -106,12 +106,12 @@ function SignUp() {
                   <motion.button
                     type="submit"
                     disabled={status === "loading"}
-                    className="btn btn-lg w-100 fw-medium text-white"
+                    className="btn btn-success w-100 fw-medium text-white"
                     style={{
                       borderRadius: "12px",
                       backgroundColor:
                         {
-                          idle: "var(--bs-primary)",
+                          idle: "var(--bs-success)",
                           loading: "var(--bs-secondary)",
                           success: "var(--bs-success)",
                           conflict: "var(--bs-danger)",
@@ -145,12 +145,12 @@ function SignUp() {
                 <div className="text-center mt-4">
                   <p className="text-muted small mb-0">
                     Already have an account?{" "}
-                    <a
-                      href="#"
+                    <Link
+                      to="/signin"
                       className="text-decoration-none text-primary fw-medium"
                     >
                       Sign in
-                    </a>
+                    </Link>
                   </p>
                 </div>
               </div>

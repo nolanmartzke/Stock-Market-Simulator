@@ -3,11 +3,13 @@ import { LogIn, User, Lock } from "lucide-react";
 import { signIn } from '../api/AuthAPI';
 import { useNavigate } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
+import { useAuth } from "../context/AuthContext";
 
 const SignIn = () => {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
   const [status, setStatus] = useState("idle"); // idle | loading | success | invalidCreds | accountNotFound | error
+  const { login } = useAuth();
   const navigate = useNavigate();
 
   const handleSubmit = (e) => {
@@ -19,14 +21,15 @@ const SignIn = () => {
       .then(response => {
         console.log("Sign-in successful:", response.data);
         setStatus("success");
-        setTimeout(() => navigate("/dashboard"), 1500); // navigate to dashboard after 1.5 secs
+        login(response.data); // adds to localStorage
+        setTimeout(() => navigate("/account"), 1000); // navigate to account after 1 secs
       })
       .catch(error => {
         console.error("Sign-in error:", error.response ? error.response.data : error.message);
         error.response.status == 401 ? setStatus("invalidCreds")
           : error.response.status == 404 ? setStatus("accountNotFound")
             : setStatus("error")
-        setTimeout(() => setStatus("idle"), 2000); // revert to idle after 2 secs
+        setTimeout(() => setStatus("idle"), 1500); // revert to idle after 1.5 secs
       });
   };
 

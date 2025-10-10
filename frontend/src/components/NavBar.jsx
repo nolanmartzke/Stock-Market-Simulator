@@ -1,12 +1,11 @@
-import React from "react";
-import {
-  LineChart,
-  BookOpen,
-  Users,
-  Activity,
-  Settings,
-  Zap,
-} from "lucide-react";
+import { LineChart, BookOpen, Users, Activity, Settings, Zap, LogIn, UserPlus } from "lucide-react";
+import { Link, useNavigate } from "react-router-dom";
+import React, { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import { motion, AnimatePresence } from "framer-motion";
+
+
+
 
 export default function NavBar() {
   const navItemsMain = [
@@ -18,6 +17,11 @@ export default function NavBar() {
   const navItemsSupport = [
     { name: "Get Started", icon: Zap, isActive: false },
     { name: "Settings", icon: Settings, isActive: false },
+  ];
+
+  const navItemsAccount = [
+    { name: "Sign In", icon: LogIn, isActive: false, link: "/signin" },
+    { name: "Create Account", icon: UserPlus, isActive: false, link: "/signup" },
   ];
 
   const navStyle = {
@@ -35,16 +39,24 @@ export default function NavBar() {
   const linkClass =
     "d-flex align-items-center rounded-lg p-3 text-decoration-none transition-colors duration-200";
 
+  const { auth, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = () => {
+    logout();
+    navigate('/signin');
+  };
+
   return (
     <nav style={navStyle} className="bg-white p-4 d-flex flex-column">
       <div className="mb-5 px-1 pt-2">
-        <a
+        <Link
           className="navbar-brand fw-bold fs-4 text-dark d-flex align-items-center"
-          href="#"
+          to="/"
         >
           <span className="me-2 text-danger">TRD</span>
           <span className="text-secondary">Wars</span>
-        </a>
+        </Link>
       </div>
 
       <div className="flex-grow-1">
@@ -91,20 +103,53 @@ export default function NavBar() {
       </div>
 
       <div className="mt-auto pt-3 border-top border-light">
-        <div className="d-flex align-items-center p-2">
-          <div className="me-3">
-            <img
-              src="https://placehold.co/40x40/007bff/ffffff?text=TW"
-              alt="User Avatar"
-              className="rounded-circle"
-            />
+
+        {auth ?
+          <div className="flex align-items-center justify-content-between p-2 w-100">
+            <Link className="d-flex align-items-center p-2 text-decoration-none" to="/account">
+              <div className="me-3">
+                <img
+                  src="https://placehold.co/40x40/007bff/ffffff?text=TW"
+                  alt="User Avatar"
+                  className="rounded-circle"
+                />
+              </div>
+              <div>
+                <div className="fw-semibold text-dark">{auth.name}</div>
+                <div className="text-muted small">{auth.email}</div>
+              </div>
+            </Link>
+
+            <div className="d-flex justify-content-center mt-4">
+              <motion.button
+                className="btn btn-danger btn-medium w-10 fw-medium text-white"
+                style={{
+                  borderRadius: "12px",
+                }}
+                whileTap={{ scale: 0.9 }} // animation upon click
+                onClick={handleLogout}
+              >
+                Logout
+              </motion.button>
+            </div>
           </div>
-          <div>
-            <div className="fw-semibold text-dark">Trade Warrior</div>
-            <div className="text-muted small">warrior@example.com</div>
-          </div>
-        </div>
+          :
+          <ul className="nav nav-pills flex-column">
+            {navItemsAccount.map((item) => {
+              const Icon = item.icon;
+              return (
+                <Link key={item.name} to={item.link} className={`${linkClass} w-100`}>
+                  <li className="nav-item mb-1" key={item.name}>
+                    <Icon className="me-3" size={20} />
+                    {item.name}
+                  </li>
+                </Link>
+              );
+            })}
+          </ul>
+
+        }
       </div>
-    </nav>
+    </nav >
   );
 }
