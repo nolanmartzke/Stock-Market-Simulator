@@ -1,18 +1,27 @@
 import React, { useState } from "react";
 import { UserPlus, User, Lock, Shield } from "lucide-react";
+import { signUp } from './api/AuthAPI';
 
 function SignUp() {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
   const [rePassword, setRePassword] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setUsername("");
-    setRePassword("");
-    setPassword("");
-    // No action on submit for now
-  };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setUsername('');
+        setRePassword('');
+        setPassword('');
+        // No action on submit for now
+
+        signUp(username, password)
+            .then(response => {
+                console.log("Sign-up successful:", response.data);
+            })
+            .catch(error => {
+                console.error("Sign-up error:", error.response ? error.response.data : error.message);
+            });
+    };
 
   return (
     <div className="min-vh-100 bg-light d-flex align-items-center">

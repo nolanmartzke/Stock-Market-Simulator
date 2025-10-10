@@ -1,15 +1,24 @@
 import React, { useState } from "react";
 import { LogIn, User, Lock } from "lucide-react";
+import { signIn } from './api/AuthAPI';
 
 const SignIn = () => {
   const [username, setUsername] = useState("");
   const [password, setPassword] = useState("");
 
-  const handleSubmit = (e) => {
-    e.preventDefault();
-    setUsername("");
-    setPassword("");
-  };
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setUsername('');
+        setPassword('');
+
+        signIn(username, password)
+            .then(response => {
+                console.log("Sign-in successful:", response.data);
+            })
+            .catch(error => {
+                console.error("Sign-in error:", error.response ? error.response.data : error.message);
+            });
+    };
 
   return (
     <div className="min-vh-100 bg-light d-flex align-items-center">
