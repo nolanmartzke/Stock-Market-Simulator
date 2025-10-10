@@ -1,22 +1,32 @@
 import React, { useState } from "react";
 import { LogIn, User, Lock } from "lucide-react";
 import { signIn } from '../api/AuthAPI';
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 const SignIn = () => {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
+  const [status, setStatus] = useState("idle"); // idle | loading | success | invalidCreds | accountNotFound | error
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setUsername('');
-    setPassword('');
 
-    signIn(username, password)
+    setStatus("loading");
+
+    signIn(email, password)
       .then(response => {
         console.log("Sign-in successful:", response.data);
+        setStatus("success");
+        setTimeout(() => navigate("/dashboard"), 1500); // navigate to dashboard after 1.5 secs
       })
       .catch(error => {
         console.error("Sign-in error:", error.response ? error.response.data : error.message);
+        error.response.status == 401 ? setStatus("invalidCreds")
+          : error.response.status == 404 ? setStatus("accountNotFound")
+            : setStatus("error")
+        setTimeout(() => setStatus("idle"), 2000); // revert to idle after 2 secs
       });
   };
 
@@ -49,14 +59,14 @@ const SignIn = () => {
                   <div className="mb-4">
                     <label className="form-label fw-medium text-dark">
                       <User className="me-2" size={16} />
-                      Username
+                      Email
                     </label>
                     <input
                       type="text"
                       className="form-control form-control-lg"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Enter your username"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
                       required
                       style={{ borderRadius: "12px", fontSize: "16px" }}
                     />
@@ -78,13 +88,44 @@ const SignIn = () => {
                     />
                   </div>
 
-                  <button
+                  <motion.button
                     type="submit"
-                    className="btn btn-primary btn-lg w-100 fw-medium"
-                    style={{ borderRadius: "12px" }}
+                    disabled={status === "loading"}
+                    className="btn btn-lg w-100 fw-medium text-white"
+                    style={{
+                      borderRadius: "12px",
+                      backgroundColor:
+                        {
+                          idle: "var(--bs-primary)",
+                          loading: "var(--bs-secondary)",
+                          success: "var(--bs-success)",
+                          invalidCreds: "var(--bs-danger)",
+                          accountNotFound: "var(--bs-danger)",
+                          error: "var(--bs-danger)",
+                        }[status],
+                    }}
+                    // animation upon click
+                    whileTap={{ scale: 0.95 }}
+                    animate={{ scale: status === "success" ? [1, 1.1, 1] : 1 }}
                   >
-                    Sign In
-                  </button>
+                    <AnimatePresence mode="wait">
+                      <motion.span // fades the text in and out 
+                        key={status}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        {status === "loading" ? "Signing In..."
+                          : status === "success" ? "✅ Success"
+                            : status === "invalidCreds" ? "Invalid Credentials"
+                              : status === "accountNotFound" ? "Account Not Found"
+                                : status === "error" ? "Unknown Error"
+                                  : "Sign In" // default
+                        }
+                      </motion.span>
+                    </AnimatePresence>
+                  </motion.button>
+
                 </form>
               </div>
             </div>

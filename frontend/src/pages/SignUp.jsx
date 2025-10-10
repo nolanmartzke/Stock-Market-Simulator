@@ -1,25 +1,32 @@
 import React, { useState } from "react";
 import { UserPlus, User, Lock, Shield } from "lucide-react";
 import { signUp } from '../api/AuthAPI';
+import { useNavigate } from "react-router-dom";
+import { motion, AnimatePresence } from "framer-motion";
 
 function SignUp() {
-  const [username, setUsername] = useState("");
+  const [email, setEmail] = useState("");
+  const [name, setName] = useState("");
   const [password, setPassword] = useState("");
-  const [rePassword, setRePassword] = useState("");
+  const [status, setStatus] = useState("idle"); // idle | loading | success | conflict |error
+  const navigate = useNavigate();
 
   const handleSubmit = (e) => {
     e.preventDefault();
-    setUsername('');
-    setRePassword('');
-    setPassword('');
-    // No action on submit for now
 
-    signUp(username, password)
+    setStatus("loading");
+
+    signUp(email, password, name)
       .then(response => {
         console.log("Sign-up successful:", response.data);
+        setStatus("success");
+        setTimeout(() => navigate("/signin"), 1500); // navigate to signin page after 1.5 secs
       })
       .catch(error => {
         console.error("Sign-up error:", error.response ? error.response.data : error.message);
+        error.response.status == 409 ? setStatus("conflict")
+          : setStatus("error")
+        setTimeout(() => setStatus("idle"), 2000); // revert to idle after 2 secs
       });
   };
 
@@ -47,17 +54,34 @@ function SignUp() {
 
                 {/* Form */}
                 <form onSubmit={handleSubmit}>
+
                   <div className="mb-4">
                     <label className="form-label fw-medium text-dark">
                       <User className="me-2" size={16} />
-                      Username
+                      Name
                     </label>
                     <input
                       type="text"
                       className="form-control"
-                      value={username}
-                      onChange={(e) => setUsername(e.target.value)}
-                      placeholder="Username"
+                      value={name}
+                      onChange={(e) => setName(e.target.value)}
+                      placeholder="Enter your name"
+                      required
+                      style={{ borderRadius: "12px" }}
+                    />
+                  </div>
+
+                  <div className="mb-4">
+                    <label className="form-label fw-medium text-dark">
+                      <User className="me-2" size={16} />
+                      Email
+                    </label>
+                    <input
+                      type="email"
+                      className="form-control"
+                      value={email}
+                      onChange={(e) => setEmail(e.target.value)}
+                      placeholder="Enter your email"
                       required
                       style={{ borderRadius: "12px" }}
                     />
@@ -79,29 +103,42 @@ function SignUp() {
                     />
                   </div>
 
-                  <div className="mb-4">
-                    <label className="form-label fw-medium text-dark">
-                      <Shield className="me-2" size={16} />
-                      Confirm Password
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control"
-                      value={rePassword}
-                      onChange={(e) => setRePassword(e.target.value)}
-                      placeholder="Confirm Password"
-                      required
-                      style={{ borderRadius: "12px" }}
-                    />
-                  </div>
-
-                  <button
+                  <motion.button
                     type="submit"
-                    className="btn btn-success w-100 fw-medium"
-                    style={{ borderRadius: "12px" }}
+                    disabled={status === "loading"}
+                    className="btn btn-lg w-100 fw-medium text-white"
+                    style={{
+                      borderRadius: "12px",
+                      backgroundColor:
+                        {
+                          idle: "var(--bs-primary)",
+                          loading: "var(--bs-secondary)",
+                          success: "var(--bs-success)",
+                          conflict: "var(--bs-danger)",
+                          error: "var(--bs-danger)",
+                        }[status],
+                    }}
+                    // animation upon click
+                    whileTap={{ scale: 0.95 }}
+                    animate={{ scale: status === "success" ? [1, 1.1, 1] : 1 }}
                   >
-                    Create Account
-                  </button>
+                    <AnimatePresence mode="wait">
+                      <motion.span // fades the text in and out 
+                        key={status}
+                        initial={{ opacity: 0 }}
+                        animate={{ opacity: 1 }}
+                        exit={{ opacity: 0 }}
+                      >
+                        {status === "loading" ? "Signing In..."
+                          : status === "success" ? "✅ Success"
+                            : status === "conflict" ? "Email Taken"
+                              : status === "error" ? "Unknown Error"
+                                : "Create Account" // default
+                        }
+                      </motion.span>
+                    </AnimatePresence>
+                  </motion.button>
+
                 </form>
 
                 {/* Footer */}

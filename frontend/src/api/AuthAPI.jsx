@@ -8,13 +8,13 @@ const api = axios.create({
 });
 
 
-export function signUp(username, password) {
+export function signUp(email, password, name) {
   // return Promise, caller then handles response or error, as well as token storage
-  return api.post('/', { username, password });
+  return api.post('/signup', { email, password, name });
 }
 
-export function signIn(username, password) {
+export function signIn(email, password) {
   // return Promise, caller then handles response or error, as well as token storage
-  return api.post('/signin', { username, password });
+  return api.post('/login', { email, password });
 }
 
