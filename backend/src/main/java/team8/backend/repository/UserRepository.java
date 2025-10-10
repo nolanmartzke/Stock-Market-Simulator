@@ -4,6 +4,8 @@ import team8.backend.entity.User;
 import org.springframework.data.jpa.repository.JpaRepository;
 
 public interface UserRepository extends JpaRepository<User, Long> {
+
+    boolean existsByEmail(String email);
     
     // does not need any additional code to function
 
