@@ -14,14 +14,13 @@ import java.util.Optional;
 
 @RestController
 @RequestMapping("/api/users")
-@CrossOrigin(origins = "http://localhost:3000")
 public class UserController {
 
     @Autowired
     private UserRepository userRepository;
 
     // Signup endpoint
-    @PostMapping("/add")
+    @PostMapping("/signup")
     public ResponseEntity<User> addUser(@RequestBody User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
@@ -40,7 +39,7 @@ public class UserController {
                 .findFirst();
 
         if (optionalUser.isEmpty()) {
-            return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
         }
 
         User user = optionalUser.get();
