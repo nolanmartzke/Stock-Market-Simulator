@@ -1,22 +1,23 @@
-import { LineChart, BookOpen, Users, Activity, Settings, Zap, LogIn, UserPlus } from "lucide-react";
-import { Link, useNavigate } from "react-router-dom";
-import React, { useEffect, useState } from "react";
+import { LineChart, BookOpen, Users, Activity, Settings, Zap, LogIn, UserPlus, Trophy } from "lucide-react";
+import { NavLink, Link, useNavigate } from "react-router-dom";
+import React from "react";
 import { useAuth } from "../context/AuthContext";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion } from "framer-motion";
 
 
 
 
 export default function NavBar() {
   const navItemsMain = [
-    { name: "Reports", icon: LineChart, isActive: true },
-    { name: "Trade", icon: Users, isActive: false },
-    { name: "History", icon: Activity, isActive: false },
+    { name: "Reports", icon: LineChart, link: "/reports" },
+    { name: "Leaderboard", icon: Trophy, link: "/leaderboard" },
+    { name: "Trade", icon: Users, link: "/trade" },
+    { name: "History", icon: Activity, link: "/history" },
   ];
 
   const navItemsSupport = [
-    { name: "Get Started", icon: Zap, isActive: false },
-    { name: "Settings", icon: Settings, isActive: false },
+    { name: "Get Started", icon: Zap, link: "/get-started" },
+    { name: "Settings", icon: Settings, link: "/settings" },
   ];
 
   const navItemsAccount = [
@@ -66,15 +67,17 @@ export default function NavBar() {
         <ul className="nav nav-pills flex-column mb-4">
           {navItemsMain.map((item) => {
             const Icon = item.icon;
-            const isActiveClass = item.isActive
-              ? "bg-red-100 text-danger fw-semibold"
-              : "text-gray-600 hover:bg-gray-100";
             return (
               <li className="nav-item mb-1" key={item.name}>
-                <a className={`${linkClass} ${isActiveClass} w-100`} href="#">
+                <NavLink
+                  to={item.link}
+                  className={({ isActive }) =>
+                    `${linkClass} ${isActive ? 'bg-red-100 text-danger fw-semibold' : 'text-gray-600 hover:bg-gray-100'} w-100`
+                  }
+                >
                   <Icon className="me-3" size={20} />
                   {item.name}
-                </a>
+                </NavLink>
               </li>
             );
           })}
@@ -86,16 +89,24 @@ export default function NavBar() {
         <ul className="nav nav-pills flex-column">
           {navItemsSupport.map((item) => {
             const Icon = item.icon;
-            const isActiveClass = item.isActive
-              ? "bg-red-100 text-danger fw-semibold"
-              : "text-gray-600 hover:bg-gray-100";
-
             return (
               <li className="nav-item mb-1" key={item.name}>
-                <a className={`${linkClass} ${isActiveClass} w-100`} href="#">
-                  <Icon className="me-3" size={20} />
-                  {item.name}
-                </a>
+                {item.link ? (
+                  <NavLink
+                    to={item.link}
+                    className={({ isActive }) =>
+                      `${linkClass} ${isActive ? 'bg-red-100 text-danger fw-semibold' : 'text-gray-600 hover:bg-gray-100'} w-100`
+                    }
+                  >
+                    <Icon className="me-3" size={20} />
+                    {item.name}
+                  </NavLink>
+                ) : (
+                  <a className={`${linkClass} text-gray-600 w-100`} href="#">
+                    <Icon className="me-3" size={20} />
+                    {item.name}
+                  </a>
+                )}
               </li>
             );
           })}
