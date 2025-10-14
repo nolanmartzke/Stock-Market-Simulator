@@ -55,13 +55,9 @@ B <--> C
 
 ```mermaid
 ---
-title: Sample Database ERD for an Order System
+title: Database ERD for an Stock Brokerage
 ---
 erDiagram
-    User ||--o{ Order : "placed by"
-    <!-- Order ||--o{ OrderItem : "contains"
-    Product ||--o{ OrderItem : "included in" -->
-
     User {
         int id PK
         string name
@@ -70,8 +66,13 @@ erDiagram
         DateTime createdAt
         DateTime lastLoginAt
     }
-
-    <!-- Order {
+```
+<!-- 
+    User ||--o{ Order : "placed by"
+    <!-- Order ||--o{ OrderItem : "contains"
+    Product ||--o{ OrderItem : "included in"
+    
+    Order {
         int order_id PK
         int customer_id FK
         string order_date
@@ -91,13 +92,12 @@ erDiagram
         int product_id FK
         int quantity
     } -->
-```
 
 #### Class Diagram
 
 ```mermaid
 ---
-title: Sample Class Diagram for Animal Program
+title: Class Diagram for TradeWar's Program (next: add Account class)
 ---
 classDiagram
     class User {
@@ -111,7 +111,8 @@ classDiagram
         + ResponseEntity<User> loginUser()
         + ResponseEntity<List<User>> getAllUsers()
     }
-    <!-- class Dog {
+```
+<!-- class Dog {
         + Dog(String name)
         + void makeSound()
     }
@@ -126,6 +127,39 @@ classDiagram
     Animal <|-- Dog
     Animal <|-- Cat
     Animal <|-- Bird -->
+
+#### Sequence Diagram
+
+```mermaid
+sequenceDiagram
+
+participant ReactFrontend
+participant SpringBoot
+participant MySQLDatabase
+
+ReactFrontend ->> SpringBoot: HTTP Request: POST /api/users/signup
+activate SpringBoot
+
+SpringBoot ->> MySQLDatabase: INSERT INTO users (name, email, password)
+activate MySQLDatabase
+
+MySQLDatabase -->> SpringBoot: Saved User Object
+deactivate MySQLDatabase
+
+SpringBoot -->> ReactFrontend: JSON Response (201 Created)
+deactivate SpringBoot
+
+ReactFrontend ->> SpringBoot: HTTP Request: POST /api/users/login
+activate SpringBoot
+
+SpringBoot ->> MySQLDatabase: Query: SELECT * FROM users WHERE email = ...
+activate MySQLDatabase
+
+MySQLDatabase -->> SpringBoot: Returns User Object
+deactivate MySQLDatabase
+
+SpringBoot -->> ReactFrontend: JSON Response (200 Success + User Data)
+deactivate SpringBoot
 ```
 
 #### Flowchart
@@ -163,27 +197,6 @@ stateDiagram
     BeansLowError --> Ready : Refill Beans
 ```
 
-#### Sequence Diagram
-
-```mermaid
-sequenceDiagram
-
-participant ReactFrontend
-participant DjangoBackend
-participant MySQLDatabase
-
-ReactFrontend ->> DjangoBackend: HTTP Request (e.g., GET /api/data)
-activate DjangoBackend
-
-DjangoBackend ->> MySQLDatabase: Query (e.g., SELECT * FROM data_table)
-activate MySQLDatabase
-
-MySQLDatabase -->> DjangoBackend: Result Set
-deactivate MySQLDatabase
-
-DjangoBackend -->> ReactFrontend: JSON Response
-deactivate DjangoBackend
-```
 
 ### Standards & Conventions
 
