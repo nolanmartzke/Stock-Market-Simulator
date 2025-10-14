@@ -6,15 +6,14 @@ Also, be sure to check out the Wiki for information on how to maintain your team
 
 ## TeamName
 
-Team 8
+Trade Wars
 
 ### Project Abstract
 
 <!--A one paragraph summary of what the software will do.-->
 
-For this project our team will be creating a map that tracks the stock market and allows users to buy, sell, and otherwise interact with this market. It will include actual stock data scraped (preferably in real time). It will make use of a database to store client/user data, including account names and passwords. 
+For this project our team will be creating an app that tracks the stock market and allows users to buy, sell, and otherwise interact with this market. It will include actual stock data scraped (in real time). It will make use of a database to store client/user data, including account names and passwords. 
 
-Please view this file's source to see `<!--comments-->` with guidance on how you might use the different sections of this document. 
 
 ### Customer
 <!--A bri description of the customer for this software, both in general (the population who might eventually use such a system) and specifically for this document (the customer(s) who informed this document). Every project will have a customer from the CS506 instructional staff. Requirements should not be derived simply from discussion among team members. Ideally your customer should not only talk to you about requirements but also be excited later in the semes-->
@@ -31,66 +30,13 @@ The customers for this application will be users interested in investing in the 
 
 #### Technology Stack
 
-Here are some sample technology stacks that you can use for inspiration:
+<!-- Here are some sample technology stacks that you can use for inspiration: -->
+
 
 ```mermaid
 flowchart RL
 subgraph Front End
 	A(Javascript: React)
-end
-	
-subgraph Back End
-	B(Python: Django with \nDjango Rest Framework)
-end
-	
-subgraph Database
-	C[(MySQL)]
-end
-
-A <-->|"REST API"| B
-B <-->|Django ORM| C
-```
-
-```mermaid
-flowchart RL
-subgraph Front End
-	A(Javascript: Vue)
-end
-	
-subgraph Back End
-	B(Python: Flask)
-end
-	
-subgraph Database
-	C[(MySQL)]
-end
-
-A <-->|"REST API"| B
-B <-->|SQLAlchemy| C
-```
-
-```mermaid
-flowchart RL
-subgraph Front End
-	A(Javascript: Vue)
-end
-	
-subgraph Back End
-	B(Javascript: Express)
-end
-	
-subgraph Database
-	C[(MySQL)]
-end
-
-A <-->|"REST API"| B
-B <--> C
-```
-
-```mermaid
-flowchart RL
-subgraph Front End
-	A(Static JS, CSS, HTML)
 end
 	
 subgraph Back End
@@ -101,29 +47,9 @@ subgraph Database
 	C[(MySQL)]
 end
 
-A <-->|HTTP| B
+A <-->|REST API| B
 B <--> C
 ```
-
-```mermaid
-flowchart RL
-subgraph Front End
-	A(Mobile App)
-end
-	
-subgraph Back End
-	B(Python: Django)
-end
-	
-subgraph Database
-	C[(MySQL)]
-end
-
-A <-->|REST API| B
-B <-->|Django ORM| C
-```
-
-
 
 #### Database
 
@@ -132,18 +58,20 @@ B <-->|Django ORM| C
 title: Sample Database ERD for an Order System
 ---
 erDiagram
-    Customer ||--o{ Order : "placed by"
-    Order ||--o{ OrderItem : "contains"
-    Product ||--o{ OrderItem : "included in"
+    User ||--o{ Order : "placed by"
+    <!-- Order ||--o{ OrderItem : "contains"
+    Product ||--o{ OrderItem : "included in" -->
 
-    Customer {
-        int customer_id PK
+    User {
+        int id PK
         string name
         string email
-        string phone
+        string password
+        DateTime createdAt
+        DateTime lastLoginAt
     }
 
-    Order {
+    <!-- Order {
         int order_id PK
         int customer_id FK
         string order_date
@@ -162,7 +90,7 @@ erDiagram
         int order_id FK
         int product_id FK
         int quantity
-    }
+    } -->
 ```
 
 #### Class Diagram
@@ -172,14 +100,18 @@ erDiagram
 title: Sample Class Diagram for Animal Program
 ---
 classDiagram
-    class Animal {
+    class User {
+        - int id PK
         - String name
-        + Animal(String name)
-        + void setName(String name)
-        + String getName()
-        + void makeSound()
+        - String email
+        - String password
+        - DateTime createdAt
+        - DateTime lastLoginAt
+        + ResponseEntity<User> addUser()
+        + ResponseEntity<User> loginUser()
+        + ResponseEntity<List<User>> getAllUsers()
     }
-    class Dog {
+    <!-- class Dog {
         + Dog(String name)
         + void makeSound()
     }
@@ -193,7 +125,7 @@ classDiagram
     }
     Animal <|-- Dog
     Animal <|-- Cat
-    Animal <|-- Bird
+    Animal <|-- Bird -->
 ```
 
 #### Flowchart
