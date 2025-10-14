@@ -6,7 +6,7 @@ Also, be sure to check out the Wiki for information on how to maintain your team
 
 ## TeamName
 
-Trade Wars
+Trade Wars - Team 8
 
 ### Project Abstract
 
@@ -55,7 +55,7 @@ B <--> C
 
 ```mermaid
 ---
-title: Database ERD for an Stock Brokerage
+title: Database ERD for a Stock Brokerage
 ---
 erDiagram
     User {
@@ -97,7 +97,7 @@ erDiagram
 
 ```mermaid
 ---
-title: Class Diagram for TradeWar's Program (next: add Account class)
+title: Class Diagram for TradeWar's Program (next- add Account class)
 ---
 classDiagram
     class User {
@@ -143,7 +143,7 @@ activate SpringBoot
 SpringBoot ->> MySQLDatabase: INSERT INTO users (name, email, password)
 activate MySQLDatabase
 
-MySQLDatabase -->> SpringBoot: Saved User Object
+MySQLDatabase -->> SpringBoot: Returns User Object
 deactivate MySQLDatabase
 
 SpringBoot -->> ReactFrontend: JSON Response (201 Created)
@@ -152,15 +152,28 @@ deactivate SpringBoot
 ReactFrontend ->> SpringBoot: HTTP Request: POST /api/users/login
 activate SpringBoot
 
-SpringBoot ->> MySQLDatabase: Query: SELECT * FROM users WHERE email = ...
+SpringBoot ->> MySQLDatabase: SELECT * FROM users WHERE email = ?
 activate MySQLDatabase
 
-MySQLDatabase -->> SpringBoot: Returns User Object
+MySQLDatabase -->> SpringBoot: Returns Auth Token
 deactivate MySQLDatabase
 
-SpringBoot -->> ReactFrontend: JSON Response (200 Success + User Data)
+SpringBoot -->> ReactFrontend: JSON Response (200 Success + Auth Token)
 deactivate SpringBoot
 ```
+
+
+
+
+
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+<br>
+
 
 #### Flowchart
 
