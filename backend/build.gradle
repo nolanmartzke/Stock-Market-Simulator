@@ -32,6 +32,9 @@ dependencies {
 	// added dependency for automatic .env parsing
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
 	
+	// H2 in-memory database for testing
+	testImplementation 'com.h2database:h2'
+	
 }
 
 tasks.named('test') {
