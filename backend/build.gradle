@@ -31,6 +31,9 @@ dependencies {
 
 	// added dependency for automatic .env parsing
 	implementation 'me.paulschwarz:spring-dotenv:4.0.0'
+
+	// added dependency for password hashing
+	implementation 'org.springframework.security:spring-security-crypto'
 	
 }
 
