@@ -27,23 +27,16 @@ const Account = () => {
               <div className="card-body p-4 p-md-5">
                 {/* Header */}
                 <div className="d-flex align-items-center mb-4">
-                  <div
-                    className="d-inline-flex align-items-center justify-content-center bg-primary rounded-circle me-3"
-                    style={{ width: "50px", height: "50px" }}
-                  >
-                    <User className="text-white" size={24} />
-                  </div>
-                  <h1 className="h4 mb-0 fw-bold text-dark">
-                    Account Settings
-                  </h1>
+                  <User size={28} className="me-2" />
+                  <h1 className="h4 mb-0">Account Settings</h1>
                 </div>
 
-                {/* Name Field */}
+                {/* Edit Profile (placeholder) */}
+                <h2 className="h6 text-uppercase text-secondary mb-3">
+                  Edit Profile (coming soon)
+                </h2>
                 <div className="mb-3">
-                  <label className="form-label fw-medium text-dark">
-                    <User className="me-2" size={16} />
-                    Name
-                  </label>
+                  <label className="form-label fw-medium">Name</label>
                   <input
                     className="form-control form-control-lg"
                     style={{ borderRadius: "12px" }}
@@ -52,13 +45,8 @@ const Account = () => {
                     readOnly
                   />
                 </div>
-
-                {/* Email Field */}
-                <div className="mb-4">
-                  <label className="form-label fw-medium text-dark">
-                    <User className="me-2" size={16} />
-                    Email
-                  </label>
+                <div className="mb-2">
+                  <label className="form-label fw-medium">Email</label>
                   <input
                     className="form-control form-control-lg"
                     style={{ borderRadius: "12px" }}
@@ -67,24 +55,79 @@ const Account = () => {
                     readOnly
                   />
                 </div>
+                <button
+                  className="btn btn-primary mt-2"
+                  style={{ borderRadius: "12px" }}
+                  disabled
+                >
+                  Save changes
+                </button>
 
-                {/* Future Features Placeholder */}
-                <div className="alert alert-secondary mb-4" role="alert">
-                  <small>
-                    Profile edits and password changes will appear here in a
-                    future update.
-                  </small>
+                <hr className="my-4" />
+
+                {/* Change Password (placeholder) */}
+                <h2 className="h6 text-uppercase text-secondary mb-3">
+                  Change Password (coming soon)
+                </h2>
+                <div className="row g-3">
+                  <div className="col-12">
+                    <label className="form-label fw-medium">
+                      Current password
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control form-control-lg"
+                      style={{ borderRadius: "12px" }}
+                      placeholder="••••••••"
+                      disabled
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-medium">New password</label>
+                    <input
+                      type="password"
+                      className="form-control form-control-lg"
+                      style={{ borderRadius: "12px" }}
+                      placeholder="Min 8 chars"
+                      disabled
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-medium">
+                      Confirm new password
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control form-control-lg"
+                      style={{ borderRadius: "12px" }}
+                      placeholder="Match new password"
+                      disabled
+                    />
+                  </div>
                 </div>
+                <small className="text-secondary d-block mt-2">
+                  Requirements will appear here (length, character mix, etc.).
+                </small>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  className="btn btn-outline-secondary w-100 mt-3"
+                  style={{ borderRadius: 12 }}
+                  disabled
+                >
+                  Update password
+                </motion.button>
 
-                {/* Logout Button */}
+                <hr className="my-4" />
+
+                {/* Logout (existing behavior) */}
                 <motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLogout}
-                  className="btn btn-outline-secondary btn-lg w-100 fw-medium text-dark"
+                  className="btn btn-outline-secondary w-100 fw-medium"
                   style={{ borderRadius: 12 }}
                 >
                   <LogOut size={18} className="me-2" />
-                  Log Out
+                  Log out
                 </motion.button>
               </div>
             </div>
