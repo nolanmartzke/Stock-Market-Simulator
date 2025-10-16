@@ -1,5 +1,5 @@
-import React from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
 import { User, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
@@ -10,7 +10,7 @@ const Account = () => {
 
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
   if (!auth) return null;
@@ -20,7 +20,10 @@ const Account = () => {
       <div className="container py-4">
         <div className="row justify-content-center">
           <div className="col-md-8 col-lg-6">
-            <div className="card shadow-lg border-0" style={{ borderRadius: 20 }}>
+            <div
+              className="card shadow-lg border-0"
+              style={{ borderRadius: 20 }}
+            >
               <div className="card-body p-4 p-md-5">
                 {/* Header */}
                 <div className="d-flex align-items-center mb-4">
@@ -30,7 +33,9 @@ const Account = () => {
                   >
                     <User className="text-white" size={24} />
                   </div>
-                  <h1 className="h4 mb-0 fw-bold text-dark">Account Settings</h1>
+                  <h1 className="h4 mb-0 fw-bold text-dark">
+                    Account Settings
+                  </h1>
                 </div>
 
                 {/* Name Field */}
@@ -65,7 +70,10 @@ const Account = () => {
 
                 {/* Future Features Placeholder */}
                 <div className="alert alert-secondary mb-4" role="alert">
-                  <small>Profile edits and password changes will appear here in a future update.</small>
+                  <small>
+                    Profile edits and password changes will appear here in a
+                    future update.
+                  </small>
                 </div>
 
                 {/* Logout Button */}
