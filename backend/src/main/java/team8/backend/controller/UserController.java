@@ -5,6 +5,7 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
 
+import team8.backend.config.PasswordUtils;
 import team8.backend.entity.User;
 import team8.backend.repository.UserRepository;
 
@@ -27,6 +28,10 @@ public class UserController {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
 
+        String hashedPassword = PasswordUtils.hashPassword(user.getPassword());
+        user.setPassword(hashedPassword);
+
+
         User savedUser = userRepository.save(user);
         return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
     }
@@ -45,8 +50,8 @@ public class UserController {
 
         User user = optionalUser.get();
 
-        // Plaintext password check
-        if (!user.getPassword().equals(loginRequest.getPassword())) {
+        // Hashed password check using BCrypt
+        if (!PasswordUtils.checkPassword(loginRequest.getPassword(), user.getPassword())) {
             return ResponseEntity.status(HttpStatus.UNAUTHORIZED).build();
         }
 
