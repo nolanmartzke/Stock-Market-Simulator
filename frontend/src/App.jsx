@@ -14,6 +14,7 @@ import Leaderboard from "./pages/Leaderboard";
 import GetStarted from "./pages/GetStarted";
 import SettingsPage from "./pages/Settings";
 import ErrorPage from "./pages/ErrorPage";
+import Stock from "./pages/Stock";
 
 
 export default function App() {
@@ -33,6 +34,7 @@ export default function App() {
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
             <Route path="/trade" element={<ProtectedRoute><Trade /></ProtectedRoute>} />
+            <Route path="/stocks/:ticker" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
             <Route path="*" element={<ErrorPage />} />
           </Routes>
         </div>
