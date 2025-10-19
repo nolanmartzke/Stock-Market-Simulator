@@ -8,6 +8,7 @@ import org.springframework.web.bind.annotation.*;
 import team8.backend.config.PasswordUtils;
 import team8.backend.entity.User;
 import team8.backend.repository.UserRepository;
+import team8.backend.dto.UserDTO;
 
 import java.time.LocalDateTime;
 import java.util.List;
@@ -23,7 +24,7 @@ public class UserController {
 
     // Signup endpoint
     @PostMapping("/signup")
-    public ResponseEntity<User> addUser(@RequestBody User user) {
+    public ResponseEntity<UserDTO> addUser(@RequestBody User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
             return ResponseEntity.status(HttpStatus.CONFLICT).build();
         }
@@ -33,12 +34,12 @@ public class UserController {
 
 
         User savedUser = userRepository.save(user);
-        return ResponseEntity.status(HttpStatus.CREATED).body(savedUser);
+        return ResponseEntity.status(HttpStatus.CREATED).body(UserDTO.fromEntity(savedUser));
     }
 
     // Login endpoint
     @PostMapping("/login")
-    public ResponseEntity<User> loginUser(@RequestBody User loginRequest) {
+    public ResponseEntity<UserDTO> loginUser(@RequestBody User loginRequest) {
         Optional<User> optionalUser = userRepository.findAll()
                 .stream()
                 .filter(u -> u.getEmail().equals(loginRequest.getEmail()))
@@ -59,12 +60,14 @@ public class UserController {
         user.setLastLoginAt(LocalDateTime.now());
         userRepository.save(user);
 
-        return ResponseEntity.ok(user);
+        return ResponseEntity.ok(UserDTO.fromEntity(user));
     }
 
     // Get all users
     @GetMapping("/all")
-    public ResponseEntity<List<User>> getAllUsers() {
-        return ResponseEntity.ok(userRepository.findAll());
+    public ResponseEntity<List<UserDTO>> getAllUsers() {
+        List<User> users = userRepository.findAll();
+        List<UserDTO> dtos = users.stream().map(UserDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
     }
 }
