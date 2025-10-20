@@ -100,18 +100,14 @@ public class StockController {
         topMetrics.put("marketCapitalization", "Market Cap");
         topMetrics.put("peTTM", "P/E Ratio");
         topMetrics.put("forwardPE", "Forward P/E");
-        topMetrics.put("pegTTM", "PEG Ratio");
-        topMetrics.put("pb", "Price to Book");
         topMetrics.put("epsTTM", "Earnings Per Share");
         topMetrics.put("roeTTM", "Return on Equity");
-        topMetrics.put("netProfitMarginTTM", "Net Profit Margin");
-        topMetrics.put("operatingMarginTTM", "Operating Margin");
         topMetrics.put("revenueGrowthTTMYoy", "Revenue Growth");
-        topMetrics.put("epsGrowthTTMYoy", "EPS Growth");
         topMetrics.put("52WeekHigh", "52-Week High");
         topMetrics.put("52WeekLow", "52-Week Low");
         topMetrics.put("currentRatioQuarterly", "Current Ratio");
         topMetrics.put("dividendYieldIndicatedAnnual", "Dividend Yield");
+        topMetrics.put("3MonthAverageTradingVolume", "Average Volume");
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange( 
             url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {}
