@@ -76,7 +76,7 @@ const Stock = () => {
             <Container>
                 <Row>
                     {/* Graph placeholder */}
-                    <Col xs={12} md={12} lg={8} className="p-3">
+                    <Col xs={12} md={12} xl={8} className="p-3">
                         <Card className="bg-gradient shadow-lg border-0 h-100" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px" }}>
                             <Card.Body className="d-flex flex-column justify-content-center align-items-center">
                                 <h5 className="mb-4 fw-bold">Stock Graph</h5>
@@ -87,7 +87,7 @@ const Stock = () => {
                         </Card>
                     </Col>
                     {/* Trading panel placeholder */}
-                    <Col xs={12} md={12} lg={4} className="p-3">
+                    <Col xs={12} md={12} xl={4} className="p-3">
                         <Card className="bg-gradient shadow-lg border-0 h-100 px-4" style={{ backgroundColor: "black", color: "white", borderRadius: "10px" }}>
                             <Card.Body>
 
@@ -197,7 +197,7 @@ const Stock = () => {
                         Object.entries(metrics).map(([name, value])  => (
                             <Col xs={12} s={12} md={6} lg={4} xl={3} key={name} className="p-3">
                                 <Card className="bg-gradient shadow-lg border-0 text-center" style={{ backgroundColor: "#1F456E", color: "white", borderRadius: "10px" }}>
-                                    <Card.Body className="p-5">
+    <Card.Body className="p-5 d-flex flex-column justify-content-between h-100">
                                         <h4>{name}</h4>
                                         <hr className="border border-secondary mb-3" />
                                         <h3>{value}</h3>
