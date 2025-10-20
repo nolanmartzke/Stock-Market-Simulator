@@ -1,2 +1,7 @@
 /* App styles removed — styling will be handled later */
 
+.no-spin::-webkit-outer-spin-button,
+.no-spin::-webkit-inner-spin-button {
+  -webkit-appearance: none;
+  margin: 0;
+}
