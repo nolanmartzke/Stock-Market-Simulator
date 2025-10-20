@@ -34,7 +34,7 @@ export default function App() {
             <Route path="/settings" element={<ProtectedRoute><SettingsPage /></ProtectedRoute>} />
             <Route path="/history" element={<ProtectedRoute><History /></ProtectedRoute>} />
             <Route path="/trade" element={<ProtectedRoute><Trade /></ProtectedRoute>} />
-            <Route path="/stocks/:ticker" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
+            <Route path="/stocks/:query" element={<ProtectedRoute><Stock /></ProtectedRoute>} />
             <Route path="*" element={<ErrorPage />} />
           </Routes>
         </div>

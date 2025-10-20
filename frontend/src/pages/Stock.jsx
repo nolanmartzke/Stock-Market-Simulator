@@ -1,30 +1,60 @@
-import React, { useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { Search, PlusCircle, ArrowRightCircle } from 'lucide-react';
 import { useNavigate, useParams, Link } from "react-router-dom"; 
 import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
+import { getQuote, getMetrics, search } from '../api/StockApi';
 
 
 const Stock = () => { 
-    const { ticker } = useParams(); 
+    const { query } = useParams(); 
 
-    const [price, setPrice] = useState("$100.00");
-    const [stock, setStock] = useState(ticker);
+    const [price, setPrice] = useState("$0");
+    const [ticker, setTicker] = useState("");
+    const stockTicker = (ticker || "").toUpperCase();
+    const [stockName, setStockName] = useState("Loading...");
+    const [metrics, setMetrics] = useState([]);
 
     const [cash, setCash] = useState("$20,000.00"); // user's cash balance
     const [mode, setMode] = useState("buy"); // buy or sell
     const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
 
+    useEffect(() => {
+        search(query)
+            .then(response => response.data)
+            .then(data => {
+                console.log(data);
+                setStockName(data.description);
+                setTicker(data.symbol);
 
-    // placeholder stats
-    const stats = {
-       "Earnings Per Share" : "$5",
-       "Market Cap" : "$10 million",
-       "Current Ratio" : "2.4",
-    };
-    
-    const wantedStats = ["Earnings Per Share", "Market Cap"];
-    const filteredStats = Object.entries(stats).filter(([key, value]) => wantedStats.includes(key));
-    
+                return data.symbol;
+            })
+            .then(ticker => {
+                getQuote(ticker)
+                    .then(response => response.data)
+                    .then(data => {
+                        console.log(data);
+                        setPrice(data.c);
+                    })
+                    .catch(err => console.log(err));
+
+                getMetrics(ticker)
+                    .then(response => response.data)
+                    .then(data => {
+                        console.log(data);
+                        setMetrics(data);
+                    })
+                    .catch(err => console.log(err));
+            })
+            .catch(err => console.log(err));
+
+        
+    }, []);
+
+    const numericPrice = typeof price === "number" ? price : parseFloat(String(price).replace(/[^0-9.]/g, "")) || 0;
+    const formattedPrice = `$${numericPrice.toFixed(2)}`;
+    const estimatedCost = (shares * numericPrice).toFixed(2);
+
+    const estimatedCostDollars = new Intl.NumberFormat('en-US', {style: 'currency', currency: 'USD'}).format(estimatedCost);
 
     return ( 
         <div className="container-fluid py-4"> 
@@ -34,10 +64,10 @@ const Stock = () => {
                 <Card className="bg-gradient shadow-lg border-0 p-3" style={{ backgroundColor: "#1F456E", color: "white", borderRadius: "10px" }}>
                     <Card.Body className="d-flex justify-content-between align-items-center" style={{ paddingLeft: "15%", paddingRight: "15%" }}>
                         <h1 className="mb-0 fw-semibold" style={{ fontSize: "3rem" }}>
-                            {stock}
+                            {stockName}
                         </h1>
                         <h2 className="mb-0 fw-semibold text-success" style={{ fontSize: "2.5rem" }}>
-                            {price}
+                            {formattedPrice}
                         </h2>
                     </Card.Body>
                 </Card>
@@ -72,13 +102,13 @@ const Stock = () => {
                                                 : "bg-transparent text-white-50"
                                             }`}
                                     >
-                                        Buy {ticker}
+                                        Buy {stockTicker}
                                     </button>
                                     <button type="button" onClick={() => setMode("sell")}
                                         className={`flex-fill py-1 rounded-pill border-0 transition ${
                                             mode === "sell" ? "bg-danger text-white shadow" : "bg-transparent text-white-50"}`}
                                     >
-                                        Sell {ticker}
+                                        Sell {stockTicker}
                                     </button>
                                 </div>
 
@@ -117,15 +147,15 @@ const Stock = () => {
                                 {/* Market/Limit Price */}
                                 <div className="d-flex justify-content-between align-items-center mt-2">
                                     <p style={{ color: "#4ade80" }}>Market Price</p> 
-                                    <p>{price}</p>
+                                    <p>{formattedPrice}</p>
                                 </div>
 
-                                <hr class="border border-secondary mb-3" />
+                                <hr className="border border-secondary mb-3" />
 
                                 {/* Estimated cost */}
                                 <div className="d-flex justify-content-between mb-3">
                                     <h5 style={{ fontWeight: "600" }}>Estimated cost</h5>
-                                    <h5>${(shares * parseFloat(price.replace(/[^0-9.]/g, ""))).toFixed(2)}</h5>
+                                    <h5>{estimatedCostDollars}</h5>
                                 </div>
 
                                 {/* Review Button */}
@@ -160,19 +190,16 @@ const Stock = () => {
                 </Row>
             </Container>
 
-
-
-
-            {/* stats */}
+            {/* metrics */}
             <Container>
                 <Row>
                     {
-                        filteredStats.map(([name, value])  => (
+                        Object.entries(metrics).map(([name, value])  => (
                             <Col xs={12} s={12} md={6} lg={4} xl={3} key={name} className="p-3">
                                 <Card className="bg-gradient shadow-lg border-0 text-center" style={{ backgroundColor: "#1F456E", color: "white", borderRadius: "10px" }}>
                                     <Card.Body className="p-5">
                                         <h4>{name}</h4>
-                                        <hr class="border border-secondary mb-3" />
+                                        <hr className="border border-secondary mb-3" />
                                         <h3>{value}</h3>
                                     </Card.Body>
                                 </Card>

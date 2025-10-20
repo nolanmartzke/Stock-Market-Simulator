@@ -16,9 +16,9 @@ import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
-
-import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.core.type.TypeReference;
 import com.fasterxml.jackson.databind.ObjectMapper;
+import com.fasterxml.jackson.databind.JsonNode;
 
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
@@ -29,6 +29,42 @@ public class StockController {
     private String API_KEY;
 
     private final RestTemplate restTemplate = new RestTemplate();
+
+    @GetMapping("/search")
+    public ResponseEntity<Map<String, Object>> searchStock(@RequestParam String query) {
+        String baseUrl = "https://finnhub.io/api/v1/search";
+
+        URI url = UriComponentsBuilder.fromUriString(baseUrl)
+            .queryParam("q", query.toUpperCase())
+            .queryParam("exchange", "US")
+            .queryParam("token", API_KEY)
+            .build().toUri();
+
+        // ensures return is in JSON format
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange( 
+            url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {}
+        );
+        if (!response.getStatusCode().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        }
+
+        Map<String, Object> body = response.getBody();
+        if (body == null)
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.valueToTree(body);
+        
+        JsonNode resultNode = root.path("result");
+        if (!resultNode.isArray() || resultNode.isEmpty())
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+
+        JsonNode firstResult = resultNode.get(0);
+        System.out.println(firstResult);
+
+        Map<String, Object> firstResultMap = mapper.convertValue(firstResult, new TypeReference<Map<String, Object>>() {});
+        return ResponseEntity.ok(firstResultMap);
+    }
 
     @GetMapping("/quote")
     public ResponseEntity<Map<String, Object>> getQuote(@RequestParam String ticker) {
@@ -43,11 +79,11 @@ public class StockController {
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange( 
             url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {}
         );
+        System.out.println(response.getBody());
 
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
 
-    
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getMetrics(@RequestParam String ticker) {
         String baseUrl = "https://finnhub.io/api/v1/stock/metric";
@@ -99,6 +135,7 @@ public class StockController {
                 filteredMetrics.put(entry.getValue(), metricNode.get(entry.getKey()));
             }
         }
+        System.out.println(filteredMetrics);
 
         return ResponseEntity.ok(filteredMetrics);
     }
