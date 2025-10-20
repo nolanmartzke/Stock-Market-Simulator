@@ -6,42 +6,48 @@ import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
 
 const Stock = () => { 
     const { ticker } = useParams(); 
+
     const [price, setPrice] = useState("$100.00");
+    const [stock, setStock] = useState(ticker);
+
     const [cash, setCash] = useState("$20,000.00"); // user's cash balance
     const [mode, setMode] = useState("buy"); // buy or sell
     const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
 
 
+    // placeholder stats
     const stats = {
        "Earnings Per Share" : "$5",
-       "Market Cap" : "10 million",
+       "Market Cap" : "$10 million",
        "Current Ratio" : "2.4",
     };
-
+    
     const wantedStats = ["Earnings Per Share", "Market Cap"];
-
-    // const filteredStats = stats;
-
     const filteredStats = Object.entries(stats).filter(([key, value]) => wantedStats.includes(key));
     
 
     return ( 
         <div className="container-fluid py-4"> 
             
-                <div className="card shadow-lg border-0">
-                    <div className="card-body p-5">
-                        <h1>{ticker}</h1> 
-                        <h2>{price}</h2>
-                    </div>
-                </div>
-
-                
+            {/* stock name and price */}
+            <Container className="p-3">
+                <Card className="bg-gradient shadow-lg border-0 p-3" style={{ backgroundColor: "#1F456E", color: "white", borderRadius: "10px" }}>
+                    <Card.Body className="d-flex justify-content-between align-items-center" style={{ paddingLeft: "15%", paddingRight: "15%" }}>
+                        <h1 className="mb-0 fw-semibold" style={{ fontSize: "3rem" }}>
+                            {stock}
+                        </h1>
+                        <h2 className="mb-0 fw-semibold text-success" style={{ fontSize: "2.5rem" }}>
+                            {price}
+                        </h2>
+                    </Card.Body>
+                </Card>
+            </Container>
 
             <Container>
                 <Row>
                     {/* Graph placeholder */}
                     <Col xs={12} md={12} lg={8} className="p-3">
-                        <Card className="shadow-lg border-0 h-100">
+                        <Card className="bg-gradient shadow-lg border-0 h-100" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px" }}>
                             <Card.Body className="d-flex flex-column justify-content-center align-items-center">
                                 <h5 className="mb-4 fw-bold">Stock Graph</h5>
                                 <div>
@@ -52,7 +58,7 @@ const Stock = () => {
                     </Col>
                     {/* Trading panel placeholder */}
                     <Col xs={12} md={12} lg={4} className="p-3">
-                        <Card className="shadow-lg border-0 h-100 px-4" style={{ backgroundColor: "#121212", color: "white", borderRadius: "10px" }}>
+                        <Card className="bg-gradient shadow-lg border-0 h-100 px-4" style={{ backgroundColor: "black", color: "white", borderRadius: "10px" }}>
                             <Card.Body>
 
                                 <h2 className="text-center my-3">Trade</h2>
@@ -163,11 +169,11 @@ const Stock = () => {
                     {
                         filteredStats.map(([name, value])  => (
                             <Col xs={12} s={12} md={6} lg={4} xl={3} key={name} className="p-3">
-                                <Card className="shadow-lg border-0">
+                                <Card className="bg-gradient shadow-lg border-0 text-center" style={{ backgroundColor: "#1F456E", color: "white", borderRadius: "10px" }}>
                                     <Card.Body className="p-5">
-                                        <p>{name}</p>
-                                        <br/>
-                                        <p>{value}</p>
+                                        <h4>{name}</h4>
+                                        <hr class="border border-secondary mb-3" />
+                                        <h3>{value}</h3>
                                     </Card.Body>
                                 </Card>
                             </Col>
