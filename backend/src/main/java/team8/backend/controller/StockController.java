@@ -68,6 +68,49 @@ public class StockController {
         return ResponseEntity.ok(firstResultMap);
     }
 
+    // Searchbar endpoint used by the frontend when a user types a partial query.
+    @GetMapping("/searchbar")
+    public ResponseEntity<Map<String, Object>> searchBar(@RequestParam String query) {
+        String baseUrl = "https://finnhub.io/api/v1/search";
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl)
+            .queryParam("q", query)
+            .queryParam("exchange", "US")
+            .queryParam("token", API_KEY);
+        URI url = builder.build().toUri();
+
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+            url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {}
+        );
+
+        if (!response.getStatusCode().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        }
+
+        Map<String, Object> body = response.getBody();
+        if (body == null) {
+            Map<String, Object> empty = new HashMap<>();
+            empty.put("count", 0);
+            empty.put("result", new java.util.ArrayList<>());
+            return ResponseEntity.ok(empty);
+        }
+
+        ObjectMapper mapper = new ObjectMapper();
+        JsonNode root = mapper.valueToTree(body);
+        JsonNode resultNode = root.path("result");
+
+        java.util.List<Map<String, Object>> results = new java.util.ArrayList<>();
+        if (resultNode.isArray() && !resultNode.isEmpty()) {
+            results = mapper.convertValue(resultNode, new TypeReference<java.util.List<Map<String, Object>>>() {});
+        }
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("count", results.size());
+        resp.put("result", results);
+
+        return ResponseEntity.ok(resp);
+    }
+
     @GetMapping("/quote")
     public ResponseEntity<Map<String, Object>> getQuote(@RequestParam String ticker) {
         String baseUrl = "https://finnhub.io/api/v1/quote";
