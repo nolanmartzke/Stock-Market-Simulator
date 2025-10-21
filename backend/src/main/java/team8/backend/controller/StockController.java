@@ -68,6 +68,7 @@ public class StockController {
         return ResponseEntity.ok(firstResultMap);
     }
 
+    // Searchbar endpoint used by the frontend when a user types a partial query.
     @GetMapping("/searchbar")
     public ResponseEntity<Map<String, Object>> searchBar(@RequestParam String query) {
         String baseUrl = "https://finnhub.io/api/v1/search";
