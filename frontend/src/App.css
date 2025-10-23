@@ -1,4 +1,39 @@
-/* App styles removed — styling will be handled later */
+/* ============================================
+   Global Token Bridge
+   Maps landing page to main app theme
+   ============================================ */
+
+:root {
+  /* Brand color palette (aliases to Bootstrap tokens) */
+  --brand-primary: var(
+    --bs-danger,
+    #dc3545
+  ); /* Red accent (matches navbar "TRD") */
+  --brand-secondary: var(--bs-primary, #0d6efd); /* Blue (standard primary) */
+  --brand-success: var(--bs-success, #198754); /* Green (signup, badges) */
+  --brand-muted: var(--bs-secondary, #6c757d); /* Gray text */
+
+  /* Backgrounds & text */
+  --brand-bg-light: var(--bs-light, #f8f9fa); /* Light page background */
+  --brand-bg-dark: var(--bs-dark, #212529); /* Dark sections */
+  --brand-text-dark: var(--bs-body-color, #212529); /* Primary text */
+  --brand-text-light: #ffffff; /* Text on dark backgrounds */
+  --brand-text-muted: rgba(108, 117, 125, 1); /* Muted/secondary text */
+
+  /* Design tokens */
+  --brand-radius-sm: 12px; /* Buttons, inputs */
+  --brand-radius-lg: 20px; /* Cards, containers */
+  --brand-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --brand-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+
+  /* Opacity levels */
+  --brand-opacity-subtle: 0.1;
+  --brand-opacity-muted: 0.6;
+}
+
+/* ============================================
+   Utility: Remove input spinner arrows
+   ============================================ */
 
 .no-spin::-webkit-outer-spin-button,
 .no-spin::-webkit-inner-spin-button {
