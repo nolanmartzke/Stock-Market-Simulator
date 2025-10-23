@@ -12,7 +12,6 @@ export default function Landing() {
 
   return (
     <div className="landing-page">
-      {/* Skip to main content for keyboard users */}
       <a
         href="#main-content"
         className="visually-hidden-focusable position-absolute top-0 start-0 bg-danger text-white px-3 py-2 m-2 rounded"
@@ -20,9 +19,7 @@ export default function Landing() {
         Skip to main content
       </a>
 
-      {/* ============================================
-          Header / Navbar
-          ============================================ */}
+      {/* Header / Navbar */}
       <Navbar
         expand="lg"
         bg="dark"
@@ -108,9 +105,7 @@ export default function Landing() {
         </Container>
       </Navbar>
 
-      {/* ============================================
-          Hero Section (Dark)
-          ============================================ */}
+      {/* Hero Section */}
       <main id="main-content">
         <section
           className="hero-bg bg-dark text-white py-5"
@@ -157,9 +152,7 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* ============================================
-          How It Works Section
-          ============================================ */}
+        {/* How It Works Section */}
         <section
           id="how"
           className="py-5 bg-light"
@@ -276,9 +269,7 @@ export default function Landing() {
           </div>
         </section>
 
-        {/* ============================================
-          Footer
-          ============================================ */}
+        {/* Footer */}
         <footer className="bg-dark text-white py-4" role="contentinfo">
           <div className="container">
             <p className="text-center text-muted small mb-0">

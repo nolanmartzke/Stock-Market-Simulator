@@ -1,14 +1,3 @@
-/**
- * Landing Page CSS Utilities
- * Uses brand token bridge from App.css
- * Respects prefers-reduced-motion for accessibility
- */
-
-/* ============================================
-   0. Focus & Keyboard Navigation
-   ============================================ */
-
-/* Ensure focus indicators are visible for keyboard users */
 a:focus-visible,
 button:focus-visible,
 .btn:focus-visible {
@@ -16,16 +5,11 @@ button:focus-visible,
   outline-offset: 2px;
 }
 
-/* Skip-to-content link (Bootstrap utility override) */
 .visually-hidden-focusable:focus {
   position: absolute !important;
   z-index: 9999;
 }
 
-/* ============================================
-   1. Themed Hero Background
-   Uses brand red accent on dark background
-   ============================================ */
 .hero-bg {
   position: relative;
   overflow: hidden;
@@ -47,16 +31,11 @@ button:focus-visible,
   z-index: 0;
 }
 
-/* Ensure content sits above the gradient */
 .hero-bg > * {
   position: relative;
   z-index: 1;
 }
 
-/* ============================================
-   2. Shine Border Wrapper
-   Animated gradient border using brand tokens
-   ============================================ */
 .shine-wrap {
   position: relative;
   border-radius: var(--brand-radius-lg);
@@ -71,7 +50,6 @@ button:focus-visible,
   box-shadow: var(--brand-shadow-lg);
 }
 
-/* Inner content container */
 .shine-wrap > * {
   position: relative;
   z-index: 1;
@@ -79,23 +57,12 @@ button:focus-visible,
   border-radius: calc(var(--brand-radius-lg) - 2px);
 }
 
-/* ============================================
-   3. Text Utilities
-   ============================================ */
-
-/* Muted text on dark backgrounds */
 .text-muted-on-dark {
   color: var(--brand-text-muted);
   opacity: var(--brand-opacity-muted);
 }
 
-/* ============================================
-   4. Animations (guarded by reduced-motion)
-   ============================================ */
-
-/* Only animate if user has no motion preference */
 @media (prefers-reduced-motion: no-preference) {
-  /* Shine border animation */
   .shine-wrap::after {
     content: "";
     position: absolute;
@@ -128,14 +95,12 @@ button:focus-visible,
     }
   }
 
-  /* Fade-in-up utility for entrance effects */
   .fade-in-up {
     opacity: 0;
     transform: translateY(8px);
     animation: fadeInUp 600ms ease-out forwards;
   }
 
-  /* Stagger delays for sequential animations */
   .fade-in-up.d2 {
     animation-delay: 120ms;
   }
@@ -157,7 +122,6 @@ button:focus-visible,
   }
 }
 
-/* Fallback: static state for reduced-motion users */
 @media (prefers-reduced-motion: reduce) {
   .shine-wrap::after {
     display: none;

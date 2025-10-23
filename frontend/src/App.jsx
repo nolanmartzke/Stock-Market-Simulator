@@ -27,10 +27,10 @@ export default function App() {
   const isAuthenticated = !!auth;
   return (
     <Routes>
-      {/* Landing page - standalone (no layout) */}
+      {/* Landing page */}
       <Route path="/" element={<Landing />} />
 
-      {/* Auth routes - use AuthLayout (no sidebar) */}
+      {/* Auth routes */}
       <Route element={<AuthLayout />}>
         <Route
           path="/signin"
@@ -42,7 +42,7 @@ export default function App() {
         />
       </Route>
 
-      {/* App routes - use MainLayout (with sidebar) */}
+      {/* App routes */}
       <Route element={<MainLayout />}>
         <Route path="/home" element={<Home />} />
         <Route path="/get-started" element={<GetStarted />} />
@@ -105,7 +105,7 @@ export default function App() {
           }
         />
 
-        {/* Fallback - 404 */}
+        {/* Fallback */}
         <Route path="*" element={<ErrorPage />} />
       </Route>
     </Routes>
