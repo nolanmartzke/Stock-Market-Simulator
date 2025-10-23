@@ -1,0 +1,24 @@
+
+# This is for if you want to only run the database in a container, just make sure there is a .env in the backend folder with db details
+
+# This file makes it much easier for developing, will not repeatedly have to build the app between every minor change.
+
+# IMPORTANT: if using this, change the "db" in the spring.datasource.url to "localhost", change back if you want to use the other compose
+
+services:
+  db:
+    image: mysql:8.0
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: ${MYSQL_ROOT_PASSWORD}
+      MYSQL_DATABASE: ${MYSQL_DATABASE}
+      MYSQL_USER: ${MYSQL_USER}
+      MYSQL_PASSWORD: ${MYSQL_PASSWORD}
+    env_file:
+      - .env
+    volumes:
+      - db_data:/var/lib/mysql
+    ports:
+      - "3306:3306"
+volumes:
+  db_data:

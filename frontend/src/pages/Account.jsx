@@ -1,41 +1,139 @@
-import React, { useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
+import React from "react";
+import { useNavigate } from "react-router-dom";
+import { User, LogOut } from "lucide-react";
+import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 
-
 const Account = () => {
-  const [user, setUser] = useState(null);
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
 
-  useEffect(() => {
-    if (auth)
-      setUser({
-        name: auth.name,
-        email: auth.email,
-      });
-  }, [auth]);
-
   const handleLogout = () => {
     logout();
-    navigate('/');
+    navigate("/");
   };
 
-  return (
-    <div style={{ maxWidth: 400, margin: '50px auto', padding: 20, border: '1px solid #ccc', borderRadius: 8 }}>
-      <h2>Account</h2>
-      {
-        user ? <>
-          <p><strong>Name:</strong> {user.name}</p>
-          <p><strong>Email:</strong> {user.email}</p>
-          <button onClick={handleLogout} style={{ width: '100%', padding: 10, marginTop: 20 }}>
-            Log Out
-          </button>
-        </>
-          :
-          <></>
-      }
+  if (!auth) return null;
 
+  return (
+    <div className="min-vh-100 bg-light d-flex align-items-center">
+      <div className="container py-4">
+        <div className="row justify-content-center">
+          <div className="col-md-8 col-lg-6">
+            <div
+              className="card shadow-lg border-0"
+              style={{ borderRadius: 20 }}
+            >
+              <div className="card-body p-4 p-md-5">
+                {/* Header */}
+                <div className="d-flex align-items-center mb-4">
+                  <User size={28} className="me-2" />
+                  <h1 className="h4 mb-0">Account Settings</h1>
+                </div>
+
+                {/* Edit Profile (placeholder) */}
+                <h2 className="h6 text-uppercase text-secondary mb-3">
+                  Edit Profile (coming soon)
+                </h2>
+                <div className="mb-3">
+                  <label className="form-label fw-medium">Name</label>
+                  <input
+                    className="form-control form-control-lg"
+                    style={{ borderRadius: "12px" }}
+                    value={auth?.name ?? ""}
+                    disabled
+                    readOnly
+                  />
+                </div>
+                <div className="mb-2">
+                  <label className="form-label fw-medium">Email</label>
+                  <input
+                    className="form-control form-control-lg"
+                    style={{ borderRadius: "12px" }}
+                    value={auth?.email ?? ""}
+                    disabled
+                    readOnly
+                  />
+                </div>
+                <button
+                  className="btn btn-primary mt-2"
+                  style={{ borderRadius: "12px" }}
+                  disabled
+                >
+                  Save changes
+                </button>
+
+                <hr className="my-4" />
+
+                {/* Change Password (placeholder) */}
+                <h2 className="h6 text-uppercase text-secondary mb-3">
+                  Change Password (coming soon)
+                </h2>
+                <div className="row g-3">
+                  <div className="col-12">
+                    <label className="form-label fw-medium">
+                      Current password
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control form-control-lg"
+                      style={{ borderRadius: "12px" }}
+                      placeholder="••••••••"
+                      disabled
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-medium">New password</label>
+                    <input
+                      type="password"
+                      className="form-control form-control-lg"
+                      style={{ borderRadius: "12px" }}
+                      placeholder="Min 8 chars"
+                      disabled
+                    />
+                  </div>
+                  <div className="col-md-6">
+                    <label className="form-label fw-medium">
+                      Confirm new password
+                    </label>
+                    <input
+                      type="password"
+                      className="form-control form-control-lg"
+                      style={{ borderRadius: "12px" }}
+                      placeholder="Match new password"
+                      disabled
+                    />
+                  </div>
+                </div>
+                <small className="text-secondary d-block mt-2">
+                  Requirements will appear here (length, character mix, etc.).
+                </small>
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  className="btn btn-outline-secondary w-100 mt-3"
+                  style={{ borderRadius: 12 }}
+                  disabled
+                >
+                  Update password
+                </motion.button>
+
+                <hr className="my-4" />
+
+                {/* Logout (existing behavior) */}
+                <motion.button
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleLogout}
+                  className="btn btn-outline-secondary w-100 fw-medium"
+                  style={{ borderRadius: 12 }}
+                >
+                  <LogOut size={18} className="me-2" />
+                  Log out
+                </motion.button>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
     </div>
   );
 };
