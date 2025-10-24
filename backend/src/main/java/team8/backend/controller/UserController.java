@@ -8,6 +8,8 @@ import org.springframework.web.bind.annotation.*;
 import team8.backend.config.PasswordUtils;
 import team8.backend.entity.User;
 import team8.backend.repository.UserRepository;
+import team8.backend.repository.AccountRepository;
+import team8.backend.entity.Account;
 import team8.backend.dto.UserDTO;
 
 import java.time.LocalDateTime;
@@ -22,6 +24,9 @@ public class UserController {
     @Autowired
     private UserRepository userRepository;
 
+    @Autowired
+    private AccountRepository accountRepository;
+
     // Signup endpoint
     @PostMapping("/signup")
     public ResponseEntity<UserDTO> addUser(@RequestBody User user) {
@@ -32,8 +37,12 @@ public class UserController {
         String hashedPassword = PasswordUtils.hashPassword(user.getPassword());
         user.setPassword(hashedPassword);
 
-
         User savedUser = userRepository.save(user);
+
+        // Create primary account with 10000 cash
+        Account primaryAccount = new Account(savedUser, 10000.0);
+        accountRepository.save(primaryAccount);
+
         return ResponseEntity.status(HttpStatus.CREATED).body(UserDTO.fromEntity(savedUser));
     }
 
