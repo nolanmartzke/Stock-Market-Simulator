@@ -9,7 +9,7 @@ import { motion } from "framer-motion";
 
 export default function NavBar() {
   const navItemsMain = [
-    { name: "Reports", icon: LineChart, link: "/reports" },
+    { name: "Dashboard", icon: LineChart, link: "/dashboard" },
     { name: "Leaderboard", icon: Trophy, link: "/leaderboard" },
     { name: "Trade", icon: Users, link: "/trade" },
     { name: "History", icon: Activity, link: "/history" },

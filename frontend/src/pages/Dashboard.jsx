@@ -1,14 +1,13 @@
 import React from 'react'
 import { LineChart, DollarSign } from 'lucide-react'
 
-const Reports = () => {
+const Dashboard = () => {
   return (
     <div className="container-fluid py-4">
       <div className="container">
         <section className="card mb-4">
           <div className="card-body p-4">
-            <h2 className="h4 fw-bold mb-3"><LineChart className="me-2" size={20} />Reports</h2>
-            <p className="text-muted mb-3">Portfolio performance summaries and visualizations (placeholder).</p>
+            <h2 className="h4 fw-bold mb-3"><LineChart className="me-2" size={20} />Dashboard</h2>
 
             <div className="row g-4">
               <div className="col-md-6">
@@ -35,4 +34,4 @@ const Reports = () => {
   )
 }
 
-export default Reports
+export default Dashboard

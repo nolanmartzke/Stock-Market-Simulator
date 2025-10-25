@@ -9,7 +9,7 @@ import Account from "./pages/Account";
 import ProtectedRoute from "./components/ProtectedRoute";
 import History from "./pages/History";
 import Trade from "./pages/Trade";
-import Reports from "./pages/Reports";
+import Dashboard from "./pages/Dashboard";
 import Leaderboard from "./pages/Leaderboard";
 import GetStarted from "./pages/GetStarted";
 import SettingsPage from "./pages/Settings";
@@ -25,7 +25,7 @@ export default function App() {
         <div className="main-content" style={{ marginLeft: "250px" }}>
           <Routes>
             <Route path="/" element={<Home />} />
-            <Route path="/reports" element={<ProtectedRoute><Reports /></ProtectedRoute>} />
+            <Route path="/dashboard" element={<ProtectedRoute><Dashboard /></ProtectedRoute>} />
             <Route path="/leaderboard" element={<ProtectedRoute><Leaderboard /></ProtectedRoute>} />
             <Route path="/signup" element={<SignUp />} />
             <Route path="/signin" element={<SignIn />} />
