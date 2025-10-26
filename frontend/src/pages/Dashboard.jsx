@@ -3,6 +3,8 @@ import { ArrowUp, ArrowDown } from 'lucide-react';
 import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
 import { loadDashboard } from '../api/AccountApi';
+import { useNavigate, useParams, Link } from "react-router-dom"; 
+
 
 const Dashboard = () => {
 
@@ -116,21 +118,17 @@ const Dashboard = () => {
                           <div className='py-3 px-1'>
                             {
                               Object.entries(positions).map(([ticker, count]) => (
-                                <div key={ticker} className="d-flex justify-content-between align-items-center rounded-3 py-2 px-3 mb-2"
-                                  style={{
-                                    border: "2px solid rgba(54, 52, 152, 0.25)",
-                                    borderRadius: "10px",
-                                    background: "linear-gradient(180deg, #111 0%, #000 100%)"
-                                  }}
-                                >
-                                  <div>
-                                    <h5 className="fw-bold">{ticker}</h5>
-                                    <p className="mb-1 ps-2"> {count} shares</p>
+                                <Link to={`/stocks/${ticker}`} className="text-decoration-none text-white">
+                                  <div key={ticker} className="position-card d-flex justify-content-between align-items-center rounded-3 py-2 px-3 mb-2">
+                                    <div>
+                                      <h5 className="fw-bold">{ticker}</h5>
+                                      <p className="mb-1 ps-2"> {count} shares</p>
+                                    </div>
+                                    <div>
+                                      <h5>$0.00</h5>
+                                    </div>
                                   </div>
-                                  <div>
-                                    <h5>$0.00</h5>
-                                  </div>
-                                </div>
+                                </Link>
                               ))
                             }
                           </div>
