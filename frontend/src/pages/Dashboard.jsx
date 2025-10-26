@@ -71,13 +71,19 @@ const Dashboard = () => {
   }, [positions, quotes]);
 
 
-  
-
   const formatUSD = (num) =>
     new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: 'USD',
   }).format(num);
+
+  const formatPercent = (num) => {
+    const roundedNum = Number(num).toFixed(2);
+    let prefix = "";
+    if (num >= 0)
+      prefix = "+"
+    return prefix + roundedNum + "%";
+  } 
 
   const formattedPortfolioValue = formatUSD(portfolioValue);
   const formattedCashBalance = formatUSD(cashBalance);
@@ -159,10 +165,17 @@ const Dashboard = () => {
                                   <div className="position-card d-flex justify-content-between align-items-center rounded-3 py-2 px-3 mb-2">
                                     <div>
                                       <h5 className="fw-bold">{ticker}</h5>
-                                      <p className="mb-1 ps-2"> {count} shares</p>
+                                      <p className="mb-1 ps-2" style={{ fontSize: "0.9rem" }}> {count} shares</p>
                                     </div>
                                     <div>
                                       <h5>{ quotes[ticker]? formatUSD(quotes[ticker].c) : "$0.00" }</h5>
+                                      <p className="mb-0 text-end" style={{
+                                          fontSize: "0.8rem",
+                                          color: quotes[ticker]?.dp > 0 ? "#22C55E" : quotes[ticker]?.dp < 0 ? "#EF4444" : "#9CA3AF",
+                                        }}
+                                      >
+                                        { quotes[ticker]? formatPercent(quotes[ticker].dp) : "0.00%" }
+                                      </p>
                                     </div>
                                   </div>
                                 </Link>
