@@ -2,8 +2,7 @@ import React, { useEffect, useState } from 'react';
 import { ArrowUp, ArrowDown } from 'lucide-react';
 import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
-
-
+import { loadDashboard } from '../api/AccountApi';
 
 const Dashboard = () => {
 
@@ -11,7 +10,8 @@ const Dashboard = () => {
 
   const [portfolioValue, setPortfolioValue] = useState(0);
   const [firstName, setFirstName] = useState("");
-  const [positions, setPotions] = useState([]);
+  const [cashBalance, setCashBalance] = useState(0);
+  const [positions, setPositions] = useState([]);
 
   const [dayChange, setDayChange] = useState("positive");
   const [dayChangeDollars, setDayChangeDollars] = useState("$0.00");
@@ -19,8 +19,19 @@ const Dashboard = () => {
 
 
   useEffect(() => {
-    if (auth)
-      setFirstName(auth.name.split(" ")[0]);
+    if (!auth) return;
+    
+    setFirstName(auth.name.split(" ")[0]);
+
+    loadDashboard(auth.id)
+      .then(response => response.data)
+      .then(data => {
+          console.log(data);
+          setCashBalance(data.totalCash)
+          setPositions(data.totalStocks);
+      })
+      .catch(err => console.log(err));
+
   }, [auth]);
 
   const formatUSD = (num) =>
@@ -30,6 +41,7 @@ const Dashboard = () => {
   }).format(num);
 
   const formattedPortfolioValue = formatUSD(portfolioValue);
+  const formattedCashBalance = formatUSD(cashBalance);
 
   return (
     <Container className="py-4">
@@ -63,7 +75,7 @@ const Dashboard = () => {
       <Container>
         <Row>
             {/* Graph + Everything else */}
-            <Col xs={12} md={12} xl={7} className="p-3">
+            <Col xs={12} md={12} xl={8} className="p-3">
                 <Card className="bg-gradient shadow-lg border-0" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px", minHeight: "450px" }}>
                     <Card.Body className="d-flex flex-column justify-content-center align-items-center">
                         <h5 className="mb-4 fw-bold">Stock Graph</h5>
@@ -88,15 +100,41 @@ const Dashboard = () => {
             </Col>
 
             {/* Postions card */}
-            <Col xs={12} md={12} xl={5} className="p-3">
-                <Card className="bg-gradient shadow-lg border-0 px-4" style={{ backgroundColor: "black", color: "white", borderRadius: "10px", minHeight: "550px"}}>
+            <Col xs={12} md={12} xl={4} className="p-3">
+                <Card className="bg-gradient shadow-lg border-0 px-2" style={{ backgroundColor: "black", color: "white", borderRadius: "10px", minHeight: "550px"}}>
                     <Card.Body>
 
                         <h2 className="text-center my-3">Positions</h2>
+                        <hr className="border border-secondary mb-3" />
+                        <div className="py-1 d-flex justify-content-between px-2">
+                          <h5>Cash</h5>
+                          <h5>{formattedCashBalance}</h5>
+                        </div>
+                        <hr className="border border-secondary mb-1" />
 
-
-
-
+                        { positions &&
+                          <div className='py-3 px-1'>
+                            {
+                              Object.entries(positions).map(([ticker, count]) => (
+                                <div key={ticker} className="d-flex justify-content-between align-items-center rounded-3 py-2 px-3 mb-2"
+                                  style={{
+                                    border: "2px solid rgba(54, 52, 152, 0.25)",
+                                    borderRadius: "10px",
+                                    background: "linear-gradient(180deg, #111 0%, #000 100%)"
+                                  }}
+                                >
+                                  <div>
+                                    <h5 className="fw-bold">{ticker}</h5>
+                                    <p className="mb-1 ps-2"> {count} shares</p>
+                                  </div>
+                                  <div>
+                                    <h5>$0.00</h5>
+                                  </div>
+                                </div>
+                              ))
+                            }
+                          </div>
+                        }
 
                     </Card.Body>
                     </Card>
