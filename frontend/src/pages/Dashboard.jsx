@@ -4,6 +4,7 @@ import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
 import { loadDashboard } from '../api/AccountApi';
 import { useNavigate, useParams, Link } from "react-router-dom"; 
+import { getQuote, getMetrics, search } from '../api/StockApi';
 
 
 const Dashboard = () => {
@@ -14,6 +15,7 @@ const Dashboard = () => {
   const [firstName, setFirstName] = useState("");
   const [cashBalance, setCashBalance] = useState(0);
   const [positions, setPositions] = useState([]);
+  const [quotes, setQuotes] = useState({});
 
   const [dayChange, setDayChange] = useState("positive");
   const [dayChangeDollars, setDayChangeDollars] = useState("$0.00");
@@ -33,8 +35,43 @@ const Dashboard = () => {
           setPositions(data.totalStocks);
       })
       .catch(err => console.log(err));
-
   }, [auth]);
+
+
+  useEffect(() => {
+    if (!positions) return;
+
+    for (const [ticker, numShares] of Object.entries(positions)) {
+      if (!(ticker in quotes)){
+        getQuote(ticker)
+          .then(response => response.data)
+          .then(data => {
+            console.log(data);
+            setQuotes(prev => ({ ...prev, [ticker]: data }))
+          })
+          .catch(err => console.log(err))
+      }
+        
+    }
+
+  }, [positions]);
+
+
+  useEffect(() => {
+    if (!positions || !quotes) return;
+
+    const cash = cashBalance;
+    const equity = Object.entries(positions).reduce((sum, [ticker, shares]) => {
+      const price = quotes[ticker]?.c ?? 0;
+      return sum + shares * price;
+    }, 0);
+
+    setPortfolioValue(cash + equity);
+
+  }, [positions, quotes]);
+
+
+  
 
   const formatUSD = (num) =>
     new Intl.NumberFormat('en-US', {
@@ -78,7 +115,7 @@ const Dashboard = () => {
         <Row>
             {/* Graph + Everything else */}
             <Col xs={12} md={12} xl={8} className="p-3">
-                <Card className="bg-gradient shadow-lg border-0" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px", minHeight: "450px" }}>
+                <Card className="bg-gradient shadow-lg border-0" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px", minHeight: "500px" }}>
                     <Card.Body className="d-flex flex-column justify-content-center align-items-center">
                         <h5 className="mb-4 fw-bold">Stock Graph</h5>
                         <div>
@@ -103,7 +140,7 @@ const Dashboard = () => {
 
             {/* Postions card */}
             <Col xs={12} md={12} xl={4} className="p-3">
-                <Card className="bg-gradient shadow-lg border-0 px-2" style={{ backgroundColor: "black", color: "white", borderRadius: "10px", minHeight: "550px"}}>
+                <Card className="bg-gradient shadow-lg border-0 px-2" style={{ backgroundColor: "black", color: "white", borderRadius: "10px", minHeight: "600px"}}>
                     <Card.Body>
 
                         <h2 className="text-center my-3">Positions</h2>
@@ -118,14 +155,14 @@ const Dashboard = () => {
                           <div className='py-3 px-1'>
                             {
                               Object.entries(positions).map(([ticker, count]) => (
-                                <Link to={`/stocks/${ticker}`} className="text-decoration-none text-white">
-                                  <div key={ticker} className="position-card d-flex justify-content-between align-items-center rounded-3 py-2 px-3 mb-2">
+                                <Link to={`/stocks/${ticker}`} key={ticker} className="text-decoration-none text-white">
+                                  <div className="position-card d-flex justify-content-between align-items-center rounded-3 py-2 px-3 mb-2">
                                     <div>
                                       <h5 className="fw-bold">{ticker}</h5>
                                       <p className="mb-1 ps-2"> {count} shares</p>
                                     </div>
                                     <div>
-                                      <h5>$0.00</h5>
+                                      <h5>{ quotes[ticker]? formatUSD(quotes[ticker].c) : "$0.00" }</h5>
                                     </div>
                                   </div>
                                 </Link>
