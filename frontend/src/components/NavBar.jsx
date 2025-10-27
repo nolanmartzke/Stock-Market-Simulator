@@ -90,7 +90,6 @@ export default function NavBar() {
         </Link>
       </div>
 
-      {/* Small inline search for quick navigation */}
       <div className="mb-3 px-1">
         <SearchInline onNavigate={() => { if (onLinkClick) onLinkClick(); }} />
       </div>
