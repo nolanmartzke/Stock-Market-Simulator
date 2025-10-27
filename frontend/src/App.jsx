@@ -21,11 +21,13 @@ import GetStarted from "./pages/GetStarted";
 import SettingsPage from "./pages/Settings";
 import ErrorPage from "./pages/ErrorPage";
 import Stock from "./pages/Stock";
+import Popular from "./pages/Popular";
 
 export default function App() {
   const { auth } = useAuth();
   const isAuthenticated = !!auth;
   return (
+
     <Routes>
       {/* Landing page */}
       <Route path="/" element={<Landing />} />
@@ -46,6 +48,7 @@ export default function App() {
       <Route element={<MainLayout />}>
         <Route path="/home" element={<Home />} />
         <Route path="/get-started" element={<GetStarted />} />
+        <Route path="/popular" element={<Popular />} />
 
         {/* Protected routes */}
         <Route
@@ -109,5 +112,6 @@ export default function App() {
         <Route path="*" element={<ErrorPage />} />
       </Route>
     </Routes>
+>>>>>>> frontend/src/App.jsx
   );
 }
