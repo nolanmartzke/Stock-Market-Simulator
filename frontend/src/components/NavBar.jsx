@@ -5,6 +5,7 @@ import {
   Activity,
   Settings,
   Zap,
+  Search,
   LogIn,
   UserPlus,
   Trophy,
@@ -12,7 +13,8 @@ import {
   X,
 } from "lucide-react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
+import { searchBar } from "../api/StockApi";
 import { useAuth } from "../context/AuthContext";
 import { motion } from "framer-motion";
 import { Offcanvas } from "react-bootstrap";
@@ -20,7 +22,6 @@ import { Offcanvas } from "react-bootstrap";
 export default function NavBar() {
   // State for mobile menu
   const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
-  const openMenu = () => setIsMobileMenuOpen(true);
   const closeMenu = () => setIsMobileMenuOpen(false);
   const toggleMenu = () => setIsMobileMenuOpen((v) => !v);
   const { pathname } = useLocation();
@@ -87,6 +88,11 @@ export default function NavBar() {
           <span className="me-2 text-danger">TRD</span>
           <span className="text-secondary">Wars</span>
         </Link>
+      </div>
+
+      {/* Small inline search for quick navigation */}
+      <div className="mb-3 px-1">
+        <SearchInline onNavigate={() => { if (onLinkClick) onLinkClick(); }} />
       </div>
 
       <div className="flex-grow-1">
@@ -212,6 +218,67 @@ export default function NavBar() {
       </div>
     </>
   );
+
+  function SearchInline({ onNavigate }) {
+    const [q, setQ] = useState('')
+    const [suggestions, setSuggestions] = useState([])
+    const [loading, setLoading] = useState(false)
+    const timer = useRef(null)
+    const navigate = useNavigate()
+
+    useEffect(() => {
+      if (!q || q.length < 1) {
+        setSuggestions([])
+        setLoading(false)
+        return
+      }
+
+      setLoading(true)
+      if (timer.current) clearTimeout(timer.current)
+      timer.current = setTimeout(() => {
+        searchBar(q)
+          .then((res) => setSuggestions((res.data && res.data.result) || []))
+          .catch(() => setSuggestions([]))
+          .finally(() => setLoading(false))
+      }, 300)
+
+      return () => clearTimeout(timer.current)
+    }, [q])
+
+    function select(sym) {
+      setQ('')
+      setSuggestions([])
+      navigate(`/stocks/${sym}`)
+      if (onNavigate) onNavigate(sym)
+    }
+
+    return (
+      <div className="position-relative">
+        <div className="input-group">
+          <span className="input-group-text"><Search size={16} /></span>
+          <input
+            value={q}
+            onChange={(e) => setQ(e.target.value)}
+            className="form-control"
+            placeholder="Search symbol or company"
+            aria-label="Quick symbol search"
+          />
+        </div>
+
+        {q && suggestions && suggestions.length > 0 && (
+          <ul className="list-group position-absolute w-100 mt-1" style={{ zIndex: 2000 }}>
+            {suggestions.slice(0, 6).map((s) => (
+              <li key={s.symbol} className="list-group-item list-group-item-action" style={{ cursor: 'pointer' }} onClick={() => select(s.symbol)}>
+                <strong>{s.symbol}</strong> <span className="text-muted">{s.description}</span>
+              </li>
+            ))}
+          </ul>
+        )}
+
+        {q && loading && <div className="small text-muted mt-1">Searching...</div>}
+      </div>
+    )
+  }
 
   return (
     <>
