@@ -1,7 +1,58 @@
+:root {
+  --brand-primary: var(--bs-danger, #dc3545);
+  --brand-secondary: var(--bs-primary, #0d6efd);
+  --brand-success: var(--bs-success, #198754);
+  --brand-muted: var(--bs-secondary, #6c757d);
+  --brand-bg-light: var(--bs-light, #f8f9fa);
+  --brand-bg-dark: var(--bs-dark, #212529);
+  --brand-text-dark: var(--bs-body-color, #212529);
+  --brand-text-light: #ffffff;
+  --brand-text-muted: rgba(108, 117, 125, 1);
+  --brand-radius-sm: 12px;
+  --brand-radius-lg: 20px;
+  --brand-shadow-sm: 0 0.125rem 0.25rem rgba(0, 0, 0, 0.075);
+  --brand-shadow-lg: 0 0.5rem 1rem rgba(0, 0, 0, 0.15);
+  --brand-opacity-subtle: 0.1;
+  --brand-opacity-muted: 0.6;
+  --sidebar-width: 250px;
+  --mobile-topbar-height: 64px;
+}
+
 /* App styles removed — styling will be handled later */
 
 .no-spin::-webkit-outer-spin-button,
 .no-spin::-webkit-inner-spin-button {
   -webkit-appearance: none;
   margin: 0;
+}
+
+/* Content layout - responsive */
+.main-content {
+  margin-left: 0;
+  padding-top: var(--mobile-topbar-height); /* space for mobile top bar */
+}
+
+@media (min-width: 768px) {
+  .main-content {
+    margin-left: var(--sidebar-width);
+    padding-top: 0;
+  }
+}
+
+/* Optional: safe area for iOS when drawer/top bars are present */
+.offcanvas {
+  padding-left: env(safe-area-inset-left, 0);
+}
+
+/* Shims for Tailwind-like classes used in code (keep visuals stable) */
+.text-gray-600 {
+  color: var(--bs-secondary-color, #6c757d) !important;
+}
+
+.bg-red-100 {
+  background-color: #ffe5e5 !important;
+}
+
+.hover\:bg-gray-100:hover {
+  background-color: var(--bs-gray-100, #f8f9fa) !important;
 }
