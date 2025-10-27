@@ -26,6 +26,20 @@
   margin: 0;
 }
 
+
+.position-card {
+  border: 3px solid rgba(54, 52, 152, 0.25);
+  border-radius: 10px;
+  background: linear-gradient(180deg, #111 0%, #000 100%);
+  transition: background 150ms ease, border-color 150ms ease, transform 150ms ease;
+}
+
+.position-card:hover {
+  border-color: rgba(99, 102, 241, 0.65);
+  background: linear-gradient(180deg, #1a1a1a 0%, #050505 100%);
+  transform: translateY(-2px);
+}
+
 /* Content layout - responsive */
 .main-content {
   margin-left: 0;

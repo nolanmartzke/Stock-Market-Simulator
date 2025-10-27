@@ -52,7 +52,7 @@ const Stock = () => {
                     .catch(err => console.log(err));
             })
             .catch(err => console.log(err));
-    }, []);
+    }, [query]);
 
     useEffect(() => {
         if (quote.d >= 0){

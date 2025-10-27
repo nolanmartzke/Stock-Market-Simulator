@@ -15,7 +15,7 @@ import Home from "./pages/Home";
 import Account from "./pages/Account";
 import History from "./pages/History";
 import Trade from "./pages/Trade";
-import Reports from "./pages/Reports";
+import Dashboard from "./pages/Dashboard";
 import Leaderboard from "./pages/Leaderboard";
 import GetStarted from "./pages/GetStarted";
 import SettingsPage from "./pages/Settings";
@@ -57,10 +57,10 @@ export default function App() {
           }
         />
         <Route
-          path="/reports"
+          path="/dashboard"
           element={
             <ProtectedRoute>
-              <Reports />
+              <Dashboard />
             </ProtectedRoute>
           }
         />

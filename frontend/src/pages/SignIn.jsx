@@ -22,7 +22,7 @@ const SignIn = () => {
         console.log("Sign-in successful:", response.data);
         setStatus("success");
         login(response.data); // adds to localStorage
-        setTimeout(() => navigate("/account"), 1000); // navigate to account after 1 secs
+        setTimeout(() => navigate("/dashboard"), 1000); // navigate to account after 1 secs
       })
       .catch((error) => {
         console.error(
