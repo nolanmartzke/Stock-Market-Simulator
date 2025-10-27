@@ -11,6 +11,10 @@ export function search(query) {
   return api.get('/search', { params: { query: query } });
 }
 
+export function searchBar(query) {
+  return api.get('/searchbar', { params: { query: query } });
+}
+
 export function getQuote(ticker) {
   return api.get('/quote', { params: { ticker: ticker } });}
 
