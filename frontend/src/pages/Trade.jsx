@@ -1,7 +1,50 @@
-import React from 'react'
+import React, { useState, useEffect, useRef } from 'react'
 import { Search, PlusCircle, ArrowRightCircle } from 'lucide-react'
+import { searchBar } from '../api/StockApi'
+import { useNavigate } from 'react-router-dom'
 
 const Trade = () => {
+  const [query, setQuery] = useState('')
+  const [suggestions, setSuggestions] = useState([])
+  const [loading, setLoading] = useState(false)
+  const timer = useRef(null)
+  const navigate = useNavigate()
+
+  useEffect(() => {
+    if (!query || query.length < 1) {
+      setSuggestions([])
+      setLoading(false)
+      return
+    }
+
+    setLoading(true)
+    if (timer.current) clearTimeout(timer.current)
+    // debounce
+    timer.current = setTimeout(() => {
+      searchBar(query)
+        .then((res) => {
+          // expected shape { count, result }
+          setSuggestions((res.data && res.data.result) || [])
+        })
+        .catch(() => setSuggestions([]))
+        .finally(() => setLoading(false))
+    }, 300)
+
+    return () => clearTimeout(timer.current)
+  }, [query])
+
+  function selectSymbol(symbol) {
+    setQuery('')
+    setSuggestions([])
+    navigate(`/stocks/${symbol}`)
+  }
+
+  function handleKeyDown(e) {
+    if (e.key === 'Enter' && suggestions.length > 0) {
+      selectSymbol(suggestions[0].symbol)
+    }
+  }
+
   return (
     <div className="container-fluid py-4">
       <div className="container">
@@ -11,11 +54,36 @@ const Trade = () => {
             <p className="text-muted mb-3">Search for a ticker, view quote info and place a simulated order.</p>
 
             <div className="row g-3 align-items-center mb-4">
-              <div className="col-auto flex-grow-1">
+              <div className="col-auto flex-grow-1 position-relative">
                 <div className="input-group">
                   <span className="input-group-text"><Search size={18} /></span>
-                  <input type="text" className="form-control" placeholder="Search symbol or company" />
+                  <input
+                    type="text"
+                    className="form-control"
+                    placeholder="Search symbol or company"
+                    value={query}
+                    onChange={(e) => setQuery(e.target.value)}
+                    onKeyDown={handleKeyDown}
+                    aria-autocomplete="list"
+                  />
                 </div>
+
+                {query && suggestions && suggestions.length > 0 && (
+                  <ul className="list-group position-absolute w-100 mt-1" style={{ zIndex: 2000 }}>
+                    {suggestions.slice(0, 10).map((s) => (
+                      <li
+                        key={s.symbol}
+                        className="list-group-item list-group-item-action"
+                        style={{ cursor: 'pointer' }}
+                        onClick={() => selectSymbol(s.symbol)}
+                      >
+                        <strong>{s.symbol}</strong> <span className="text-muted">{s.description}</span>
+                      </li>
+                    ))}
+                  </ul>
+                )}
+
+                {query && loading && <div className="small text-muted mt-1">Searching...</div>}
               </div>
               <div className="col-auto">
                 <button className="btn btn-primary d-flex align-items-center">

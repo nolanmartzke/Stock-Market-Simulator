@@ -1,0 +1,134 @@
+a:focus-visible,
+button:focus-visible,
+.btn:focus-visible {
+  outline: 2px solid currentColor;
+  outline-offset: 2px;
+}
+
+.visually-hidden-focusable:focus {
+  position: absolute !important;
+  z-index: 9999;
+}
+
+.hero-bg {
+  position: relative;
+  overflow: hidden;
+  background-color: var(--brand-bg-dark);
+  color: var(--brand-text-light);
+}
+
+.hero-bg::before {
+  content: "";
+  position: absolute;
+  inset: -20% -10% auto -10%;
+  height: 140%;
+  background: radial-gradient(
+    60% 60% at 50% -10%,
+    color-mix(in oklab, var(--brand-primary) 28%, transparent),
+    transparent 60%
+  );
+  pointer-events: none;
+  z-index: 0;
+}
+
+.hero-bg > * {
+  position: relative;
+  z-index: 1;
+}
+
+.shine-wrap {
+  position: relative;
+  border-radius: var(--brand-radius-lg);
+  padding: 2px;
+  background: linear-gradient(
+    90deg,
+    color-mix(in oklab, var(--brand-primary) 45%, transparent),
+    color-mix(in oklab, var(--brand-text-light) 28%, transparent),
+    color-mix(in oklab, var(--brand-primary) 45%, transparent)
+  );
+  background-size: 200% 100%;
+  box-shadow: var(--brand-shadow-lg);
+}
+
+.shine-wrap > * {
+  position: relative;
+  z-index: 1;
+  background: var(--brand-bg-dark);
+  border-radius: calc(var(--brand-radius-lg) - 2px);
+}
+
+.text-muted-on-dark {
+  color: var(--brand-text-muted);
+  opacity: var(--brand-opacity-muted);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  .shine-wrap::after {
+    content: "";
+    position: absolute;
+    inset: 0;
+    border-radius: inherit;
+    background: linear-gradient(
+      120deg,
+      transparent 0%,
+      rgba(255, 255, 255, 0.33) 12%,
+      transparent 26%
+    );
+    filter: blur(6px);
+    animation: shine 12s linear infinite;
+    mix-blend-mode: screen;
+    pointer-events: none;
+    z-index: 2;
+  }
+
+  @keyframes shine {
+    0% {
+      transform: translateX(-120%);
+      opacity: 0.35;
+    }
+    50% {
+      opacity: 0.15;
+    }
+    100% {
+      transform: translateX(120%);
+      opacity: 0.35;
+    }
+  }
+
+  .fade-in-up {
+    opacity: 0;
+    transform: translateY(8px);
+    animation: fadeInUp 600ms ease-out forwards;
+  }
+
+  .fade-in-up.d2 {
+    animation-delay: 120ms;
+  }
+  .fade-in-up.d3 {
+    animation-delay: 240ms;
+  }
+  .fade-in-up.d4 {
+    animation-delay: 360ms;
+  }
+  .fade-in-up.d5 {
+    animation-delay: 480ms;
+  }
+
+  @keyframes fadeInUp {
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .shine-wrap::after {
+    display: none;
+  }
+
+  .fade-in-up {
+    opacity: 1;
+    transform: none;
+  }
+}
