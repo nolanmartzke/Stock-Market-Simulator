@@ -1,12 +1,6 @@
 import React from 'react';
 
-// Template page for "Popular" — shows layout and placeholders for:
-// - Popular stocks (center)
-// - Related news (right column)
-// - Noteworthy topics / filters (left column)
-// This is a static template — no API calls or dynamic data yet.
-
-export default function Popular() {
+const Popular = () => {
 	return (
 		<div className="container py-4">
 			<h1 className="mb-4">Popular</h1>
@@ -56,7 +50,7 @@ export default function Popular() {
 					<div className="card">
 						<div className="card-body">
 							<h6 className="card-title">Notes</h6>
-							<p className="text-muted small">This is a static template. Replace the mapped items with real API data when ready.</p>
+							<p className="text-muted small">This is just template. Replace the mapped items with real API data eventually</p>
 						</div>
 					</div>
 				</main>
@@ -87,4 +81,7 @@ export default function Popular() {
 			</div>
 		</div>
 	);
-}
+
+};
+
+export default Popular;
