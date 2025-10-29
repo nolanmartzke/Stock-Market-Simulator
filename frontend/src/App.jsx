@@ -112,6 +112,5 @@ export default function App() {
         <Route path="*" element={<ErrorPage />} />
       </Route>
     </Routes>
->>>>>>> frontend/src/App.jsx
   );
 }
