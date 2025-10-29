@@ -1,8 +1,9 @@
 package team8.backend.entity;
 
 import jakarta.persistence.*;
-import java.util.HashMap;
-import java.util.Map;
+
+import java.util.ArrayList;
+import java.util.List;
 
 @Entity
 @Table(name = "accounts")
@@ -19,12 +20,9 @@ public class Account {
 
     private double cash = 0.0;
 
-    // Store stockTicker -> #shares
-    @ElementCollection
-    @CollectionTable(name = "account_stocks", joinColumns = @JoinColumn(name = "account_id"))
-    @MapKeyColumn(name = "stock_ticker")
-    @Column(name = "shares")
-    private Map<String, Integer> stockPositions = new HashMap<>();
+    // One account can have many holdings
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Holding> holdings = new ArrayList<>();
 
 
     // ===== Constructors =====
@@ -56,11 +54,22 @@ public class Account {
         this.cash = cash;
     }
 
-    public Map<String, Integer> getStockPositions() {
-        return stockPositions;
+    public List<Holding> getHoldings() {
+        return holdings;
     }
 
-    public void setStockPositions(Map<String, Integer> stockPositions) {
-        this.stockPositions = stockPositions;
+    public void setHoldings(List<Holding> holdings) {
+        this.holdings = holdings;
+    }
+
+    // Helper methods
+    public void addHolding(Holding holding) {
+        holdings.add(holding);
+        holding.setAccount(this);
+    }
+
+    public void removeHolding(Holding holding) {
+        holdings.remove(holding);
+        holding.setAccount(null);
     }
 }
