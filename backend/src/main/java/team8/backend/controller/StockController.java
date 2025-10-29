@@ -111,6 +111,50 @@ public class StockController {
         return ResponseEntity.ok(resp);
     }
 
+    /**
+     * News endpoint - outputs Finnhub /news for a given category.
+     * Optional: minId to only return news after the given ID (integer)
+     * Returns a map with { count, result } where result is a list of news objects.
+     */
+    @GetMapping("/news")
+    public ResponseEntity<Map<String, Object>> getNews(
+            @RequestParam String category,
+            @RequestParam(required = false, defaultValue = "0") long minId) {
+
+        String baseUrl = "https://finnhub.io/api/v1/news";
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl)
+                .queryParam("category", category)
+                .queryParam("token", API_KEY);
+        if (minId > 0) builder.queryParam("minId", minId);
+
+        URI url = builder.build().toUri();
+
+        ResponseEntity<java.util.List<Map<String, Object>>> response = restTemplate.exchange(
+                url, HttpMethod.GET, null,
+                new ParameterizedTypeReference<java.util.List<Map<String, Object>>>() {
+                }
+        );
+
+        if (!response.getStatusCode().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(response.getStatusCode()).build();
+        }
+
+        java.util.List<Map<String, Object>> body = response.getBody();
+        if (body == null) {
+            Map<String, Object> empty = new HashMap<>();
+            empty.put("count", 0);
+            empty.put("result", new java.util.ArrayList<>());
+            return ResponseEntity.ok(empty);
+        }
+
+        Map<String, Object> resp = new HashMap<>();
+        resp.put("count", body.size());
+        resp.put("result", body);
+
+        return ResponseEntity.ok(resp);
+    }
+
     @GetMapping("/quote")
     public ResponseEntity<Map<String, Object>> getQuote(@RequestParam String ticker) {
         String baseUrl = "https://finnhub.io/api/v1/quote";
