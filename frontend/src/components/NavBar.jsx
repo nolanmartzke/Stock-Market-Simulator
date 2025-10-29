@@ -11,6 +11,7 @@ import {
   Trophy,
   Menu,
   X,
+  TrendingUp,
 } from "lucide-react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
@@ -33,6 +34,7 @@ export default function NavBar() {
 
   const navItemsMain = [
     { name: "Dashboard", icon: LineChart, link: "/dashboard" },
+    { name: "Popular", icon: TrendingUp, link: "/popular" },
     { name: "Leaderboard", icon: Trophy, link: "/leaderboard" },
     { name: "Trade", icon: Users, link: "/trade" },
     { name: "History", icon: Activity, link: "/history" },
