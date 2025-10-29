@@ -3,8 +3,12 @@ package team8.backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-import team8.backend.entity.*;
-import team8.backend.repository.*;
+import team8.backend.dto.AccountDTO;
+import team8.backend.entity.Account;
+import team8.backend.entity.Holding;
+import team8.backend.entity.User;
+import team8.backend.repository.AccountRepository;
+import team8.backend.repository.UserRepository;
 import team8.backend.service.HoldingService;
 
 import java.util.*;
@@ -26,66 +30,74 @@ public class AccountController {
 
     // ===== Get all accounts for a user =====
     @GetMapping
-    public ResponseEntity<List<Account>> getAccounts(@RequestParam Long userId) {
+    public ResponseEntity<List<AccountDTO>> getAccounts(@RequestParam Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
 
         List<Account> accounts = accountRepository.findByUser(userOpt.get());
-        return ResponseEntity.ok(accounts);
+        List<AccountDTO> dtos = accounts.stream()
+                .map(AccountDTO::fromEntity)
+                .collect(Collectors.toList());
+
+        return ResponseEntity.ok(dtos);
     }
 
     // ===== Get single account (with holdings) =====
     @GetMapping("/{accountId}")
-    public ResponseEntity<Account> getAccount(@PathVariable Long accountId) {
+    public ResponseEntity<AccountDTO> getAccount(@PathVariable Long accountId) {
         Optional<Account> accountOpt = accountRepository.findById(accountId);
-        return accountOpt.map(ResponseEntity::ok).orElseGet(() -> ResponseEntity.notFound().build());
+        return accountOpt.map(a -> ResponseEntity.ok(AccountDTO.fromEntity(a)))
+                         .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
     // ===== Trade endpoint (buy/sell shares) =====
-@PostMapping("/{accountId}/trade")
-public ResponseEntity<?> trade(@PathVariable Long accountId, @RequestBody Map<String, Object> body) {
-    String action = (String) body.get("action"); // "buy" or "sell"
-    String ticker = (String) body.get("ticker");
-    Integer shares = (Integer) body.get("shares");
-    Double price = (Double) body.get("price");
+    @PostMapping("/{accountId}/trade")
+    public ResponseEntity<?> trade(@PathVariable Long accountId, @RequestBody Map<String, Object> body) {
+        String action = (String) body.get("action"); // "buy" or "sell"
+        String ticker = (String) body.get("ticker");
+        Number sharesNum = (Number) body.get("shares");
+        Number priceNum = (Number) body.get("price");
 
-    if (ticker == null || shares == null || shares <= 0 || action == null || price == null) {
-        return ResponseEntity.badRequest().body("Invalid trade parameters.");
-    }
-
-    Optional<Account> accOpt = accountRepository.findById(accountId);
-    if (accOpt.isEmpty()) return ResponseEntity.notFound().build();
-    Account account = accOpt.get();
-
-    double totalValue = shares * price;
-
-    try {
-        if (action.equalsIgnoreCase("buy")) {
-            if (account.getCash() < totalValue) {
-                return ResponseEntity.badRequest().body("Not enough cash to complete purchase.");
-            }
-            account.setCash(account.getCash() - totalValue);
-            holdingService.addOrUpdateHolding(account, ticker, shares, price);
-
-        } else if (action.equalsIgnoreCase("sell")) {
-            // Delegate sell logic entirely to HoldingService
-            holdingService.updateAfterSell(account, ticker, shares);
-
-            // Add cash from sale
-            account.setCash(account.getCash() + totalValue);
-
-        } else {
-            return ResponseEntity.badRequest().body("Invalid action type. Must be 'buy' or 'sell'.");
+        if (ticker == null || sharesNum == null || priceNum == null || action == null) {
+            return ResponseEntity.badRequest().body("Invalid trade parameters.");
         }
 
-        accountRepository.save(account);
-        return ResponseEntity.ok(account);
+        int shares = sharesNum.intValue();
+        double price = priceNum.doubleValue();
 
-    } catch (IllegalArgumentException e) {
-        // Handle errors thrown from HoldingService (e.g., not enough shares)
-        return ResponseEntity.badRequest().body(e.getMessage());
+        if (shares <= 0 || price <= 0) {
+            return ResponseEntity.badRequest().body("Shares and price must be greater than 0.");
+        }
+
+        Optional<Account> accOpt = accountRepository.findById(accountId);
+        if (accOpt.isEmpty()) return ResponseEntity.notFound().build();
+        Account account = accOpt.get();
+
+        double totalValue = shares * price;
+
+        try {
+            if (action.equalsIgnoreCase("buy")) {
+                if (account.getCash() < totalValue) {
+                    return ResponseEntity.badRequest().body("Not enough cash to complete purchase.");
+                }
+                account.setCash(account.getCash() - totalValue);
+                holdingService.addOrUpdateHolding(account, ticker, shares, price);
+
+            } else if (action.equalsIgnoreCase("sell")) {
+                holdingService.updateAfterSell(account, ticker, shares);
+                account.setCash(account.getCash() + totalValue);
+
+            } else {
+                return ResponseEntity.badRequest().body("Invalid action type. Must be 'buy' or 'sell'.");
+            }
+
+            accountRepository.save(account);
+            return ResponseEntity.ok(AccountDTO.fromEntity(account));
+
+        } catch (IllegalArgumentException e) {
+            return ResponseEntity.badRequest().body(e.getMessage());
+        }
     }
-}
 
     // ===== Dashboard =====
     @GetMapping("/dashboard")
@@ -94,10 +106,8 @@ public ResponseEntity<?> trade(@PathVariable Long accountId, @RequestBody Map<St
         if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
 
         List<Account> accounts = accountRepository.findByUser(userOpt.get());
-
         double totalCash = accounts.stream().mapToDouble(Account::getCash).sum();
 
-        // Aggregate all holdings from all accounts
         Map<String, Integer> totalStocks = accounts.stream()
                 .flatMap(a -> a.getHoldings().stream())
                 .collect(Collectors.toMap(
@@ -112,5 +122,15 @@ public ResponseEntity<?> trade(@PathVariable Long accountId, @RequestBody Map<St
         );
 
         return ResponseEntity.ok(response);
+    }
+
+    // ===== Get ALL accounts (admin/testing) =====
+    @GetMapping("/all")
+    public ResponseEntity<List<AccountDTO>> getAllAccounts() {
+        List<Account> accounts = accountRepository.findAll();
+        List<AccountDTO> dtos = accounts.stream()
+                .map(AccountDTO::fromEntity)
+                .collect(Collectors.toList());
+        return ResponseEntity.ok(dtos);
     }
 }

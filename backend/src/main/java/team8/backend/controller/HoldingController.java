@@ -1,7 +1,7 @@
 package team8.backend.controller;
 
 import org.springframework.web.bind.annotation.*;
-import team8.backend.entity.Holding;
+import team8.backend.dto.HoldingDTO;
 import team8.backend.service.HoldingService;
 
 import java.util.List;
@@ -17,11 +17,13 @@ public class HoldingController {
         this.holdingService = holdingService;
     }
 
+    // Get holdings for an account
     @GetMapping("/account/{accountId}")
-    public List<Holding> getHoldingsByAccount(@PathVariable Long accountId) {
+    public List<HoldingDTO> getHoldingsByAccount(@PathVariable Long accountId) {
         return holdingService.getHoldingsByAccount(accountId);
     }
 
+    // Delete a holding
     @DeleteMapping("/{holdingId}")
     public void deleteHolding(@PathVariable Long holdingId) {
         holdingService.deleteHolding(holdingId);
