@@ -19,20 +19,20 @@ public class HoldingService {
         this.holdingRepository = holdingRepository;
     }
 
-    // ===== Get holdings for an account (DTO-safe) =====
+    // Get holdings for an account
     public List<HoldingDTO> getHoldingsByAccount(Long accountId) {
         return holdingRepository.findByAccountId(accountId).stream()
                 .map(this::toDTO)
                 .collect(Collectors.toList());
     }
 
-    // ===== Get a single holding (DTO-safe) =====
+    // Get a single holding
     public HoldingDTO getHolding(Long accountId, String ticker) {
         Holding h = holdingRepository.findByAccountIdAndStockTicker(accountId, ticker);
         return h != null ? toDTO(h) : null;
     }
 
-    // ===== Add or update a holding (Buy) =====
+    // Add or update a holding (Buy)
     @Transactional
     public HoldingDTO addOrUpdateHolding(Account account, String ticker, int shares, double purchasePrice) {
         Holding existing = holdingRepository.findByAccountIdAndStockTicker(account.getId(), ticker);
@@ -54,7 +54,7 @@ public class HoldingService {
         return toDTO(saved);
     }
 
-    // ===== Update after a sell transaction =====
+    // Update after a sell transaction
     @Transactional
     public void updateAfterSell(Account account, String ticker, int sharesToSell) {
         Holding existing = holdingRepository.findByAccountIdAndStockTicker(account.getId(), ticker);
@@ -77,18 +77,18 @@ public class HoldingService {
         }
     }
 
-    // ===== Delete a holding =====
+    // Delete a holding
     public void deleteHolding(Long holdingId) {
         holdingRepository.deleteById(holdingId);
     }
 
-    // ===== Save a holding (if needed internally) =====
+    // Save a holding (if needed internally)
     public HoldingDTO save(Holding holding) {
         Holding saved = holdingRepository.save(holding);
         return toDTO(saved);
     }
 
-    // ===== Helper to convert entity → DTO =====
+    // Helper to convert entity -> DTO
     private HoldingDTO toDTO(Holding h) {
     return new HoldingDTO(
         h.getId(),

@@ -19,7 +19,7 @@ public class AccountDTO {
         this.holdings = holdings;
     }
 
-    // ===== fromEntity method =====
+    // fromEntity method
     public static AccountDTO fromEntity(Account a) {
         return new AccountDTO(
             a.getId(),
@@ -31,7 +31,7 @@ public class AccountDTO {
         );
     }
 
-    // ===== getters & setters =====
+    // getters & setters
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
     public double getCash() { return cash; }

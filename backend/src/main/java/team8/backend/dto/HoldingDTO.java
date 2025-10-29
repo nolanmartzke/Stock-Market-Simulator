@@ -19,7 +19,7 @@ public class HoldingDTO {
         this.accountId = accountId;
     }
 
-    // ===== fromEntity method =====
+    // fromEntity method
     public static HoldingDTO fromEntity(Holding h) {
         return new HoldingDTO(
             h.getId(),
@@ -30,7 +30,7 @@ public class HoldingDTO {
         );
     }
 
-    // ===== getters & setters =====
+    // getters & setters
     public Long getId() { return id; }
     public String getStockTicker() { return stockTicker; }
     public int getShares() { return shares; }

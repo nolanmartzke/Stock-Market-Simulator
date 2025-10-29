@@ -24,7 +24,7 @@ public class Holding {
     @Column(name = "average_price", nullable = false)
     private double averagePrice;
 
-    // ===== Constructors =====
+    // Constructors
     public Holding() {}
 
     public Holding(Account account, String stockTicker, int shares, double averagePrice) {
@@ -34,7 +34,7 @@ public class Holding {
         this.averagePrice = averagePrice;
     }
 
-    // ===== Getters & Setters =====
+    // Getters & Setters
     public Long getId() {
         return id;
     }

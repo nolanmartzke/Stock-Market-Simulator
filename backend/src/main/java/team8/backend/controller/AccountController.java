@@ -28,7 +28,7 @@ public class AccountController {
     @Autowired
     private HoldingService holdingService;
 
-    // ===== Get all accounts for a user =====
+    // Get all accounts for a user
     @GetMapping
     public ResponseEntity<List<AccountDTO>> getAccounts(@RequestParam Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -42,7 +42,7 @@ public class AccountController {
         return ResponseEntity.ok(dtos);
     }
 
-    // ===== Get single account (with holdings) =====
+    // Get single account (with holdings)
     @GetMapping("/{accountId}")
     public ResponseEntity<AccountDTO> getAccount(@PathVariable Long accountId) {
         Optional<Account> accountOpt = accountRepository.findById(accountId);
@@ -50,7 +50,7 @@ public class AccountController {
                          .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // ===== Trade endpoint (buy/sell shares) =====
+    // Trade endpoint (buy/sell shares)
     @PostMapping("/{accountId}/trade")
     public ResponseEntity<?> trade(@PathVariable Long accountId, @RequestBody Map<String, Object> body) {
         String action = (String) body.get("action"); // "buy" or "sell"
@@ -99,7 +99,7 @@ public class AccountController {
         }
     }
 
-    // ===== Dashboard =====
+    // Dashboard
     @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Object>> dashboard(@RequestParam Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -124,7 +124,7 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    // ===== Get ALL accounts (admin/testing) =====
+    // Get ALL accounts (admin/testing)
     @GetMapping("/all")
     public ResponseEntity<List<AccountDTO>> getAllAccounts() {
         List<Account> accounts = accountRepository.findAll();

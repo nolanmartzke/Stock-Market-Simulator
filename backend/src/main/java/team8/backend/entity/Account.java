@@ -25,7 +25,7 @@ public class Account {
     private List<Holding> holdings = new ArrayList<>();
 
 
-    // ===== Constructors =====
+    // Constructors
     public Account() {}
 
     public Account(User user, double initialCash) {
@@ -33,7 +33,7 @@ public class Account {
         this.cash = initialCash;
     }
 
-    // ===== Getters & Setters =====
+    // Getters & Setters
     public Long getId() {
         return id;
     }
