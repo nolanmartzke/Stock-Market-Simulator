@@ -15,6 +15,12 @@ export function searchBar(query) {
   return api.get('/searchbar', { params: { query: query } });
 }
 
+export function getNews(category, minId) {
+  const params = { category };
+  if (typeof minId !== 'undefined' && minId !== null) params.minId = minId;
+  return api.get('/news', { params });
+}
+
 export function getQuote(ticker) {
   return api.get('/quote', { params: { ticker: ticker } });}
 

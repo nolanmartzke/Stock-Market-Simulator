@@ -1,4 +1,5 @@
 import React from 'react';
+import NewsCard from '../components/NewsCard';
 
 const Popular = () => {
 	return (
@@ -55,28 +56,9 @@ const Popular = () => {
 					</div>
 				</main>
 
-				{/* Right column: news */}
+				{/* Right column: news (NewsCard) */}
 				<aside className="col-12 col-md-3 mb-4">
-					<div className="card">
-						<div className="card-body">
-							<h5 className="card-title">Related News</h5>
-							<p className="text-muted">Top headlines related to popular stocks.</p>
-							<ul className="list-unstyled">
-								<li className="mb-3">
-									<strong>Headline 1</strong>
-									<div className="text-muted small">Brief summary of the news item. (Template)</div>
-								</li>
-								<li className="mb-3">
-									<strong>Headline 2</strong>
-									<div className="text-muted small">Brief summary of the news item. (Template)</div>
-								</li>
-								<li className="mb-3">
-									<strong>Headline 3</strong>
-									<div className="text-muted small">Brief summary of the news item. (Template)</div>
-								</li>
-							</ul>
-						</div>
-					</div>
+					<NewsCard category="general" pageSize={6} />
 				</aside>
 			</div>
 		</div>
