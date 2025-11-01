@@ -1,0 +1,35 @@
+stages:
+  - lint
+
+before_script:
+  - dos2unix ./gradlew || echo "dos2unix not installed, skipping"
+  - chmod +x ./gradlew || true
+
+# Frontend
+lint_frontend:
+  stage: lint
+  image: node:18-bullseye
+  tags:
+    - csl
+  script:
+    - cd frontend
+    - npm ci --prefer-offline --no-audit --progress=false
+    - npm run lint
+  only:
+    - branches
+
+# Backend
+lint_backend:
+  stage: lint
+  image: eclipse-temurin:21-jdk
+  tags:
+    - csl
+  script:
+    - ./gradlew checkstyleMain
+  artifacts:
+    paths:
+      - build/reports/checkstyle/
+    when: always
+    expire_in: 7 days
+  only:
+    - branches
