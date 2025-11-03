@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Search, PlusCircle, ArrowRightCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useNavigate, useParams, Link } from "react-router-dom"; 
 import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
-import { getQuote, getMetrics, search } from '../api/StockApi';
+import { getQuote, getMetrics, search, getHistory } from '../api/StockApi';
 
 
 const Stock = () => { 
@@ -14,6 +15,7 @@ const Stock = () => {
     const [stockName, setStockName] = useState("Loading...");
     const [metrics, setMetrics] = useState([]);
     const [quote, setQuote] = useState([]);
+    const [history, setHistory] = useState([]);
 
     const [dayChange, setDayChange] = useState("positive");
     const [dayChangeDollars, setDayChangeDollars] = useState(0);
@@ -50,6 +52,13 @@ const Stock = () => {
                         setMetrics(data);
                     })
                     .catch(err => console.log(err));
+
+                getHistory(ticker, "2Y")
+                    .then(response => response.data)
+                    .then(data => {
+                        setHistory(data.results);
+                    })
+                    .catch(err => console.log(err));
             })
             .catch(err => console.log(err));
     }, [query]);
@@ -77,6 +86,13 @@ const Stock = () => {
     const formattedPrice = formatUSD(price);
     const estimatedCost = (shares * price).toFixed(2);
     const estimatedCostDollars = formatUSD(estimatedCost);
+
+    const sampleData = [
+        { date: "2025-01-01", close: 150 },
+        { date: "2025-02-01", close: 160 },
+        { date: "2025-03-01", close: 170 },
+    ];
+
 
     return ( 
         <div className="container-fluid py-4"> 
@@ -132,8 +148,16 @@ const Stock = () => {
                         <Card className="bg-gradient shadow-lg border-0 h-100" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px" }}>
                             <Card.Body className="d-flex flex-column justify-content-center align-items-center">
                                 <h5 className="mb-4 fw-bold">Stock Graph</h5>
-                                <div>
-                                    [ Graph Placeholder ]
+                                <div style={{ width: "100%", height: 400 }}> 
+                                <ResponsiveContainer> 
+                                    <LineChart data={sampleData}> 
+                                        <CartesianGrid strokeDasharray="3 3" /> 
+                                        <XAxis dataKey="date" /> 
+                                        <YAxis domain={['auto', 'auto']} /> 
+                                        {/* <Tooltip formatter={(value) => $${value.toFixed(2)}} />  */}
+                                        <Line type="monotone" dataKey="close" stroke="#22C55E" strokeWidth={2} dot={false} /> 
+                                    </LineChart> 
+                                </ResponsiveContainer>
                                 </div>
                             </Card.Body>
                         </Card>
