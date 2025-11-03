@@ -16,6 +16,7 @@ const Stock = () => {
     const [metrics, setMetrics] = useState([]);
     const [quote, setQuote] = useState([]);
     const [history, setHistory] = useState([]);
+    const [filteredHistory, setFilteredHistory] = useState([]);
 
     const [dayChange, setDayChange] = useState("positive");
     const [dayChangeDollars, setDayChangeDollars] = useState(0);
@@ -76,23 +77,26 @@ const Stock = () => {
         }
     }, [quote]);
 
+    useEffect(() => {
+        const data = history.map(item => ({
+            date: new Date(item.t).toISOString().split("T")[0], // format as "YYYY-MM-DD"
+            price: item.c
+        }));
+
+        console.log(data)
+
+        setFilteredHistory(data);
+    }, [history]);
+
     const formatUSD = (num) =>
         new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
     }).format(num);
 
-
     const formattedPrice = formatUSD(price);
     const estimatedCost = (shares * price).toFixed(2);
     const estimatedCostDollars = formatUSD(estimatedCost);
-
-    const sampleData = [
-        { date: "2025-01-01", close: 150 },
-        { date: "2025-02-01", close: 160 },
-        { date: "2025-03-01", close: 170 },
-    ];
-
 
     return ( 
         <div className="container-fluid py-4"> 
@@ -149,15 +153,21 @@ const Stock = () => {
                             <Card.Body className="d-flex flex-column justify-content-center align-items-center">
                                 <h5 className="mb-4 fw-bold">Stock Graph</h5>
                                 <div style={{ width: "100%", height: 400 }}> 
-                                <ResponsiveContainer> 
-                                    <LineChart data={sampleData}> 
-                                        <CartesianGrid strokeDasharray="3 3" /> 
-                                        <XAxis dataKey="date" /> 
-                                        <YAxis domain={['auto', 'auto']} /> 
-                                        {/* <Tooltip formatter={(value) => $${value.toFixed(2)}} />  */}
-                                        <Line type="monotone" dataKey="close" stroke="#22C55E" strokeWidth={2} dot={false} /> 
-                                    </LineChart> 
-                                </ResponsiveContainer>
+                                    <ResponsiveContainer> 
+                                        <LineChart data={filteredHistory}> 
+                                            <CartesianGrid strokeDasharray="3 3" /> 
+                                            <XAxis dataKey="date" /> 
+                                            <YAxis domain={['auto', 'auto']} /> 
+                                            <Tooltip
+                                                formatter={(value, name, props) => {
+                                                    const date = props?.payload?.date;
+                                                    const price = `$${value.toFixed(2)}`
+                                                    return [`${price} on ${date}`];
+                                                }}
+                                            />
+                                            <Line type="monotone" dataKey="price" stroke="#22C55E" strokeWidth={2} dot={false} /> 
+                                        </LineChart> 
+                                    </ResponsiveContainer>
                                 </div>
                             </Card.Body>
                         </Card>
