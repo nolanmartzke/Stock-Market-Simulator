@@ -80,10 +80,35 @@ const Stock = () => {
     }, [quote]);
 
     useEffect(() => {
-        const data = history.map(item => ({
+        let data = history.map(item => ({
             date: new Date(item.t).toISOString().split("T")[0], // format as "YYYY-MM-DD"
             price: item.c
         }));
+
+        let cutoff = new Date();
+
+        switch(range) {
+            case "1Y":
+                cutoff.setFullYear(cutoff.getFullYear() - 1);
+                break;
+            case "YTD":
+                cutoff = new Date(cutoff.getFullYear(), 0, 1);
+                break;
+            case "3M":
+                cutoff.setMonth(cutoff.getMonth() - 3);
+                break;
+            case "1M":
+                cutoff.setMonth(cutoff.getMonth() - 1);
+                break;
+            case "1W":
+                cutoff.setDate(cutoff.getDate() - 7);
+                break;
+            default:
+                cutoff = null;
+        }
+
+        if (cutoff)
+            data = data.filter(item => new Date(item.date) >= cutoff);
 
         console.log(data)
 
@@ -153,7 +178,6 @@ const Stock = () => {
                     <Col xs={12} md={12} xl={8} className="p-3">
                         <Card className="bg-gradient shadow-lg border-0 h-100" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px" }}>
                             <Card.Body className="d-flex flex-column justify-content-center align-items-center">
-                                <h5 className="mb-4 fw-bold">Stock Graph</h5>
                                 <div style={{ width: "100%", height: 400 }}> 
                                     <ResponsiveContainer> 
                                         <LineChart data={filteredHistory}> 
