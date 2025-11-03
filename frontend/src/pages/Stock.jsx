@@ -15,8 +15,10 @@ const Stock = () => {
     const [stockName, setStockName] = useState("Loading...");
     const [metrics, setMetrics] = useState([]);
     const [quote, setQuote] = useState([]);
+
     const [history, setHistory] = useState([]);
     const [filteredHistory, setFilteredHistory] = useState([]);
+    const [range, setRange] = useState("2Y");
 
     const [dayChange, setDayChange] = useState("positive");
     const [dayChangeDollars, setDayChangeDollars] = useState(0);
@@ -86,7 +88,7 @@ const Stock = () => {
         console.log(data)
 
         setFilteredHistory(data);
-    }, [history]);
+    }, [history,range]);
 
     const formatUSD = (num) =>
         new Intl.NumberFormat('en-US', {
@@ -169,6 +171,18 @@ const Stock = () => {
                                         </LineChart> 
                                     </ResponsiveContainer>
                                 </div>
+                                <div className="d-flex gap-2 mb-2" >
+                                    {["1W","1M","3M","YTD","1Y","2Y"].map(r => (
+                                    <button
+                                        key={r}
+                                        className={`btn btn-sm ${range === r ? "btn-success" : "btn-outline-success"}`}
+                                        onClick={() => setRange(r)}
+                                    >
+                                        {r}
+                                    </button>
+                                    ))}
+                                </div>
+                                
                             </Card.Body>
                         </Card>
                     </Col>
