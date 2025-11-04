@@ -10,6 +10,8 @@ import team8.backend.entity.User;
 import team8.backend.repository.AccountRepository;
 import team8.backend.repository.UserRepository;
 import team8.backend.service.HoldingService;
+import team8.backend.entity.Transaction;
+import team8.backend.repository.TransactionRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +29,9 @@ public class AccountController {
 
     @Autowired
     private HoldingService holdingService;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     // Get all accounts for a user
     @GetMapping
@@ -90,6 +95,18 @@ public class AccountController {
             } else {
                 return ResponseEntity.badRequest().body("Invalid action type. Must be 'buy' or 'sell'.");
             }
+
+
+            // Save transaction
+            Transaction tx = new Transaction(
+                account,
+                action.toLowerCase(),
+                ticker,
+                shares,
+                price,
+                java.time.LocalDateTime.now()
+            );
+            transactionRepository.save(tx);
 
             accountRepository.save(account);
             return ResponseEntity.ok(AccountDTO.fromEntity(account));
