@@ -14,4 +14,8 @@ export function loadDashboard(userId) {
   });
 }
 
+export function loadAccount(accountId) {
+  return api.get(`/${accountId}`);
+}
+
 
