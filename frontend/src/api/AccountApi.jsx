@@ -14,4 +14,12 @@ export function loadDashboard(userId) {
   });
 }
 
+export function loadAccount(accountId) {
+  return api.get(`/${accountId}`);
+}
+
+export function trade(accountId, tradeData) {
+  return api.post(`/${accountId}/trade`, tradeData);
+}
+
 

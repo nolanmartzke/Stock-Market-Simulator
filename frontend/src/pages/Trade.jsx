@@ -2,13 +2,42 @@ import React, { useState, useEffect, useRef } from 'react'
 import { Search, PlusCircle, ArrowRightCircle } from 'lucide-react'
 import { searchBar } from '../api/StockApi'
 import { useNavigate } from 'react-router-dom'
+import { loadAccount } from '../api/AccountApi'
 
 const Trade = () => {
   const [query, setQuery] = useState('')
   const [suggestions, setSuggestions] = useState([])
   const [loading, setLoading] = useState(false)
+  const [account, setAccount] = useState(null)
+  const [accountLoading, setAccountLoading] = useState(false)
+  const [holdings, setHoldings] = useState([])
   const timer = useRef(null)
   const navigate = useNavigate()
+
+  let accountId = 0
+  
+  const authString = localStorage.getItem("auth")
+    if (authString) {
+        const auth = JSON.parse(authString);
+        accountId = auth.id;
+        console.log("Account ID:", accountId);
+    }
+  useEffect(() => {
+    console.log("useEffect triggered for accountId:", accountId);
+    if (!accountId) return;
+    setAccountLoading(true)
+    loadAccount(accountId)
+      .then((res) => {
+        setAccount(res.data)
+        setHoldings(res.data.holdings || [])
+        console.log("Loaded holdings:", res.data.holdings)
+      })
+      .catch((err) => console.error("Error loading account:", err))
+      .finally(() => {
+        console.log("Finished loading account");
+        setAccountLoading(false)
+      })
+  }, [accountId])
 
   useEffect(() => {
     if (!query || query.length < 1) {
@@ -107,8 +136,8 @@ const Trade = () => {
 
         <section className="card">
           <div className="card-body p-4">
-            <h3 className="h5 fw-semibold mb-3">Open Orders & Positions</h3>
-            <p className="text-muted">This table will show simulated open orders and positions.</p>
+            <h3 className="h5 fw-semibold mb-3">Recent Orders</h3>
+            {/* Holdings display */}
             <div className="table-responsive">
               <table className="table table-striped">
                 <thead>
@@ -122,14 +151,29 @@ const Trade = () => {
                   </tr>
                 </thead>
                 <tbody>
-                  <tr>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td>--</td>
-                    <td><button className="btn btn-sm btn-outline-secondary">Cancel</button></td>
-                  </tr>
+                  {holdings.length > 0 ? (
+                    [...holdings]
+                    .reverse()
+                    .slice(0, 5)
+                    .map((holding) => (
+                      <tr key={holding.stockTicker}>
+                        <td>{holding.stockTicker}</td>
+                        <td>{holding.shares > 0 ? 'LONG' : 'SHORT'}</td>
+                        <td>{holding.shares}</td>
+                        <td>${holding.averagePrice?.toFixed(2) ?? '--'}</td>
+                        <td>OPEN</td>
+                        <td>
+                          <button className="btn btn-sm btn-outline-secondary">Close</button>
+                        </td>
+                      </tr>
+                    ))
+                  ) : (
+                    <tr>
+                      <td colSpan="6" className="text-muted text-center">
+                        No holdings yet.
+                      </td>
+                    </tr>
+                  )}
                 </tbody>
               </table>
             </div>
