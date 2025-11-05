@@ -24,8 +24,11 @@ export function getNews(category, minId) {
 export function getQuote(ticker) {
   return api.get('/quote', { params: { ticker: ticker } });}
 
+
 export function getMetrics(ticker) {
   return api.get('/metrics', { params: { ticker: ticker } });
 }
 
-
+export function getHistory(ticker, range) {
+  return api.get('/historical', { params: { ticker: ticker, range: range } });
+}

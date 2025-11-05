@@ -1,8 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Search, PlusCircle, ArrowRightCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useNavigate, useParams, Link } from "react-router-dom"; 
 import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
-import { getQuote, getMetrics, search } from '../api/StockApi';
+import { getQuote, getMetrics, search, getHistory } from '../api/StockApi';
 
 
 const Stock = () => { 
@@ -14,6 +15,10 @@ const Stock = () => {
     const [stockName, setStockName] = useState("Loading...");
     const [metrics, setMetrics] = useState([]);
     const [quote, setQuote] = useState([]);
+
+    const [history, setHistory] = useState([]);
+    const [filteredHistory, setFilteredHistory] = useState([]);
+    const [range, setRange] = useState("2Y");
 
     const [dayChange, setDayChange] = useState("positive");
     const [dayChangeDollars, setDayChangeDollars] = useState(0);
@@ -50,6 +55,13 @@ const Stock = () => {
                         setMetrics(data);
                     })
                     .catch(err => console.log(err));
+
+                getHistory(ticker, "2Y")
+                    .then(response => response.data)
+                    .then(data => {
+                        setHistory(data.results);
+                    })
+                    .catch(err => console.log(err));
             })
             .catch(err => console.log(err));
     }, [query]);
@@ -67,12 +79,47 @@ const Stock = () => {
         }
     }, [quote]);
 
+    useEffect(() => {
+        let data = history.map(item => ({
+            date: new Date(item.t).toISOString().split("T")[0], // format as "YYYY-MM-DD"
+            price: item.c
+        }));
+
+        let cutoff = new Date();
+
+        switch(range) {
+            case "1Y":
+                cutoff.setFullYear(cutoff.getFullYear() - 1);
+                break;
+            case "YTD":
+                cutoff = new Date(cutoff.getFullYear(), 0, 1);
+                break;
+            case "3M":
+                cutoff.setMonth(cutoff.getMonth() - 3);
+                break;
+            case "1M":
+                cutoff.setMonth(cutoff.getMonth() - 1);
+                break;
+            case "1W":
+                cutoff.setDate(cutoff.getDate() - 7);
+                break;
+            default:
+                cutoff = null;
+        }
+
+        if (cutoff)
+            data = data.filter(item => new Date(item.date) >= cutoff);
+
+        console.log(data)
+
+        setFilteredHistory(data);
+    }, [history,range]);
+
     const formatUSD = (num) =>
         new Intl.NumberFormat('en-US', {
             style: 'currency',
             currency: 'USD',
     }).format(num);
-
 
     const formattedPrice = formatUSD(price);
     const estimatedCost = (shares * price).toFixed(2);
@@ -131,10 +178,35 @@ const Stock = () => {
                     <Col xs={12} md={12} xl={8} className="p-3">
                         <Card className="bg-gradient shadow-lg border-0 h-100" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px" }}>
                             <Card.Body className="d-flex flex-column justify-content-center align-items-center">
-                                <h5 className="mb-4 fw-bold">Stock Graph</h5>
-                                <div>
-                                    [ Graph Placeholder ]
+                                <div style={{ width: "100%", height: 400 }}> 
+                                    <ResponsiveContainer> 
+                                        <LineChart data={filteredHistory}> 
+                                            <CartesianGrid strokeDasharray="3 3" /> 
+                                            <XAxis dataKey="date" /> 
+                                            <YAxis domain={['auto', 'auto']} /> 
+                                            <Tooltip
+                                                formatter={(value, name, props) => {
+                                                    const date = props?.payload?.date;
+                                                    const price = `$${value.toFixed(2)}`
+                                                    return [`${price} on ${date}`];
+                                                }}
+                                            />
+                                            <Line type="monotone" dataKey="price" stroke="#22C55E" strokeWidth={2} dot={false} /> 
+                                        </LineChart> 
+                                    </ResponsiveContainer>
                                 </div>
+                                <div className="d-flex gap-2 mb-2" >
+                                    {["1W","1M","3M","YTD","1Y","2Y"].map(r => (
+                                    <button
+                                        key={r}
+                                        className={`btn btn-sm ${range === r ? "btn-success" : "btn-outline-success"}`}
+                                        onClick={() => setRange(r)}
+                                    >
+                                        {r}
+                                    </button>
+                                    ))}
+                                </div>
+                                
                             </Card.Body>
                         </Card>
                     </Col>
