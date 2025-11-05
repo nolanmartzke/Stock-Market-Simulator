@@ -3,6 +3,8 @@ package team8.backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.transaction.Transactional;
 import team8.backend.dto.AccountDTO;
 import team8.backend.entity.Account;
 import team8.backend.entity.Holding;
@@ -56,6 +58,7 @@ public class AccountController {
     }
 
     // Trade endpoint (buy/sell shares)
+    @Transactional
     @PostMapping("/{accountId}/trade")
     public ResponseEntity<?> trade(@PathVariable Long accountId, @RequestBody Map<String, Object> body) {
         String action = (String) body.get("action"); // "buy" or "sell"
@@ -106,9 +109,11 @@ public class AccountController {
                 price,
                 java.time.LocalDateTime.now()
             );
-            transactionRepository.save(tx);
+            account.addTransaction(tx);
 
+            transactionRepository.save(tx);
             accountRepository.save(account);
+
             return ResponseEntity.ok(AccountDTO.fromEntity(account));
 
         } catch (IllegalArgumentException e) {

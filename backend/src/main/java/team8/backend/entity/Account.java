@@ -24,6 +24,16 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Holding> holdings = new ArrayList<>();
 
+    // One account can have many transactions
+    @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
+    private List<Transaction> transactions = new ArrayList<>();
+
+    // Helper
+    public void addTransaction(Transaction tx) {
+        transactions.add(tx);
+        tx.setAccount(this);
+    }
+
 
     // Constructors
     public Account() {}
@@ -60,6 +70,14 @@ public class Account {
 
     public void setHoldings(List<Holding> holdings) {
         this.holdings = holdings;
+    }
+
+    public List<Transaction> getTransactions() {
+        return transactions;
+    }
+
+    public void setTransactions(List<Transaction> transactions) {
+        this.transactions = transactions;
     }
 
     // Helper methods
