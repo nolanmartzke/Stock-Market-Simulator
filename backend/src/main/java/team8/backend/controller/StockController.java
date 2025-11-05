@@ -1,8 +1,11 @@
 package team8.backend.controller;
 
 import java.net.URI;
+import java.text.DecimalFormat;
 import java.util.HashMap;
 import java.util.Map;
+import java.time.LocalDate;
+
 
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
@@ -11,15 +14,16 @@ import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.CrossOrigin;
 import org.springframework.web.bind.annotation.GetMapping;
+import org.springframework.web.bind.annotation.PathVariable;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestParam;
 import org.springframework.web.bind.annotation.RestController;
 import org.springframework.web.client.RestTemplate;
 import org.springframework.web.util.UriComponentsBuilder;
+
 import com.fasterxml.jackson.core.type.TypeReference;
-import com.fasterxml.jackson.databind.ObjectMapper;
 import com.fasterxml.jackson.databind.JsonNode;
-import java.text.DecimalFormat;
+import com.fasterxml.jackson.databind.ObjectMapper;
 
 
 @RestController
@@ -28,7 +32,10 @@ import java.text.DecimalFormat;
 public class StockController {
 
     @Value("${finnhub.api-key}")
-    private String API_KEY;
+    private String FINNHUB_API_KEY;
+
+    @Value("${massive.api-key}")
+    private String MASSIVE_API_KEY;
 
     private final RestTemplate restTemplate = new RestTemplate();
 
@@ -39,7 +46,7 @@ public class StockController {
         URI url = UriComponentsBuilder.fromUriString(baseUrl)
             .queryParam("q", query.toUpperCase())
             .queryParam("exchange", "US")
-            .queryParam("token", API_KEY)
+            .queryParam("token", FINNHUB_API_KEY)
             .build().toUri();
 
         // ensures return is in JSON format
@@ -76,7 +83,7 @@ public class StockController {
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl)
             .queryParam("q", query)
             .queryParam("exchange", "US")
-            .queryParam("token", API_KEY);
+            .queryParam("token", FINNHUB_API_KEY);
         URI url = builder.build().toUri();
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -125,7 +132,7 @@ public class StockController {
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl)
                 .queryParam("category", category)
-                .queryParam("token", API_KEY);
+                .queryParam("token", FINNHUB_API_KEY);
         if (minId > 0) builder.queryParam("minId", minId);
 
         URI url = builder.build().toUri();
@@ -161,7 +168,7 @@ public class StockController {
 
         URI url = UriComponentsBuilder.fromUriString(baseUrl)
             .queryParam("symbol", ticker.toUpperCase())
-            .queryParam("token", API_KEY)
+            .queryParam("token", FINNHUB_API_KEY)
             .build().toUri();
 
         // ensures return is in JSON format
@@ -179,7 +186,7 @@ public class StockController {
 
         URI url = UriComponentsBuilder.fromUriString(baseUrl)
             .queryParam("symbol", ticker.toUpperCase())
-            .queryParam("token", API_KEY)
+            .queryParam("token", FINNHUB_API_KEY)
             .queryParam("metric", "all")
             .build().toUri();
         
@@ -226,5 +233,50 @@ public class StockController {
         System.out.println(filteredMetrics);
 
         return ResponseEntity.ok(filteredMetrics);
+    }
+
+
+    @GetMapping("/historical")
+    public ResponseEntity<Map<String, Object>> getHistorical(@RequestParam String ticker, @RequestParam(required = false) String range) {
+        String baseUrl = "https://api.massive.com/v2/aggs";
+
+        String multiplier = "1";
+        String timespan = "day";
+        LocalDate startDate = LocalDate.now().minusYears(2);
+        LocalDate endDate = LocalDate.now();
+        
+        // range can be 1W for 1 week or 1D for 1 day
+        if (range.equals("1W")){
+            multiplier = "1";
+            timespan = "hour";
+            startDate = LocalDate.now().minusWeeks(1);
+        }
+
+        URI url = UriComponentsBuilder.fromUriString(baseUrl)
+            .path("/ticker/" + ticker)
+            .path("/range/" + multiplier)
+            .path("/"+ timespan)
+            .path("/" + startDate + "/" + endDate)
+            .queryParam("adjusted", "true")
+            .queryParam("sort", "asc")
+            .queryParam("limit", "5000")
+            .queryParam("apiKey", MASSIVE_API_KEY)
+            .build().toUri();
+
+        System.out.println("ddd57: " + url);
+
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange( 
+            url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {}
+        );
+        if (!response.getStatusCode().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        }
+
+        Map<String, Object> body = response.getBody();
+        if (body == null || !body.containsKey("results")) {
+            return ResponseEntity.status(HttpStatus.INTERNAL_SERVER_ERROR).build();
+        }
+
+        return ResponseEntity.ok(body);
     }
 }
