@@ -9,11 +9,19 @@ const Trade = () => {
   const [suggestions, setSuggestions] = useState([])
   const [loading, setLoading] = useState(false)
   const [account, setAccount] = useState(null)
+  const [accountLoading, setAccountLoading] = useState(false)
   const [holdings, setHoldings] = useState([])
   const timer = useRef(null)
   const navigate = useNavigate()
-  const accountId = 1
 
+  let accountId = 0
+  
+  const authString = localStorage.getItem("auth")
+    if (authString) {
+        const auth = JSON.parse(authString);
+        accountId = auth.id;
+        console.log("Account ID:", accountId);
+    }
   useEffect(() => {
     console.log("useEffect triggered for accountId:", accountId);
     if (!accountId) return;
@@ -128,8 +136,7 @@ const Trade = () => {
 
         <section className="card">
           <div className="card-body p-4">
-            <h3 className="h5 fw-semibold mb-3">Open Orders & Positions</h3>
-            <p className="text-muted">This table will show simulated open orders and positions.</p>
+            <h3 className="h5 fw-semibold mb-3">Recent Orders</h3>
             {/* Holdings display */}
             <div className="table-responsive">
               <table className="table table-striped">
@@ -145,12 +152,15 @@ const Trade = () => {
                 </thead>
                 <tbody>
                   {holdings.length > 0 ? (
-                    holdings.map((holding) => (
-                      <tr key={holding.stock_ticker}>
-                        <td>{holding.stock_ticker}</td>
+                    [...holdings]
+                    .reverse()
+                    .slice(0, 5)
+                    .map((holding) => (
+                      <tr key={holding.stockTicker}>
+                        <td>{holding.stockTicker}</td>
                         <td>{holding.shares > 0 ? 'LONG' : 'SHORT'}</td>
                         <td>{holding.shares}</td>
-                        <td>${holding.average_price?.toFixed(2) ?? '--'}</td>
+                        <td>${holding.averagePrice?.toFixed(2) ?? '--'}</td>
                         <td>OPEN</td>
                         <td>
                           <button className="btn btn-sm btn-outline-secondary">Close</button>

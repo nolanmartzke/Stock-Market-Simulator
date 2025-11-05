@@ -4,6 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { useNavigate, useParams, Link } from "react-router-dom"; 
 import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
 import { getQuote, getMetrics, search, getHistory } from '../api/StockApi';
+import { trade } from '../api/AccountApi';
 
 
 const Stock = () => { 
@@ -28,6 +29,15 @@ const Stock = () => {
 
     const [mode, setMode] = useState("buy"); // buy or sell
     const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
+
+    let accountId = 0
+
+    const authString = localStorage.getItem("auth")
+    if (authString) {
+        const auth = JSON.parse(authString);
+        accountId = auth.id;
+        console.log("Account ID:", accountId);
+    }
 
     useEffect(() => {
         search(query)
@@ -124,6 +134,32 @@ const Stock = () => {
     const formattedPrice = formatUSD(price);
     const estimatedCost = (shares * price).toFixed(2);
     const estimatedCostDollars = formatUSD(estimatedCost);
+
+    const handleSubmitOrder = async () => {
+        if (!shares || shares <= 0) {
+            alert("Please enter a valid number of shares.")
+            return;
+        }
+        
+        try {
+            const order = {
+                action: mode,
+                ticker: stockTicker,
+                shares: shares,
+                price: quote.c,
+            }
+
+            const updatedAccount = await trade(accountId, order)
+
+            setCash(formatUSD(updatedAccount.data.cash))
+            alert(`Successfully placed ${mode} order for ${shares} shares of ${stockTicker}.`)
+            setShares(0)
+
+        } catch (error) {
+            console.error(error)
+            alert(error.response?.data || "Failed to execute trade.")
+        }
+    }
 
     return ( 
         <div className="container-fluid py-4"> 
@@ -286,6 +322,7 @@ const Stock = () => {
                                 <Button
                                     variant="success"
                                     className="bg-success w-100 border-0 rounded-pill fw-bold text-white py-3"
+                                    onClick={handleSubmitOrder}
                                 >
                                     Review Order
                                 </Button>
