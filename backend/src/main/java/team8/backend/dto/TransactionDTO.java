@@ -39,7 +39,7 @@ public class TransactionDTO {
         );
     }
 
-    // Optional: convert list of entities
+    // convert list of entities
     public static java.util.List<TransactionDTO> fromEntities(java.util.List<Transaction> txs) {
         return txs.stream().map(TransactionDTO::fromEntity).toList();
     }
