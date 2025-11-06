@@ -3,6 +3,8 @@ package team8.backend.controller;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
+
+import jakarta.transaction.Transactional;
 import team8.backend.dto.AccountDTO;
 import team8.backend.entity.Account;
 import team8.backend.entity.Holding;
@@ -10,6 +12,8 @@ import team8.backend.entity.User;
 import team8.backend.repository.AccountRepository;
 import team8.backend.repository.UserRepository;
 import team8.backend.service.HoldingService;
+import team8.backend.entity.Transaction;
+import team8.backend.repository.TransactionRepository;
 
 import java.util.*;
 import java.util.stream.Collectors;
@@ -27,6 +31,9 @@ public class AccountController {
 
     @Autowired
     private HoldingService holdingService;
+
+    @Autowired
+    private TransactionRepository transactionRepository;
 
     // Get all accounts for a user
     @GetMapping
@@ -51,6 +58,7 @@ public class AccountController {
     }
 
     // Trade endpoint (buy/sell shares)
+    @Transactional
     @PostMapping("/{accountId}/trade")
     public ResponseEntity<?> trade(@PathVariable Long accountId, @RequestBody Map<String, Object> body) {
         String action = (String) body.get("action"); // "buy" or "sell"
@@ -91,7 +99,21 @@ public class AccountController {
                 return ResponseEntity.badRequest().body("Invalid action type. Must be 'buy' or 'sell'.");
             }
 
+
+            // Save transaction
+            Transaction tx = new Transaction(
+                account,
+                action.toLowerCase(),
+                ticker,
+                shares,
+                price,
+                java.time.LocalDateTime.now()
+            );
+            account.addTransaction(tx);
+
+            transactionRepository.save(tx);
             accountRepository.save(account);
+
             return ResponseEntity.ok(AccountDTO.fromEntity(account));
 
         } catch (IllegalArgumentException e) {

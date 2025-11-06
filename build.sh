@@ -14,12 +14,12 @@ docker compose build
 echo "Starting containers (detached)..."
 docker compose up -d
 
-echo "\nDone. Access containers at:"
+echo "Done. Access containers at:"
 echo "  Frontend: http://localhost:5173"
 echo "  Backend:  http://localhost:8080"
 echo "  MySQL:    localhost:3306"
 
-echo "\nIf you get a permission error running this script, run:"
+echo "If you get a permission error running this script, run:"
 echo "  chmod +x build.sh"
 
 exit 0
