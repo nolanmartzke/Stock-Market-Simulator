@@ -32,3 +32,7 @@ export function getMetrics(ticker) {
 export function getHistory(ticker, range) {
   return api.get('/historical', { params: { ticker: ticker, range: range } });
 }
+
+export function getProfile(symbol) {
+  return api.get('/profile2', { params: { symbol } });
+}
