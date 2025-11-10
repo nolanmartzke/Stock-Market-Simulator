@@ -207,11 +207,11 @@ const Stock = () => {
     }
 
     return ( 
-        <div className="container-fluid py-4"> 
+        <div className="container-fluid"> 
             
             {/* stock name and price */}
-            <Container className="p-3">
-                <Card className="bg-gradient shadow-lg border-0 p-3" style={{ backgroundColor: "#01497c", color: "white", borderRadius: "10px" }}>
+            <Container className="py-2 pb-0 px-3">
+                <Card className="bg-gradient shadow-lg border-0 py-3" style={{ backgroundColor: "#01497c", color: "white", borderRadius: "10px" }}>
                     <Card.Body className="d-flex justify-content-between align-items-center" style={{ paddingLeft: "2%", paddingRight: "5%" }}>
 
                         <div
@@ -437,29 +437,21 @@ const Stock = () => {
                 {/* Company profile details */}
                 {profile && (
                     <Row>
-                        <Col xs={12} className="p-3">
-                            <Card className="bg-gradient shadow-lg border-0 text-white" style={{ backgroundColor: "#01497c", borderRadius: "15px" }}>
-                                <Card.Body className="p-4 d-flex flex-column">
-                                    <h4 className="mb-3">Company Profile</h4>
-                                    <Row>
-                                        <Col md={6}>
-                                            <p><strong>Industry:</strong> {profile.finnhubIndustry || '—'}</p>
-                                            <p><strong>Exchange:</strong> {profile.exchange || '—'}</p>
-                                            <p><strong>Country:</strong> {profile.country || '—'}</p>
-                                            <p><strong>Currency:</strong> {profile.currency || '—'}</p>
-                                        </Col>
-                                        <Col md={6}>
-                                            <p><strong>Market Cap:</strong> {profile.marketCapitalization ? new Intl.NumberFormat().format(profile.marketCapitalization) : '—'}</p>
-                                            <p><strong>Shares Outstanding:</strong> {profile.shareOutstanding ? new Intl.NumberFormat().format(Math.round(profile.shareOutstanding)) : '—'}</p>
-                                            <p><strong>IPO Date:</strong> {profile.ipo || '—'}</p>
-                                            <p><strong>Phone:</strong> {profile.phone || '—'}</p>
-                                        </Col>
-                                    </Row>
-                                    <Row className="mt-2">
-                                        <Col>
-                                            <p><strong>Website:</strong> {profile.weburl ? (<a href={profile.weburl} target="_blank" rel="noreferrer" style={{ color: '#fff', textDecoration: 'underline' }}>{profile.weburl}</a>) : '—'}</p>
-                                        </Col>
-                                    </Row>
+                        <Col xs={12} className="px-3 py-0">
+                            <Card className="bg-gradient shadow-lg border-0 text-white" style={{ backgroundColor: "#0c2f49ff", borderRadius: "15px" }}>
+                                <Card.Body className="mx-5 py-4 d-flex flex-column">
+                                    <h3 className="mt-2 fw-semibold text-white mb-4 pb-3" style={{ borderBottom: "2px solid rgba(255,255,255,0.12)"  }}>Company Profile</h3>
+                                    <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-3 g-2">
+                                        <Col><p><strong>Industry:</strong> {profile.finnhubIndustry || '—'}</p></Col>
+                                        <Col><p><strong>Exchange:</strong> {profile.exchange || '—'}</p></Col>
+                                        <Col><p><strong>Country:</strong> {profile.country || '—'}</p></Col>
+                                        <Col><p><strong>Currency:</strong> {profile.currency || '—'}</p></Col>
+                                        <Col><p><strong>Market Cap:</strong> {profile.marketCapitalization ? new Intl.NumberFormat().format(profile.marketCapitalization) : '—'}</p></Col>
+                                        <Col><p><strong>Shares Outstanding:</strong> {profile.shareOutstanding ? new Intl.NumberFormat().format(Math.round(profile.shareOutstanding)) : '—'}</p></Col>
+                                        <Col><p><strong>IPO Date:</strong> {profile.ipo || '—'}</p></Col>
+                                        <Col><p><strong>Phone:</strong> {profile.phone || '—'}</p></Col>
+                                        <Col><p><strong>Website:</strong> {profile.weburl ? (<a href={profile.weburl} target="_blank" rel="noreferrer" style={{ color: '#fff', textDecoration: 'underline' }}>{profile.weburl}</a>) : '—'}</p></Col>
+                                    </div>
                                 </Card.Body>
                             </Card>
                         </Col>
@@ -469,7 +461,7 @@ const Stock = () => {
                 {/* metrics */}
                 {Object.keys(metrics || {}).length > 0 && (
                     <Row className="">
-                        <Col xs={12} className="p-3">
+                        <Col xs={12} className="py-3">
                             <Card className="border-0 shadow-lg" style={{ background: "linear-gradient(135deg, #020b1f 0%, #04112a 55%, #071b3d 100%)", color: "white", borderRadius: "22px", border: "1px solid rgba(255,255,255,0.08)"}}>
                                 <Card.Body className="p-4 p-md-5">
                                     <h3 className="mb-0 fw-semibold text-white mb-4">Key Metrics</h3>
