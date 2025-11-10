@@ -11,7 +11,6 @@ import Landing from "./pages/Landing";
 import SignIn from "./pages/SignIn";
 import SignUp from "./pages/SignUp";
 import AlreadyLoggedIn from "./pages/AlreadyLoggedIn";
-import Home from "./pages/Home";
 import Account from "./pages/Account";
 import History from "./pages/History";
 import Trade from "./pages/Trade";
@@ -46,7 +45,6 @@ export default function App() {
 
       {/* App routes */}
       <Route element={<MainLayout />}>
-        <Route path="/home" element={<Home />} />
         <Route path="/get-started" element={<GetStarted />} />
         <Route path="/popular" element={<Popular />} />
 
