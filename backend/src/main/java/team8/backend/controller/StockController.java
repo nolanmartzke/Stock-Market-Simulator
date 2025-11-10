@@ -34,7 +34,7 @@ public class StockController {
     @Value("${finnhub.api-key}")
     private String FINNHUB_API_KEY;
 
-    @Value("${massive.api-key}")
+    @Value("${massive.api-key:}")
     private String MASSIVE_API_KEY;
 
     private final RestTemplate restTemplate = new RestTemplate();
@@ -178,6 +178,51 @@ public class StockController {
         System.out.println(response.getBody());
 
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+    }
+
+    /**
+     * Company Profile 2 - Finnhub
+     * Accepts one of: symbol, isin, or cusip. Returns the company profile map from Finnhub.
+     */
+    @GetMapping("/profile2")
+    public ResponseEntity<Map<String, Object>> getCompanyProfile(
+            @RequestParam(required = false) String symbol,
+            @RequestParam(required = false) String isin,
+            @RequestParam(required = false) String cusip) {
+
+        String baseUrl = "https://finnhub.io/api/v1/stock/profile2";
+
+        UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
+        if (symbol != null && !symbol.isBlank()) {
+            builder.queryParam("symbol", symbol.toUpperCase());
+        } else if (isin != null && !isin.isBlank()) {
+            builder.queryParam("isin", isin);
+        } else if (cusip != null && !cusip.isBlank()) {
+            builder.queryParam("cusip", cusip);
+        } else {
+            Map<String, Object> err = new HashMap<>();
+            err.put("error", "Missing query parameter: provide symbol, isin or cusip");
+            return ResponseEntity.badRequest().body(err);
+        }
+
+        builder.queryParam("token", FINNHUB_API_KEY);
+        URI url = builder.build().toUri();
+
+        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+                url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {
+                }
+        );
+
+        if (!response.getStatusCode().equals(HttpStatus.OK)) {
+            return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
+        }
+
+        Map<String, Object> body = response.getBody();
+        if (body == null || body.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        return ResponseEntity.ok(body);
     }
 
     @GetMapping("/metrics")

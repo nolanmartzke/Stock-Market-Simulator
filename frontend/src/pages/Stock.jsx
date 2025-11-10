@@ -1,9 +1,9 @@
 import React, { useEffect, useState } from 'react';
 import { Search, PlusCircle, ArrowRightCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
-import { useNavigate, useParams, Link } from "react-router-dom"; 
+import { useParams } from "react-router-dom"; 
 import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
-import { getQuote, getMetrics, search, getHistory } from '../api/StockApi';
+import { getQuote, getMetrics, search, getHistory, getProfile } from '../api/StockApi';
 import { trade } from '../api/AccountApi';
 
 
@@ -16,6 +16,7 @@ const Stock = () => {
     const [stockName, setStockName] = useState("Loading...");
     const [metrics, setMetrics] = useState([]);
     const [quote, setQuote] = useState([]);
+    const [profile, setProfile] = useState(null);
 
     const [history, setHistory] = useState([]);
     const [filteredHistory, setFilteredHistory] = useState([]);
@@ -72,6 +73,17 @@ const Stock = () => {
                         setHistory(data.results);
                     })
                     .catch(err => console.log(err));
+
+                // fetch company profile from backend (/profile2)
+                getProfile(ticker)
+                    .then(response => response.data)
+                    .then(data => {
+                        setProfile(data);
+                    })
+                    .catch(err => {
+                        console.log('getProfile error', err);
+                        setProfile(null);
+                    });
             })
             .catch(err => console.log(err));
     }, [query]);
@@ -200,9 +212,14 @@ const Stock = () => {
                             
                         </div>
                         <div className="flex-grow-1 text-center">
-                            <h1 className="mb-0 fw-semibold" style={{ fontSize: "3rem" }}>
-                                {stockName}
-                            </h1>
+                            <div className="d-flex align-items-center justify-content-center gap-3">
+                                {profile && profile.logo ? (
+                                    <img src={profile.logo} alt={`${stockName} logo`} style={{ width: 64, height: 64, objectFit: 'contain', borderRadius: 8 }} />
+                                ) : null}
+                                <h1 className="mb-0 fw-semibold" style={{ fontSize: "3rem" }}>
+                                    {stockName}
+                                </h1>
+                            </div>
                         </div>
                     </Card.Body>
                 </Card>
@@ -353,6 +370,37 @@ const Stock = () => {
 
             {/* metrics */}
             <Container>
+                {/* Company profile details */}
+                {profile && (
+                    <Row>
+                        <Col xs={12} className="p-3">
+                            <Card className="bg-gradient shadow-lg border-0 text-white" style={{ backgroundColor: "#01497c", borderRadius: "15px" }}>
+                                <Card.Body className="p-4 d-flex flex-column">
+                                    <h4 className="mb-3">Company Profile</h4>
+                                    <Row>
+                                        <Col md={6}>
+                                            <p><strong>Industry:</strong> {profile.finnhubIndustry || '—'}</p>
+                                            <p><strong>Exchange:</strong> {profile.exchange || '—'}</p>
+                                            <p><strong>Country:</strong> {profile.country || '—'}</p>
+                                            <p><strong>Currency:</strong> {profile.currency || '—'}</p>
+                                        </Col>
+                                        <Col md={6}>
+                                            <p><strong>Market Cap:</strong> {profile.marketCapitalization ? new Intl.NumberFormat().format(profile.marketCapitalization) : '—'}</p>
+                                            <p><strong>Shares Outstanding:</strong> {profile.shareOutstanding ? new Intl.NumberFormat().format(Math.round(profile.shareOutstanding)) : '—'}</p>
+                                            <p><strong>IPO Date:</strong> {profile.ipo || '—'}</p>
+                                            <p><strong>Phone:</strong> {profile.phone || '—'}</p>
+                                        </Col>
+                                    </Row>
+                                    <Row className="mt-2">
+                                        <Col>
+                                            <p><strong>Website:</strong> {profile.weburl ? (<a href={profile.weburl} target="_blank" rel="noreferrer" style={{ color: '#fff', textDecoration: 'underline' }}>{profile.weburl}</a>) : '—'}</p>
+                                        </Col>
+                                    </Row>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                )}
                 <Row>
                     {
                         Object.entries(metrics).map(([name, value])  => (
