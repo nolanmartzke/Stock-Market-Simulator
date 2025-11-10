@@ -212,10 +212,10 @@ const Stock = () => {
             {/* stock name and price */}
             <Container className="p-3">
                 <Card className="bg-gradient shadow-lg border-0 p-3" style={{ backgroundColor: "#01497c", color: "white", borderRadius: "10px" }}>
-                    <Card.Body className="d-flex justify-content-between align-items-center" style={{ paddingLeft: "5%", paddingRight: "5%" }}>
+                    <Card.Body className="d-flex justify-content-between align-items-center" style={{ paddingLeft: "2%", paddingRight: "5%" }}>
 
                         <div
-                            className="text-end px-4 py-3 rounded-4 border"
+                            className="text-end px-4 py-3 me-5 rounded-4 border"
                             style={{
                                 background: dayChange === "positive" ? "linear-gradient(135deg, rgba(34, 197, 94, 0.55), rgba(34, 197, 94, 0.35))" : "linear-gradient(135deg, rgba(248, 113, 113, 0.55), rgba(248, 113, 113, 0.35))",
                                 borderColor: dayChange === "positive" ? "rgba(22, 163, 74, 0.25)" : "rgba(220, 38, 38, 0.25)",
@@ -432,7 +432,7 @@ const Stock = () => {
                 </Row>
             </Container>
 
-            {/* metrics */}
+            
             <Container>
                 {/* Company profile details */}
                 {profile && (
@@ -465,8 +465,10 @@ const Stock = () => {
                         </Col>
                     </Row>
                 )}
+                
+                {/* metrics */}
                 {Object.keys(metrics || {}).length > 0 && (
-                    <Row className="mt-3">
+                    <Row className="">
                         <Col xs={12} className="p-3">
                             <Card className="border-0 shadow-lg" style={{ background: "linear-gradient(135deg, #020b1f 0%, #04112a 55%, #071b3d 100%)", color: "white", borderRadius: "22px", border: "1px solid rgba(255,255,255,0.08)"}}>
                                 <Card.Body className="p-4 p-md-5">
