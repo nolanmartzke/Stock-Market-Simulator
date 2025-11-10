@@ -1,10 +1,10 @@
 import React, { useEffect, useState } from 'react';
-import { Search, PlusCircle, ArrowRightCircle, ArrowUpRight, ArrowDownRight } from 'lucide-react';
+import { Search, PlusCircle, ArrowRightCircle, ArrowUpRight, ArrowDownRight, TrendingUp, Layers, CircleDollarSign } from 'lucide-react';
 import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianGrid } from "recharts";
 import { useParams } from "react-router-dom"; 
 import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
 import { getQuote, getMetrics, search, getHistory, getProfile } from '../api/StockApi';
-import { trade } from '../api/AccountApi';
+import { trade, loadAccount } from '../api/AccountApi';
 
 
 const Stock = () => { 
@@ -31,14 +31,44 @@ const Stock = () => {
     const [mode, setMode] = useState("buy"); // buy or sell
     const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
 
-    let accountId = 0
+    const [accountId, setAccountId] = useState(null);
+    const [numHoldingShares, setNumHoldingShares] = useState(0);
+    const [averageCost, setAverageCost] = useState(0);
+    
+    useEffect(() => {
+        const authString = localStorage.getItem("auth")
+        if (authString) {
+            const auth = JSON.parse(authString);
+            setAccountId(auth.id);
+            // TODO: this should be changed to get the account ID from localStorage instead of the user ID
+            // in order to do this, must change the userDTO to also send account
+        }
+    },[])
 
-    const authString = localStorage.getItem("auth")
-    if (authString) {
-        const auth = JSON.parse(authString);
-        accountId = auth.id;
-        console.log("Account ID:", accountId);
-    }
+    useEffect(() => {
+        if (!accountId) return;
+        if (!ticker) return;
+
+        loadAccount(accountId)
+            .then(response => response.data)
+            .then(data => {
+                if (!data.holdings) return;
+
+                const currHolding = data.holdings.find(h => h.stockTicker === ticker);
+                if (!currHolding){
+                    setNumHoldingShares(0);
+                    setAverageCost(null);
+                }
+                else{
+                    setNumHoldingShares(currHolding.shares);
+                    setAverageCost(currHolding.averagePrice);
+                }
+
+
+                console.log(data)
+            })
+            .catch(err => console.log(err));
+    },[accountId, ticker, query])
 
     useEffect(() => {
         search(query)
@@ -132,7 +162,7 @@ const Stock = () => {
         if (cutoff)
             data = data.filter(item => new Date(item.date) >= cutoff);
 
-        console.log(data)
+        data.length > 1 && console.log(data)
 
         setFilteredHistory(data);
     }, [history,range]);
@@ -144,6 +174,9 @@ const Stock = () => {
     }).format(num);
 
     const formattedPrice = formatUSD(price);
+    const holdingsMarketValue = formatUSD((Number(numHoldingShares) || 0) * (Number(price) || 0));
+    const formattedAverageCost = formatUSD(Number(averageCost) || 0);
+    const formattedShareCount = (Number(numHoldingShares) || 0).toLocaleString("en-US");
     const estimatedCost = (shares * price).toFixed(2);
     const estimatedCostDollars = formatUSD(estimatedCost);
 
@@ -227,12 +260,12 @@ const Stock = () => {
 
             <Container>
                 <Row>
-                    {/* Graph placeholder */}
+                    {/* Graph */}
                     <Col xs={12} md={12} xl={8} className="p-3">
                         <Card className="bg-gradient shadow-lg border-0 h-100" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px" }}>
                             <Card.Body className="d-flex flex-column justify-content-center align-items-center">
-                                <div style={{ width: "100%", height: 400 }}> 
-                                    <ResponsiveContainer> 
+                                <div style={{ width: "100%", minWidth: 0, height: 400, marginTop: 20 }}> 
+                                    <ResponsiveContainer width="100%" height="100%"> 
                                         <LineChart data={filteredHistory}> 
                                             <CartesianGrid strokeDasharray="3 3" /> 
                                             <XAxis dataKey="date" /> 
@@ -259,11 +292,42 @@ const Stock = () => {
                                     </button>
                                     ))}
                                 </div>
-                                
+                                {/* shares, average price and portfolio percentage of this stock */}
+                                {numHoldingShares > 0 && 
+                                    <Card className="border-0 shadow-lg mt-1 w-100" style={{ background: "linear-gradient(135deg, rgba(2,22,46,0.95), rgba(0,10,20,0.92))", color: "white", borderRadius: "16px", border: "1px solid rgba(255,255,255,0.08)" }}>
+                                        <Card.Body className="d-flex flex-column gap-3">
+                                            <div className="d-flex flex-column flex-md-row gap-3 w-100">
+                                                <div className="flex-fill p-3 rounded-4 d-flex flex-column gap-1" style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                                                    <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
+                                                        <TrendingUp size={24} className="text-success" />
+                                                        <span> Your Equity</span>
+                                                    </div>
+                                                    <h4 className="mb-0 fw-semibold text-white text-center">{holdingsMarketValue}</h4>
+                                                </div>
+                                                <div className="flex-fill p-3 rounded-4 d-flex flex-column gap-1" style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                                                    <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
+                                                        <Layers size={24} className="text-info" />
+                                                        <span>Shares Held</span>
+                                                    </div>
+                                                    <h4 className="mb-0 fw-semibold text-white text-center">{formattedShareCount} shares</h4>
+                                                </div>
+                                                <div className="flex-fill p-3 rounded-4 d-flex flex-column gap-1" style={{ backgroundColor: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}>
+                                                    <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
+                                                        <CircleDollarSign size={24} className="text-warning" />
+                                                        <span>Average Cost</span>
+                                                    </div>
+                                                    <h4 className="mb-0 fw-semibold text-white text-center">{formattedAverageCost}</h4>
+                                                </div>
+                                            </div>
+                                        </Card.Body>
+                                    </Card>
+                                }
                             </Card.Body>
+                        
                         </Card>
+
                     </Col>
-                    {/* Trading panel placeholder */}
+                    {/* Trading panel */}
                     <Col xs={12} md={12} xl={4} className="p-3">
                         <Card className="bg-gradient shadow-lg border-0 h-100 px-4" style={{ backgroundColor: "black", color: "white", borderRadius: "10px" }}>
                             <Card.Body>

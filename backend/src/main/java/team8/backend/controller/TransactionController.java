@@ -20,7 +20,7 @@ public class TransactionController {
 
     // Get all transactions for an account
     @GetMapping
-    public ResponseEntity<java.util.List<TransactionDTO>> getTransactions(@RequestParam Long accountId) {
+    public ResponseEntity<java.util.List<TransactionDTO>> getTransactions(@RequestParam(name = "accountId") Long accountId) {
         var accountOpt = accountRepository.findById(accountId);
         if (accountOpt.isEmpty()) return ResponseEntity.notFound().build();
 
@@ -32,7 +32,7 @@ public class TransactionController {
     }
 
     @GetMapping("/{id}")
-    public ResponseEntity<TransactionDTO> getTransaction(@PathVariable Long id) {
+    public ResponseEntity<TransactionDTO> getTransaction(@PathVariable(name = "id") Long id) {
         var txOpt = transactionRepository.findById(id);
         return txOpt.map(tx -> ResponseEntity.ok(TransactionDTO.fromEntity(tx)))
                     .orElseGet(() -> ResponseEntity.notFound().build());
