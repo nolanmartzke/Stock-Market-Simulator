@@ -51,6 +51,17 @@ export default function Landing() {
                   <Nav.Item className="me-2">
                     <Button
                       as={Link}
+                      to="/dashboard"
+                      variant="danger"
+                      size="lg"
+                      style={{ borderRadius: "12px" }}
+                    >
+                      Dashboard
+                    </Button>
+                  </Nav.Item>
+                  <Nav.Item>
+                    <Button
+                      as={Link}
                       to="/account"
                       variant="outline-light"
                       size="lg"
@@ -59,17 +70,6 @@ export default function Landing() {
                     >
                       <User size={18} />
                       {auth.name}
-                    </Button>
-                  </Nav.Item>
-                  <Nav.Item>
-                    <Button
-                      as={Link}
-                      to="/account"
-                      variant="danger"
-                      size="lg"
-                      style={{ borderRadius: "12px" }}
-                    >
-                      Dashboard
                     </Button>
                   </Nav.Item>
                 </>
