@@ -4,7 +4,7 @@ import { LineChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, CartesianG
 import { useParams } from "react-router-dom"; 
 import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
 import { getQuote, getMetrics, search, getHistory, getProfile } from '../api/StockApi';
-import { trade } from '../api/AccountApi';
+import { trade, loadAccount } from '../api/AccountApi';
 
 
 const Stock = () => { 
@@ -31,14 +31,30 @@ const Stock = () => {
     const [mode, setMode] = useState("buy"); // buy or sell
     const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
 
-    let accountId = 0
+    const [accountId, setAccountId] = useState(null);
+    const [account, setAccount] = useState([]);
+    
+    useEffect(() => {
+        const authString = localStorage.getItem("auth")
+        if (authString) {
+            const auth = JSON.parse(authString);
+            setAccountId(auth.id);
+            // TODO: this should be changed to get the account ID from localStorage instead of the user ID
+            // in order to do this, must change the userDTO to also send account
+        }
+    },[])
 
-    const authString = localStorage.getItem("auth")
-    if (authString) {
-        const auth = JSON.parse(authString);
-        accountId = auth.id;
-        console.log("Account ID:", accountId);
-    }
+    useEffect(() => {
+        if (!accountId) return;
+        
+        loadAccount(accountId)
+            .then(response => response.data)
+            .then(data => {
+                setAccount(data)
+                console.log(data)
+            })
+            .catch(err => console.log(err));
+    },[accountId])
 
     useEffect(() => {
         search(query)
@@ -132,7 +148,7 @@ const Stock = () => {
         if (cutoff)
             data = data.filter(item => new Date(item.date) >= cutoff);
 
-        console.log(data)
+        data.length > 1 && console.log(data)
 
         setFilteredHistory(data);
     }, [history,range]);
