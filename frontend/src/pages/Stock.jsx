@@ -249,7 +249,7 @@ const Stock = () => {
                                 {profile && profile.logo ? (
                                     <img src={profile.logo} alt={`${stockName} logo`} style={{ width: 64, height: 64, objectFit: 'contain', borderRadius: 8 }} />
                                 ) : null}
-                                <h1 className="mb-0 fw-semibold" style={{ fontSize: "3rem" }}>
+                                <h1 className="mb-0 fw-semibold text-truncate" style={{ fontSize: "3rem" }}>
                                     {stockName}
                                 </h1>
                             </div>
@@ -465,21 +465,27 @@ const Stock = () => {
                         </Col>
                     </Row>
                 )}
-                <Row>
-                    {
-                        Object.entries(metrics).map(([name, value])  => (
-                            <Col xs={12} s={12} md={6} lg={4} xl={3} key={name} className="p-3">
-                                <Card className="bg-gradient shadow-lg border-0 text-center" style={{ backgroundColor: "#01497c", color: "white", borderRadius: "15px" }}>
-                                    <Card.Body className="p-4 d-flex flex-column justify-content-between h-30">
-                                        <h4>{name}</h4>
-                                        <hr className="border border-secondary mb-3" />
-                                        <h3>{value}</h3>
-                                    </Card.Body>
-                                </Card>
-                            </Col>
-                        ))
-                    }
-                </Row>
+                {Object.keys(metrics || {}).length > 0 && (
+                    <Row className="mt-3">
+                        <Col xs={12} className="p-3">
+                            <Card className="border-0 shadow-lg" style={{ background: "linear-gradient(135deg, #020b1f 0%, #04112a 55%, #071b3d 100%)", color: "white", borderRadius: "22px", border: "1px solid rgba(255,255,255,0.08)"}}>
+                                <Card.Body className="p-4 p-md-5">
+                                    <h3 className="mb-0 fw-semibold text-white mb-4">Key Metrics</h3>
+                                    <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
+                                        {Object.entries(metrics).map(([name, value]) => (
+                                            <div key={name} className="col d-flex">
+                                                <div className="flex-grow-1 py-3 px-2" style={{ borderTop: "1px solid rgba(255,255,255,0.12)"  }}>
+                                                    <p className="text-white-50 text-uppercase small mb-1 fw-semibold"> {name} </p>
+                                                    <h4 className="text-white mb-0 fw-semibold"> {value} </h4>
+                                                </div>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </Card.Body>
+                            </Card>
+                        </Col>
+                    </Row>
+                )}
             </Container>
 
         </div> 
