@@ -19,13 +19,13 @@ public class HoldingController {
 
     // Get holdings for an account
     @GetMapping("/account/{accountId}")
-    public List<HoldingDTO> getHoldingsByAccount(@PathVariable Long accountId) {
+    public List<HoldingDTO> getHoldingsByAccount(@PathVariable(name = "accountId") Long accountId) {
         return holdingService.getHoldingsByAccount(accountId);
     }
 
     // Delete a holding
     @DeleteMapping("/{holdingId}")
-    public void deleteHolding(@PathVariable Long holdingId) {
+    public void deleteHolding(@PathVariable(name = "holdingId") Long holdingId) {
         holdingService.deleteHolding(holdingId);
     }
 }

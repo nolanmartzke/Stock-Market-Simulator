@@ -37,7 +37,7 @@ public class AccountController {
 
     // Get all accounts for a user
     @GetMapping
-    public ResponseEntity<List<AccountDTO>> getAccounts(@RequestParam Long userId) {
+    public ResponseEntity<List<AccountDTO>> getAccounts(@RequestParam(name = "userId") Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
 
@@ -51,7 +51,7 @@ public class AccountController {
 
     // Get single account (with holdings)
     @GetMapping("/{accountId}")
-    public ResponseEntity<AccountDTO> getAccount(@PathVariable Long accountId) {
+    public ResponseEntity<AccountDTO> getAccount(@PathVariable(name = "accountId") Long accountId) {
         Optional<Account> accountOpt = accountRepository.findById(accountId);
         return accountOpt.map(a -> ResponseEntity.ok(AccountDTO.fromEntity(a)))
                          .orElseGet(() -> ResponseEntity.notFound().build());
@@ -60,7 +60,7 @@ public class AccountController {
     // Trade endpoint (buy/sell shares)
     @Transactional
     @PostMapping("/{accountId}/trade")
-    public ResponseEntity<?> trade(@PathVariable Long accountId, @RequestBody Map<String, Object> body) {
+    public ResponseEntity<?> trade(@PathVariable(name = "accountId") Long accountId, @RequestBody Map<String, Object> body) {
         String action = (String) body.get("action"); // "buy" or "sell"
         String ticker = (String) body.get("ticker");
         Number sharesNum = (Number) body.get("shares");
@@ -123,7 +123,7 @@ public class AccountController {
 
     // Dashboard
     @GetMapping("/dashboard")
-    public ResponseEntity<Map<String, Object>> dashboard(@RequestParam Long userId) {
+    public ResponseEntity<Map<String, Object>> dashboard(@RequestParam(name = "userId") Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) return ResponseEntity.notFound().build();
 

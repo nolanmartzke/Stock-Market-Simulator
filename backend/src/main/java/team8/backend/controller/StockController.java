@@ -40,7 +40,7 @@ public class StockController {
     private final RestTemplate restTemplate = new RestTemplate();
 
     @GetMapping("/search")
-    public ResponseEntity<Map<String, Object>> searchStock(@RequestParam String query) {
+    public ResponseEntity<Map<String, Object>> searchStock(@RequestParam(name = "query") String query) {
         String baseUrl = "https://finnhub.io/api/v1/search";
 
         URI url = UriComponentsBuilder.fromUriString(baseUrl)
@@ -77,7 +77,7 @@ public class StockController {
 
     // Searchbar endpoint used by the frontend when a user types a partial query.
     @GetMapping("/searchbar")
-    public ResponseEntity<Map<String, Object>> searchBar(@RequestParam String query) {
+    public ResponseEntity<Map<String, Object>> searchBar(@RequestParam(name = "query") String query) {
         String baseUrl = "https://finnhub.io/api/v1/search";
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl)
@@ -125,8 +125,8 @@ public class StockController {
      */
     @GetMapping("/news")
     public ResponseEntity<Map<String, Object>> getNews(
-            @RequestParam String category,
-            @RequestParam(required = false, defaultValue = "0") long minId) {
+            @RequestParam(name = "category") String category,
+            @RequestParam(name = "minId", required = false, defaultValue = "0") long minId) {
 
         String baseUrl = "https://finnhub.io/api/v1/news";
 
@@ -163,7 +163,7 @@ public class StockController {
     }
 
     @GetMapping("/quote")
-    public ResponseEntity<Map<String, Object>> getQuote(@RequestParam String ticker) {
+    public ResponseEntity<Map<String, Object>> getQuote(@RequestParam(name = "ticker") String ticker) {
         String baseUrl = "https://finnhub.io/api/v1/quote";
 
         URI url = UriComponentsBuilder.fromUriString(baseUrl)
@@ -186,9 +186,9 @@ public class StockController {
      */
     @GetMapping("/profile2")
     public ResponseEntity<Map<String, Object>> getCompanyProfile(
-            @RequestParam(required = false) String symbol,
-            @RequestParam(required = false) String isin,
-            @RequestParam(required = false) String cusip) {
+            @RequestParam(name = "symbol", required = false) String symbol,
+            @RequestParam(name = "isin", required = false) String isin,
+            @RequestParam(name = "cusip", required = false) String cusip) {
 
         String baseUrl = "https://finnhub.io/api/v1/stock/profile2";
 
@@ -226,7 +226,7 @@ public class StockController {
     }
 
     @GetMapping("/metrics")
-    public ResponseEntity<Map<String, Object>> getMetrics(@RequestParam String ticker) {
+    public ResponseEntity<Map<String, Object>> getMetrics(@RequestParam(name = "ticker") String ticker) {
         String baseUrl = "https://finnhub.io/api/v1/stock/metric";
 
         URI url = UriComponentsBuilder.fromUriString(baseUrl)
@@ -282,7 +282,9 @@ public class StockController {
 
 
     @GetMapping("/historical")
-    public ResponseEntity<Map<String, Object>> getHistorical(@RequestParam String ticker, @RequestParam(required = false) String range) {
+    public ResponseEntity<Map<String, Object>> getHistorical(
+            @RequestParam(name = "ticker") String ticker,
+            @RequestParam(name = "range", required = false) String range) {
         String baseUrl = "https://api.massive.com/v2/aggs";
 
         String multiplier = "1";
@@ -291,7 +293,7 @@ public class StockController {
         LocalDate endDate = LocalDate.now();
         
         // range can be 1W for 1 week or 1D for 1 day
-        if (range.equals("1W")){
+        if ("1W".equalsIgnoreCase(range)){
             multiplier = "1";
             timespan = "hour";
             startDate = LocalDate.now().minusWeeks(1);
