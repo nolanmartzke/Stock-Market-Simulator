@@ -32,7 +32,8 @@ const Stock = () => {
     const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
 
     const [accountId, setAccountId] = useState(null);
-    const [account, setAccount] = useState([]);
+    const [numHoldingShares, setNumHoldingShares] = useState(0);
+    const [averageCost, setAverageCost] = useState(0);
     
     useEffect(() => {
         const authString = localStorage.getItem("auth")
@@ -46,15 +47,21 @@ const Stock = () => {
 
     useEffect(() => {
         if (!accountId) return;
-        
+        if (!ticker) return;
+
         loadAccount(accountId)
             .then(response => response.data)
             .then(data => {
-                setAccount(data)
+                if (!data.holdings) return;
+
+                const currHolding = data.holdings.find(h => h.stockTicker === ticker);
+                setNumHoldingShares(currHolding.shares);
+                setAverageCost(currHolding.averagePrice);
+
                 console.log(data)
             })
             .catch(err => console.log(err));
-    },[accountId])
+    },[accountId, ticker])
 
     useEffect(() => {
         search(query)
@@ -243,12 +250,12 @@ const Stock = () => {
 
             <Container>
                 <Row>
-                    {/* Graph placeholder */}
+                    {/* Graph */}
                     <Col xs={12} md={12} xl={8} className="p-3">
                         <Card className="bg-gradient shadow-lg border-0 h-100" style={{ backgroundColor: "#011936", color: "white", borderRadius: "10px" }}>
                             <Card.Body className="d-flex flex-column justify-content-center align-items-center">
-                                <div style={{ width: "100%", height: 400 }}> 
-                                    <ResponsiveContainer> 
+                                <div style={{ width: "100%", minWidth: 0, height: 400 }}> 
+                                    <ResponsiveContainer width="100%" height="100%"> 
                                         <LineChart data={filteredHistory}> 
                                             <CartesianGrid strokeDasharray="3 3" /> 
                                             <XAxis dataKey="date" /> 
@@ -275,11 +282,22 @@ const Stock = () => {
                                     </button>
                                     ))}
                                 </div>
-                                
+                                {/* shares, average price and portfolio percentage of this stock */}
+                                {numHoldingShares > 1 && 
+                                    <Card className="bg-gradient shadow-lg border-0 p-0" style={{ backgroundColor: "#000000ff", color: "white", borderRadius: "10px" }}>
+                                        <Card.Body className="d-flex justify-content-between align-items-center" style={{ paddingLeft: "5%", paddingRight: "5%" }}>
+                                            <p>Your Market Value: ${numHoldingShares * price}</p>
+                                            <p>Num Shares: {numHoldingShares}</p>
+                                            <p>Average Cost: ${averageCost}</p>
+                                        </Card.Body>
+                                    </Card>
+                                }
                             </Card.Body>
+                        
                         </Card>
+
                     </Col>
-                    {/* Trading panel placeholder */}
+                    {/* Trading panel */}
                     <Col xs={12} md={12} xl={4} className="p-3">
                         <Card className="bg-gradient shadow-lg border-0 h-100 px-4" style={{ backgroundColor: "black", color: "white", borderRadius: "10px" }}>
                             <Card.Body>
