@@ -50,4 +50,14 @@ dependencies {
 
 tasks.named('test') {
 	useJUnitPlatform()
+	testLogging {
+		// Only show test results, not Spring Boot startup logs
+		events "passed", "failed", "skipped"
+		exceptionFormat "short"
+		showExceptions true
+		showCauses true
+		showStackTraces false
+		// Don't show all standard output (Spring Boot logs)
+		showStandardStreams = false
+	}
 }
