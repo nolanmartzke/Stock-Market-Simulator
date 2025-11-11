@@ -1,36 +1,117 @@
-import React from 'react'
-import { Clock, List } from 'lucide-react'
+// Added for read-only Trade History
+import { useEffect, useState } from "react";
+import { useAuth } from "../context/AuthContext";
+import api from "../api/AccountApi"; // shared axios (baseURL: /api/accounts) // Added for read-only Trade History
+import { getAccountTransactions } from "../api/TransactionApi";
 
-const History = () => {
-  const entries = [
-    { id: 1, time: '2025-10-01 10:02', symbol: 'AAPL', action: 'Buy', qty: 10, price: '$150.00' },
-    { id: 2, time: '2025-10-03 14:12', symbol: 'TSLA', action: 'Sell', qty: 5, price: '$230.00' },
-  ]
+export default function History() {
+  const { auth } = useAuth(); // localStorage → { id, ... }
+  const userId = auth?.id;
+
+  const [accounts, setAccounts] = useState([]);
+  const [accountId, setAccountId] = useState(null);
+  const [rows, setRows] = useState([]);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+
+  // Load user's accounts (existing: GET /api/accounts?userId={id})
+  useEffect(() => {
+    if (!userId) return;
+    // IMPORTANT: use '' so baseURL '/api/accounts' + '' → '/api/accounts'
+    api
+      .get("", { params: { userId } })
+      .then((res) => {
+        const list = Array.isArray(res.data) ? res.data : [];
+        setAccounts(list);
+        if (!accountId && list.length) setAccountId(list[0].id);
+      })
+      .catch((err) => {
+        console.error("Accounts fetch failed", err);
+        setError("Unable to load accounts.");
+      });
+  }, [userId]);
+
+  // Load trade history for selected account (existing: GET /api/transactions?accountId=)
+  useEffect(() => {
+    if (!accountId) return;
+    setLoading(true);
+    setError(null);
+    getAccountTransactions(accountId, { page: 0, size: 20 })
+      .then((res) => {
+        const data = res.data;
+        setRows(Array.isArray(data) ? data : []);
+      })
+      .catch((err) => {
+        console.error("Transactions fetch failed", err);
+        setError("Unable to load trade history.");
+        setRows([]);
+      })
+      .finally(() => setLoading(false));
+  }, [accountId]);
 
   return (
-    <div className="container-fluid py-4">
-      <div className="container">
-        <section className="card mb-4">
-          <div className="card-body p-4">
-            <h2 className="h4 fw-bold mb-2">Trade History</h2>
-            <p className="text-muted mb-3">A chronological list of executed simulated trades.</p>
+    <div className="container py-3">
+      <h2 className="mb-3">Trade History</h2>
+      {error && <div className="alert alert-danger">{error}</div>}
 
-            <div className="list-group">
-              {entries.map(e => (
-                <div key={e.id} className="list-group-item d-flex justify-content-between align-items-start">
-                  <div>
-                    <div className="fw-semibold">{e.symbol} — {e.action} {e.qty} @ {e.price}</div>
-                    <div className="text-muted small">{e.time}</div>
-                  </div>
-                  <div className="text-muted small">Details</div>
-                </div>
-              ))}
-            </div>
-          </div>
-        </section>
+      {/* Account selector */}
+      <div className="mb-3">
+        <label className="form-label">Account</label>
+        <select
+          className="form-select"
+          value={accountId || ""}
+          onChange={(e) => setAccountId(Number(e.target.value))}
+          disabled={loading}
+        >
+          {accounts.map((a) => (
+            <option key={a.id} value={a.id}>
+              {a.name || `Account #${a.id}`}
+            </option>
+          ))}
+        </select>
       </div>
-    </div>
-  )
-}
 
-export default History
+      {/* Loading state */}
+      {loading && (
+        <div className="text-center py-3">
+          <div className="spinner-border" role="status">
+            <span className="visually-hidden">Loading...</span>
+          </div>
+        </div>
+      )}
+
+      {/* Empty state */}
+      {!loading && rows.length === 0 && (
+        <p className="text-muted">No trades yet.</p>
+      )}
+
+      {/* Trade history table */}
+      {!loading && rows.length > 0 && (
+        <div className="table-responsive">
+          <table className="table table-striped table-sm align-middle">
+            <thead>
+              <tr>
+                <th>Ticker</th>
+                <th>Action</th>
+                <th>Shares</th>
+                <th>Price</th>
+                <th>Timestamp</th>
+              </tr>
+            </thead>
+            <tbody>
+              {rows.map((tx) => (
+                <tr key={tx.id}>
+                  <td>{tx.stockTicker}</td>
+                  <td>{(tx.action || "").toUpperCase()}</td>
+                  <td>{tx.shares}</td>
+                  <td>{tx.price}</td>
+                  <td>{tx.timestamp}</td>
+                </tr>
+              ))}
+            </tbody>
+          </table>
+        </div>
+      )}
+    </div>
+  );
+}
