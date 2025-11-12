@@ -18,6 +18,11 @@ import team8.backend.repository.TransactionRepository;
 import java.util.*;
 import java.util.stream.Collectors;
 
+/**
+ * Controller responsible for account-related actions.
+ * Provides endpoints to list accounts, retrieve a single account, execute trades,
+ * show a dashboard summary, and access all accounts for administrative/testing use.
+ */
 @RestController
 @RequestMapping("/api/accounts")
 @CrossOrigin(origins = "http://localhost:5173")
@@ -35,7 +40,12 @@ public class AccountController {
     @Autowired
     private TransactionRepository transactionRepository;
 
-    // Get all accounts for a user
+    /**
+     * Get all accounts belonging to the given user.
+     *
+     * @param userId id of the user to fetch accounts for
+     * @return 200 with a list of AccountDTO when the user exists, 404 otherwise
+     */
     @GetMapping
     public ResponseEntity<List<AccountDTO>> getAccounts(@RequestParam(name = "userId") Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -49,7 +59,12 @@ public class AccountController {
         return ResponseEntity.ok(dtos);
     }
 
-    // Get single account (with holdings)
+    /**
+     * Get a single account by id, including holdings.
+     *
+     * @param accountId id of the account to retrieve
+     * @return 200 with AccountDTO when found, 404 when not found
+     */
     @GetMapping("/{accountId}")
     public ResponseEntity<AccountDTO> getAccount(@PathVariable(name = "accountId") Long accountId) {
         Optional<Account> accountOpt = accountRepository.findById(accountId);
@@ -57,7 +72,14 @@ public class AccountController {
                          .orElseGet(() -> ResponseEntity.notFound().build());
     }
 
-    // Trade endpoint (buy/sell shares)
+    /**
+     * Execute a trade (buy or sell) against the given account.
+     * Expected JSON body: { "action": "buy|sell", "ticker": "SYM", "shares": number, "price": number }
+     *
+     * @param accountId id of the account to trade on
+     * @param body      request body containing action, ticker, shares and price
+     * @return 200 with updated AccountDTO on success, 4xx for invalid input or insufficient funds
+     */
     @Transactional
     @PostMapping("/{accountId}/trade")
     public ResponseEntity<?> trade(@PathVariable(name = "accountId") Long accountId, @RequestBody Map<String, Object> body) {
@@ -121,7 +143,12 @@ public class AccountController {
         }
     }
 
-    // Dashboard
+    /**
+     * Dashboard summary for a user: total cash and aggregated stock holdings.
+     *
+     * @param userId id of the user to build dashboard for
+     * @return 200 with a map containing "totalCash" and "totalStocks"
+     */
     @GetMapping("/dashboard")
     public ResponseEntity<Map<String, Object>> dashboard(@RequestParam(name = "userId") Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
@@ -146,7 +173,11 @@ public class AccountController {
         return ResponseEntity.ok(response);
     }
 
-    // Get ALL accounts (admin/testing)
+    /**
+     * Retrieve all accounts (admin/testing use).
+     *
+     * @return 200 with a list of AccountDTO for all accounts
+     */
     @GetMapping("/all")
     public ResponseEntity<List<AccountDTO>> getAllAccounts() {
         List<Account> accounts = accountRepository.findAll();

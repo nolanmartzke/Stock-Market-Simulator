@@ -26,6 +26,11 @@ import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 
 
+/**
+ * Controller exposing stock-related endpoints backed by third-party APIs
+ * (Finnhub and Massive). Endpoints provide search, news, quotes, company
+ * profile, metrics, and historical aggregates used by the frontend.
+ */
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/stock")
@@ -39,6 +44,12 @@ public class StockController {
 
     private final RestTemplate restTemplate = new RestTemplate();
 
+    /**
+     * Search Finnhub for a stock symbol by query (returns the first matching result).
+     *
+     * @param query search query (symbol or company name)
+     * @return 200 with the first search result map, 404 if no result, 500 on error
+     */
     @GetMapping("/search")
     public ResponseEntity<Map<String, Object>> searchStock(@RequestParam(name = "query") String query) {
         String baseUrl = "https://finnhub.io/api/v1/search";
@@ -75,7 +86,13 @@ public class StockController {
         return ResponseEntity.ok(firstResultMap);
     }
 
-    // Searchbar endpoint used by the frontend when a user types a partial query.
+    /**
+     * Lightweight search endpoint used by the UI typeahead / search bar.
+     * Returns a list of matching results and a count.
+     *
+     * @param query partial query string
+     * @return 200 with { count, result } map
+     */
     @GetMapping("/searchbar")
     public ResponseEntity<Map<String, Object>> searchBar(@RequestParam(name = "query") String query) {
         String baseUrl = "https://finnhub.io/api/v1/search";
@@ -119,14 +136,16 @@ public class StockController {
     }
 
     /**
-     * News endpoint - outputs Finnhub /news for a given category.
-     * Optional: minId to only return news after the given ID (integer)
-     * Returns a map with { count, result } where result is a list of news objects.
+     * Retrieve news for a given Finnhub category.
+     *
+     * @param category Finnhub news category
+     * @param minId    optional minId to filter newer items
+     * @return 200 with { count, result } map of news items
      */
     @GetMapping("/news")
     public ResponseEntity<Map<String, Object>> getNews(
-            @RequestParam(name = "category") String category,
-            @RequestParam(name = "minId", required = false, defaultValue = "0") long minId) {
+        @RequestParam(name = "category") String category,
+        @RequestParam(name = "minId", required = false, defaultValue = "0") long minId) {
 
         String baseUrl = "https://finnhub.io/api/v1/news";
 
@@ -162,6 +181,12 @@ public class StockController {
         return ResponseEntity.ok(resp);
     }
 
+    /**
+     * Fetch real-time quote data for the given ticker from Finnhub.
+     *
+     * @param ticker stock ticker symbol
+     * @return Finnhub quote map and status forwarded to the caller
+     */
     @GetMapping("/quote")
     public ResponseEntity<Map<String, Object>> getQuote(@RequestParam(name = "ticker") String ticker) {
         String baseUrl = "https://finnhub.io/api/v1/quote";
@@ -181,14 +206,19 @@ public class StockController {
     }
 
     /**
-     * Company Profile 2 - Finnhub
-     * Accepts one of: symbol, isin, or cusip. Returns the company profile map from Finnhub.
+     * Company profile endpoint (Finnhub /stock/profile2).
+     * Accepts one of: symbol, isin, or cusip and returns the profile map.
+     *
+     * @param symbol ticker symbol (optional)
+     * @param isin   ISIN code (optional)
+     * @param cusip  CUSIP code (optional)
+     * @return 200 with profile map, 400 when no identifier provided, 404 when not found
      */
     @GetMapping("/profile2")
     public ResponseEntity<Map<String, Object>> getCompanyProfile(
-            @RequestParam(name = "symbol", required = false) String symbol,
-            @RequestParam(name = "isin", required = false) String isin,
-            @RequestParam(name = "cusip", required = false) String cusip) {
+        @RequestParam(name = "symbol", required = false) String symbol,
+        @RequestParam(name = "isin", required = false) String isin,
+        @RequestParam(name = "cusip", required = false) String cusip) {
 
         String baseUrl = "https://finnhub.io/api/v1/stock/profile2";
 
@@ -225,6 +255,12 @@ public class StockController {
         return ResponseEntity.ok(body);
     }
 
+    /**
+     * Retrieve a filtered set of company metrics from Finnhub for display.
+     *
+     * @param ticker stock ticker symbol
+     * @return 200 with a map of human-friendly metric names to formatted values
+     */
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getMetrics(@RequestParam(name = "ticker") String ticker) {
         String baseUrl = "https://finnhub.io/api/v1/stock/metric";
@@ -281,10 +317,18 @@ public class StockController {
     }
 
 
+    /**
+     * Get historical aggregate data (Massive API) for a ticker.
+     * Supports optional ranges (e.g. "1W" for one week).
+     *
+     * @param ticker stock ticker symbol
+     * @param range  optional range code (e.g. "1W", "1D")
+     * @return 200 with Massive API response map containing "results"
+     */
     @GetMapping("/historical")
     public ResponseEntity<Map<String, Object>> getHistorical(
-            @RequestParam(name = "ticker") String ticker,
-            @RequestParam(name = "range", required = false) String range) {
+        @RequestParam(name = "ticker") String ticker,
+        @RequestParam(name = "range", required = false) String range) {
         String baseUrl = "https://api.massive.com/v2/aggs";
 
         String multiplier = "1";
