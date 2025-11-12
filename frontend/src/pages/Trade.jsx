@@ -117,7 +117,7 @@ const Trade = () => {
       });
       
       const res = await trade(accountId, order);
-      console.log("Trade placed:", res.data);
+      console.log("Trade placed:", res.data, accountId);
 
       alert(
         `Successfully placed ${orderType.toUpperCase()} order for ${shares} shares of ${ticker.toUpperCase()}`
@@ -143,7 +143,7 @@ const Trade = () => {
           <div className="card-body p-4">
             <h2 className="h4 fw-bold mb-3">Trade</h2>
             <p className="text-muted mb-3">
-              Search for a ticker, view quote info and place a simulated order.
+              Search for a stock here to begin placing an order.
             </p>
 
             <div className="row g-3 align-items-center mb-4">
@@ -203,11 +203,6 @@ const Trade = () => {
                   <div className="small text-muted mt-1">Searching...</div>
                 )}
               </div>
-              <div className="col-auto">
-                <button className="btn btn-primary d-flex align-items-center">
-                  <PlusCircle className="me-2" size={16} /> New Order
-                </button>
-              </div>
             </div>
 
             <div className="card shadow-sm">
@@ -222,18 +217,8 @@ const Trade = () => {
                   </span>
                 </div>
               )}
-                <h5 className="mb-3">Order Entry (placeholder)</h5>
-                <p className="text-muted">
-                  Ticker, quantity, order type and confirm button will go here.
-                </p>
-                <input
-                  type="text"
-                  className="form-control mb-3"
-                  placeholder="Ticker"
-                  value={ticker}
-                  readOnly
-                  aria-autocomplete="list"
-                />
+                <h5 className="mb-3">Order Information</h5>
+                <div className="text-muted mb-2">Enter the number of shares to {orderType || "buy/sell"}:</div>
                 <Form.Control
                   type="number"
                   className="mb-3"
