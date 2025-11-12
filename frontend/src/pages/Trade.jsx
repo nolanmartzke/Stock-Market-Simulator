@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Search, PlusCircle, ArrowRightCircle } from "lucide-react";
-import { searchBar } from "../api/StockApi";
+import { searchBar, getQuote } from "../api/StockApi";
 import { useNavigate } from "react-router-dom";
-import api, { loadAccount } from "../api/AccountApi";
+import api, { loadAccount, trade } from "../api/AccountApi";
+import { Form } from "react-bootstrap";
 
 const Trade = () => {
   const [query, setQuery] = useState("");
@@ -15,6 +16,13 @@ const Trade = () => {
   const navigate = useNavigate();
 
   const [accountId, setAccountId] = useState(null);
+
+  const [shares, setShares] = useState(0);
+  const [ticker, setTicker] = useState("");
+  const [orderType, setOrderType] = useState("buy");
+  const [selectedStock, setSelectedStock] = useState(null);
+
+
   useEffect(() => {
     const authString = localStorage.getItem("auth");
     if (!authString) return;
@@ -80,6 +88,54 @@ const Trade = () => {
     }
   }
 
+  async function handleOrderSubmit() {
+    if (!ticker || shares <= 0 || !orderType) {
+      alert("Please fill in all order details.");
+      return;
+    }
+    if (!accountId) {
+      alert("No account selected!");
+      return;
+    }
+
+    const quoteRes = await getQuote(ticker);
+    const price = quoteRes.data.c;
+
+    try {
+      const order = {
+        action: orderType.toLowerCase(),
+        ticker: ticker,
+        shares: Number(shares),
+        price: price,
+      };
+
+      console.log("Submitting order:", {
+        action: orderType,
+        ticker,
+        shares,
+        price
+      });
+      
+      const res = await trade(accountId, order);
+      console.log("Trade placed:", res.data);
+
+      alert(
+        `Successfully placed ${orderType.toUpperCase()} order for ${shares} shares of ${ticker.toUpperCase()}`
+      );
+
+      loadAccount(accountId)
+        .then((res) => setHoldings(res.data.holdings || []))
+        .catch(console.error);
+
+      setTicker("");
+      setShares(0);
+      setOrderType("");
+    } catch (error) {
+      console.error("Trade failed:", error);
+      alert(error.response?.data || "Failed to place order.");
+    }
+  }
+
   return (
     <div className="container-fluid py-4">
       <div className="container">
@@ -112,12 +168,29 @@ const Trade = () => {
                     className="list-group position-absolute w-100 mt-1"
                     style={{ zIndex: 2000 }}
                   >
-                    {suggestions.slice(0, 10).map((s) => (
+                    {suggestions.slice(0, 6).map((s) => (
                       <li
                         key={s.symbol}
                         className="list-group-item list-group-item-action"
                         style={{ cursor: "pointer" }}
-                        onClick={() => selectSymbol(s.symbol)}
+                        onClick={async () => {
+                          try {
+                            const quoteRes = await getQuote(s.symbol);
+                            const price = quoteRes.data.c;
+
+                            setTicker(s.symbol);
+                            setSelectedStock({
+                              symbol: s.symbol,
+                              name: s.description,
+                              price: price,
+                            });
+                            setQuery("");
+                            setSuggestions([]);
+                          } catch (error) {
+                            console.error("Failed to fetch quote:", error);
+                            alert("Failed to fetch quote for selected symbol.");
+                          }
+                        }}
                       >
                         <strong>{s.symbol}</strong>{" "}
                         <span className="text-muted">{s.description}</span>
@@ -139,16 +212,85 @@ const Trade = () => {
 
             <div className="card shadow-sm">
               <div className="card-body">
+              {selectedStock && (
+                <div className="alert alert-info d-flex justify-content-between align-items-center">
+                  <div>
+                    <strong>{selectedStock.symbol}</strong> — {selectedStock.name}
+                  </div>
+                  <span className="fw-semibold text-success">
+                    ${selectedStock.price?.toFixed(2)}
+                  </span>
+                </div>
+              )}
                 <h5 className="mb-3">Order Entry (placeholder)</h5>
                 <p className="text-muted">
                   Ticker, quantity, order type and confirm button will go here.
                 </p>
+                <input
+                  type="text"
+                  className="form-control mb-3"
+                  placeholder="Ticker"
+                  value={ticker}
+                  readOnly
+                  aria-autocomplete="list"
+                />
+                <Form.Control
+                  type="number"
+                  className="mb-3"
+                  placeholder="Quantity"
+                  onChange={(e) => setShares(Number(e.target.value))}
+                  onFocus={() => {
+                    if (shares === 0) setShares("");
+                  }}
+                  onBlur={() => {
+                    if (shares === "") setShares(0);
+                  }}
+                  value={shares}
+                />
+                {selectedStock && shares > 0 && (
+                  <div className="text-muted mb-3">
+                    Estimated cost: ${(selectedStock.price * shares).toFixed(2)}
+                  </div>
+                )}
+
+                <div className="d-flex mb-3">
+                  <button
+                    className={`btn flex-fill me-2 ${
+                      orderType === "buy" ? "btn-success" : "btn-outline-success"
+                    }`}
+                    onClick={() => setOrderType("buy")}
+                  >
+                    Buy
+                  </button>
+                  <button
+                    className={`btn flex-fill ${
+                      orderType === "sell" ? "btn-danger" : "btn-outline-danger"
+                    }`}
+                    onClick={() => setOrderType("sell")}
+                  >
+                    Sell
+                  </button>
+                </div>
+
                 <div className="d-flex justify-content-end">
-                  <button className="btn btn-outline-secondary me-2">
+                  <button 
+                    className="btn btn-outline-secondary me-2"
+                    onClick={() => {
+                      setTicker("");
+                      setShares(0);
+                      setOrderType("");
+                    }}
+                  >
                     Reset
                   </button>
-                  <button className="btn btn-danger d-flex align-items-center">
-                    Place Order <ArrowRightCircle className="ms-2" size={16} />
+                  <button 
+                    className={`btn d-flex align-items-center ${
+                      orderType === "buy" ? "btn-success" : "btn-danger"
+                    }`}
+                    onClick={handleOrderSubmit}
+                  >
+                    {orderType === "buy" ? "Buy" : "Sell"} {ticker || "Stock"}
+                    <ArrowRightCircle className="ms-2" size={16} />
                   </button>
                 </div>
               </div>
@@ -185,7 +327,20 @@ const Trade = () => {
                           <td>${holding.averagePrice?.toFixed(2) ?? "--"}</td>
                           <td>OPEN</td>
                           <td>
-                            <button className="btn btn-sm btn-outline-secondary">
+                            <button
+                              className="btn btn-sm btn-outline-danger"
+                              onClick={() => {
+                                setTicker(holding.stockTicker);
+                                setShares(Math.abs(holding.shares));
+                                setOrderType("sell");
+                                setSelectedStock({
+                                  symbol: holding.stockTicker,
+                                  name: holding.stockTicker,
+                                  price: holding.averagePrice,
+                                });
+                                window.scrollTo({ top: 0, behavior: "smooth" });
+                              }}
+                            >
                               Close
                             </button>
                           </td>
