@@ -16,6 +16,9 @@ import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 
+/**
+ * Controller handling user registration, authentication, and user listing.
+ */
 @RestController
 @CrossOrigin(origins = "http://localhost:5173")
 @RequestMapping("/api/users")
@@ -27,7 +30,13 @@ public class UserController {
     @Autowired
     private AccountRepository accountRepository;
 
-    // Signup endpoint
+    /**
+     * Register a new user and create a primary account for them.
+     * Password will be hashed before saving.
+     *
+     * @param user user object (email, password, etc.)
+     * @return 201 with created UserDTO, 409 when email already exists
+     */
     @PostMapping("/signup")
     public ResponseEntity<UserDTO> addUser(@RequestBody User user) {
         if (userRepository.existsByEmail(user.getEmail())) {
@@ -46,7 +55,12 @@ public class UserController {
         return ResponseEntity.status(HttpStatus.CREATED).body(UserDTO.fromEntity(savedUser));
     }
 
-    // Login endpoint
+    /**
+     * Authenticate a user by email/password and update lastLoginAt on success.
+     *
+     * @param loginRequest user object containing email and plaintext password
+     * @return 200 with UserDTO on success, 401 on invalid credentials, 404 if user not found
+     */
     @PostMapping("/login")
     public ResponseEntity<UserDTO> loginUser(@RequestBody User loginRequest) {
         Optional<User> optionalUser = userRepository.findAll()
@@ -72,7 +86,11 @@ public class UserController {
         return ResponseEntity.ok(UserDTO.fromEntity(user));
     }
 
-    // Get all users
+    /**
+     * Retrieve all users (admin/testing use).
+     *
+     * @return 200 with a list of UserDTO for all users
+     */
     @GetMapping("/all")
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userRepository.findAll();
