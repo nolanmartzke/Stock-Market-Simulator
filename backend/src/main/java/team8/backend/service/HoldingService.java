@@ -70,7 +70,7 @@ public class HoldingService {
         int remainingShares = existing.getShares() - sharesToSell;
 
         if (remainingShares == 0) {
-            holdingRepository.delete(existing);
+            account.getHoldings().remove(existing);
         } else {
             existing.setShares(remainingShares);
             holdingRepository.save(existing);
