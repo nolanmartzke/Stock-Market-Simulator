@@ -5,6 +5,10 @@ import { useNavigate } from "react-router-dom";
 import api, { loadAccount, trade } from "../api/AccountApi";
 import { Form } from "react-bootstrap";
 
+/**
+ * Trade page that fetches the user’s first account, supports symbol
+ * search/autocomplete, and submits buy/sell orders against the backend.
+ */
 const Trade = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
@@ -22,7 +26,10 @@ const Trade = () => {
   const [orderType, setOrderType] = useState("buy");
   const [selectedStock, setSelectedStock] = useState(null);
 
-
+  /** 
+   * On mount, grab the authenticated user from localStorage and fetch
+   * the first account so subsequent trades know which ID to target.
+   */
   useEffect(() => {
     const authString = localStorage.getItem("auth");
     if (!authString) return;
@@ -36,6 +43,11 @@ const Trade = () => {
       })
       .catch((err) => console.error("Failed to load accounts", err));
   }, []);
+
+  /**
+   * When the selected account changes, load the latest balances/
+   * holdings so both the order ticket and recent orders stay in sync.
+   */
   useEffect(() => {
     console.log("useEffect triggered for accountId:", accountId);
     if (!accountId) return;
@@ -53,6 +65,9 @@ const Trade = () => {
       });
   }, [accountId]);
 
+  /**
+   * Debounce the symbol search box and populate autocomplete results.
+   */
   useEffect(() => {
     if (!query || query.length < 1) {
       setSuggestions([]);
@@ -76,18 +91,29 @@ const Trade = () => {
     return () => clearTimeout(timer.current);
   }, [query]);
 
+  /**
+   * Navigate to the Stock page when a suggestion is clicked.
+   */
   function selectSymbol(symbol) {
     setQuery("");
     setSuggestions([]);
     navigate(`/stocks/${symbol}`);
   }
 
+  /**
+   * If the user presses Enter inside the search box, jump to the first
+   * suggestion to mimic brokerage search behavior.
+   */
   function handleKeyDown(e) {
     if (e.key === "Enter" && suggestions.length > 0) {
       selectSymbol(suggestions[0].symbol);
     }
   }
 
+  /**
+   * Validates the order ticket, fetches a fresh quote, and posts the
+   * trade to the backend. Alerts the user on validation or API errors.
+   */
   async function handleOrderSubmit() {
     if (!ticker || shares <= 0 || !orderType) {
       alert("Please fill in all order details.");

@@ -29,6 +29,10 @@ import {
 } from "../api/StockApi";
 import api, { trade, loadAccount } from "../api/AccountApi";
 
+/**
+ * Stock detail page that loads quote data, fundamentals, price history,
+ * and account-specific holdings so users can trade a single ticker.
+ */
 const Stock = () => {
   const { query } = useParams();
 
@@ -56,7 +60,11 @@ const Stock = () => {
   const [accountId, setAccountId] = useState(null);
   const [numHoldingShares, setNumHoldingShares] = useState(0);
   const [averageCost, setAverageCost] = useState(0);
-
+  
+  /**
+   * On mount, resolve the authenticated user’s first brokerage account
+   * so subsequent trades can be tied to a concrete account ID.
+   */
   useEffect(() => {
     const authString = localStorage.getItem("auth");
     if (!authString) return;
@@ -71,6 +79,10 @@ const Stock = () => {
       .catch((err) => console.error("Failed to load accounts", err));
   }, []);
 
+  /**
+   * Whenever the account or ticker changes, refresh holdings so we can
+   * show share count and average cost for the selected symbol.
+   */
   useEffect(() => {
     if (!accountId) return;
     if (!ticker) return;
@@ -94,6 +106,10 @@ const Stock = () => {
       .catch((err) => console.log(err));
   }, [accountId, ticker, query]);
 
+  /**
+   * Respond to route changes by loading quotes, metrics, history, and
+   * the company profile for the requested symbol.
+   */
   useEffect(() => {
     search(query)
       .then((response) => response.data)
@@ -142,6 +158,9 @@ const Stock = () => {
       .catch((err) => console.log(err));
   }, [query]);
 
+  /**
+   * Derive the day-change badges whenever the latest quote updates.
+   */
   useEffect(() => {
     if (quote.d >= 0) {
       setDayChange("positive");
@@ -154,6 +173,9 @@ const Stock = () => {
     }
   }, [quote]);
 
+  /**
+   * Re-filter cached history when the user switches the range selector.
+   */
   useEffect(() => {
     let data = history.map((item) => ({
       date: new Date(item.t).toISOString().split("T")[0], // format as "YYYY-MM-DD"
@@ -189,6 +211,10 @@ const Stock = () => {
     setFilteredHistory(data);
   }, [history, range]);
 
+  /**
+   * Utility that formats numbers as USD strings for reuse throughout
+   * the component (cash balance, share value, estimated cost, etc.).
+   */
   const formatUSD = (num) =>
     new Intl.NumberFormat("en-US", {
       style: "currency",
@@ -206,6 +232,10 @@ const Stock = () => {
   const estimatedCost = (shares * price).toFixed(2);
   const estimatedCostDollars = formatUSD(estimatedCost);
 
+  /**
+   * Validates the share count, assembles a trade payload, and posts it
+   * to the backend. On success, refreshes cash and clears the ticket.
+   */
   const handleSubmitOrder = async () => {
     if (!shares || shares <= 0) {
       alert("Please enter a valid number of shares.");

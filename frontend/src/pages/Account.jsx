@@ -4,15 +4,25 @@ import { User, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 
+/**
+ * Account page that shows read-only profile data and placeholder forms
+ * for upcoming edit/change-password flows. Redirects to the landing page
+ * when the user signs out.
+ */
 const Account = () => {
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
 
+  /**
+   * Clears the auth context/local storage and returns the user to the
+   * marketing page so no private data remains visible.
+   */
   const handleLogout = () => {
     logout();
     navigate("/");
   };
 
+  // Guard: wait for auth state before rendering the account shell.
   if (!auth) return null;
 
   return (
