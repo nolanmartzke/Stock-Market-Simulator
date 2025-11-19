@@ -15,7 +15,7 @@ import Account from "./pages/Account";
 import History from "./pages/History";
 import Trade from "./pages/Trade";
 import Dashboard from "./pages/Dashboard";
-import Leaderboard from "./pages/Leaderboard";
+import Tournament from "./pages/Tournament";
 import GetStarted from "./pages/GetStarted";
 import SettingsPage from "./pages/Settings";
 import ErrorPage from "./pages/ErrorPage";
@@ -66,10 +66,10 @@ export default function App() {
           }
         />
         <Route
-          path="/leaderboard"
+          path="/Tournament"
           element={
             <ProtectedRoute>
-              <Leaderboard />
+              <Tournament />
             </ProtectedRoute>
           }
         />
