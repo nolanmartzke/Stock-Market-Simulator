@@ -60,6 +60,8 @@ const Stock = () => {
   const [accountId, setAccountId] = useState(null);
   const [numHoldingShares, setNumHoldingShares] = useState(0);
   const [averageCost, setAverageCost] = useState(0);
+
+  const [tradeConfirmModal, setTradeConfirmModal] = useState(false);
   
   /**
    * On mount, resolve the authenticated user’s first brokerage account
@@ -605,7 +607,7 @@ const Stock = () => {
                 <Button
                   variant="success"
                   className="bg-success w-100 border-0 rounded-pill fw-bold text-white py-3"
-                  onClick={handleSubmitOrder}
+                  onClick={() => setTradeConfirmModal(true)}
                 >
                   Review Order
                 </Button>
@@ -773,6 +775,35 @@ const Stock = () => {
             </Col>
           </Row>
         )}
+
+        {/* Public/private confirmation modal */}
+        {tradeConfirmModal && (
+            <dialog open className="modal modal-open">
+                <div className="modal-box bg-base-200">
+                    <h3 className="font-bold text-lg text-white text-center">Confirm Order</h3>
+                    <div className="bg-base-100 p-3 mt-5 rounded-2xl text-sm text-white">
+                        <p>INFO </p>
+                        <p>INFO </p>
+                        <p>INFO </p>
+                        <p>INFO </p>
+                    </div>
+                    <div className="modal-action">
+                        <button className="btn" onClick={() => {
+                            setTradeConfirmModal(false);
+                            // setPendingVisibility(null);
+                        }}>Cancel</button>
+                        <button
+                            className="btn btn-primary text-white"
+                            // disabled={pendingVisibility === null}
+                            // onClick={() => pendingVisibility !== null && updateVisibility(pendingVisibility)}
+                        >
+                            Place Order
+                        </button>
+                    </div>
+                </div>
+            </dialog>
+        )}
+
       </Container>
     </div>
   );
