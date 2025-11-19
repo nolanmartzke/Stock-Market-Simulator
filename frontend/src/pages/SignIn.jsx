@@ -1,5 +1,5 @@
 import React, { useState } from "react";
-import { LogIn, User, Lock } from "lucide-react";
+import { ArrowLeft, LogIn, User, Lock } from "lucide-react";
 import { signIn } from "../api/AuthAPI";
 import { useNavigate, Link } from "react-router-dom";
 import { motion, AnimatePresence } from "framer-motion";
@@ -46,6 +46,15 @@ const SignIn = () => {
           style={{ borderRadius: "20px" }}
         >
           <div className="card-body p-5">
+            <button
+              type="button"
+              className="btn btn-outline-secondary btn-sm text-dark fw-medium mb-3 d-inline-flex align-items-center gap-2"
+              style={{ borderRadius: "999px", borderWidth: "1.5px" }}
+              onClick={() => navigate("/")}
+            >
+              <ArrowLeft size={16} />
+              Back to home
+            </button>
             {/* Header */}
             <div className="text-center mb-4">
               <div
