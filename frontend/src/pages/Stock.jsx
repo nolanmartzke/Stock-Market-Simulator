@@ -19,7 +19,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useParams } from "react-router-dom";
-import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
+import { Button, Container, Form, Row, Col, Card, Modal } from "react-bootstrap";
 import {
   getQuote,
   getMetrics,
@@ -242,15 +242,22 @@ const Stock = () => {
   const estimatedCost = (shares * price).toFixed(2);
   const estimatedCostDollars = formatUSD(estimatedCost);
 
+
+  function handleReviewOrder() {
+    if (!shares || shares <= 0) {
+      alert("Please enter a valid number of shares.");
+      return;
+    }
+
+    setTradeConfirmModal(true);
+  }
   /**
    * Validates the share count, assembles a trade payload, and posts it
    * to the backend. On success, refreshes cash and clears the ticket.
    */
   const handleSubmitOrder = async () => {
-    if (!shares || shares <= 0) {
-      alert("Please enter a valid number of shares.");
-      return;
-    }
+
+    setTradeConfirmModal(false);
 
     try {
       const order = {
@@ -607,7 +614,7 @@ const Stock = () => {
                 <Button
                   variant="success"
                   className="bg-success w-100 border-0 rounded-pill fw-bold text-white py-3"
-                  onClick={() => setTradeConfirmModal(true)}
+                  onClick={handleReviewOrder}
                 >
                   Review Order
                 </Button>
@@ -777,32 +784,38 @@ const Stock = () => {
         )}
 
         {/* Public/private confirmation modal */}
-        {tradeConfirmModal && (
-            <dialog open className="modal modal-open">
-                <div className="modal-box bg-base-200">
-                    <h3 className="font-bold text-lg text-white text-center">Confirm Order</h3>
-                    <div className="bg-base-100 p-3 mt-5 rounded-2xl text-sm text-white">
-                        <p>INFO </p>
-                        <p>INFO </p>
-                        <p>INFO </p>
-                        <p>INFO </p>
-                    </div>
-                    <div className="modal-action">
-                        <button className="btn" onClick={() => {
-                            setTradeConfirmModal(false);
-                            // setPendingVisibility(null);
-                        }}>Cancel</button>
-                        <button
-                            className="btn btn-primary text-white"
-                            // disabled={pendingVisibility === null}
-                            // onClick={() => pendingVisibility !== null && updateVisibility(pendingVisibility)}
-                        >
-                            Place Order
-                        </button>
-                    </div>
-                </div>
-            </dialog>
-        )}
+        <Modal
+          show={tradeConfirmModal}
+          onHide={() => setTradeConfirmModal(false)}
+          centered
+          backdrop="static"
+        >
+          <Modal.Header closeButton className="bg-dark border-0 text-white">
+            <Modal.Title>Confirm Order</Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body className="bg-dark text-white">
+            <p>INFO </p>
+            <p>INFO </p>
+            <p>INFO </p>
+            <p>INFO </p>
+          </Modal.Body>
+
+          <Modal.Footer className="bg-dark border-0">
+            <Button onClick={() => {
+                setTradeConfirmModal(false);
+                // setPendingVisibility(null);
+            }}>Cancel</Button>
+            <Button
+                // disabled={pendingVisibility === null}
+                onClick={handleSubmitOrder}
+            >
+                Place Order
+            </Button>
+          </Modal.Footer>
+               
+        </Modal>
+        
 
       </Container>
     </div>
