@@ -35,7 +35,7 @@ export default function NavBar() {
   const navItemsMain = [
     { name: "Dashboard", icon: LineChart, link: "/dashboard" },
     { name: "Popular", icon: TrendingUp, link: "/popular" },
-    { name: "Leaderboard", icon: Trophy, link: "/leaderboard" },
+    { name: "Tournament", icon: Trophy, link: "/tournament" },
     { name: "Trade", icon: Users, link: "/trade" },
     { name: "History", icon: Activity, link: "/history" },
   ];
