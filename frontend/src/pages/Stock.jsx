@@ -28,6 +28,8 @@ import {
   getProfile,
 } from "../api/StockApi";
 import api, { trade, loadAccount } from "../api/AccountApi";
+import { motion, AnimatePresence } from "framer-motion";
+
 
 /**
  * Stock detail page that loads quote data, fundamentals, price history,
@@ -62,6 +64,7 @@ const Stock = () => {
   const [averageCost, setAverageCost] = useState(0);
 
   const [tradeConfirmModal, setTradeConfirmModal] = useState(false);
+  const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | missingRequiredInput | successfulClick
   
   /**
    * On mount, resolve the authenticated user’s first brokerage account
@@ -531,6 +534,7 @@ const Stock = () => {
                     Buy {stockTicker}
                   </button>
                   <button
+                    disabled={numHoldingShares === 0}
                     type="button"
                     onClick={() => setMode("sell")}
                     className={`flex-fill py-1 rounded-pill border-0 transition ${
@@ -610,14 +614,46 @@ const Stock = () => {
                   <h5>{estimatedCostDollars}</h5>
                 </div>
 
-                {/* Review Button */}
-                <Button
-                  variant="success"
-                  className="bg-success w-100 border-0 rounded-pill fw-bold text-white py-3"
+                      
+                <motion.button // idle | notEnoughBP | missingRequiredInput | successfulClick
+                  className=" w-100 border-0 rounded-pill fw-bold text-white py-3"
+                  style={{
+                    borderRadius: "12px",
+                    backgroundColor: {
+                      idle: "var(--bs-success)",
+                      successfulClick: "var(--bs-success)",
+                      notEnoughBP: "var(--bs-danger)",
+                      missingRequiredInput: "var(--bs-danger)",
+                    }[reviewButtonStatus],
+                  }}
+                  // animation upon click
+                  whileTap={{ scale: 0.95 }}
+                  animate={{ scale: reviewButtonStatus === "successfulClick" ? [1, 1.1, 1] : 1 }}
                   onClick={handleReviewOrder}
                 >
-                  Review Order
-                </Button>
+                  <AnimatePresence mode="wait">
+                    <motion.span // fades the text in and out
+                      key={reviewButtonStatus}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1 }}
+                      exit={{ opacity: 0 }}
+                    >
+                      {
+                        reviewButtonStatus === "idle"
+                          ? "Review Order"
+                          : reviewButtonStatus === "successfulClick"
+                          ? "✅ Success"
+                          : reviewButtonStatus === "notEnoughBP"
+                          ? "Invalid Credentials"
+                          : reviewButtonStatus === "missingRequiredInput"
+                          ? "Account Not Found"
+                          : "Review Order" // default
+                      }
+                    </motion.span>
+                  </AnimatePresence>
+                </motion.button>
+
+        
 
                 {/* Buying power */}
                 <div className="text-center mt-3">
