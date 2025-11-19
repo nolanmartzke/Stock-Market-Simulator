@@ -32,7 +32,11 @@ const Dashboard = () => {
       .then(data => {
           console.log(data);
           setCashBalance(data.totalCash)
-          setPositions(data.totalStocks);
+          // filter so that do not show positions with 0 shares
+          const filteredPositions = Object.fromEntries(
+            Object.entries(data.totalStocks).filter(([key, value]) => value !== 0)
+          );
+          setPositions(filteredPositions);
       })
       .catch(err => console.log(err));
   }, [auth]);
