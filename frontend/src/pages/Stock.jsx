@@ -52,7 +52,7 @@ const Stock = () => {
   const [dayChangeDollars, setDayChangeDollars] = useState(0);
   const [dayChangePercent, setDayChangePercent] = useState(0);
 
-  const [cash, setCash] = useState("$20,000.00"); // user's cash balance
+  const [cash, setCash] = useState("0"); // user's cash balance
 
   const [mode, setMode] = useState("buy"); // buy or sell
   const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
@@ -79,11 +79,7 @@ const Stock = () => {
       .catch((err) => console.error("Failed to load accounts", err));
   }, []);
 
-  /**
-   * Whenever the account or ticker changes, refresh holdings so we can
-   * show share count and average cost for the selected symbol.
-   */
-  useEffect(() => {
+  function refreshHoldings() {
     if (!accountId) return;
     if (!ticker) return;
 
@@ -91,6 +87,7 @@ const Stock = () => {
       .then((response) => response.data)
       .then((data) => {
         if (!data.holdings) return;
+        setCash(data.cash)
 
         const currHolding = data.holdings.find((h) => h.stockTicker === ticker);
         if (!currHolding) {
@@ -104,6 +101,13 @@ const Stock = () => {
         console.log(data);
       })
       .catch((err) => console.log(err));
+  } 
+  /**
+   * Whenever the account or ticker changes, refresh holdings so we can
+   * show share count and average cost for the selected symbol.
+   */
+  useEffect(() => {
+    refreshHoldings();
   }, [accountId, ticker, query]);
 
   /**
@@ -215,11 +219,15 @@ const Stock = () => {
    * Utility that formats numbers as USD strings for reuse throughout
    * the component (cash balance, share value, estimated cost, etc.).
    */
-  const formatUSD = (num) =>
-    new Intl.NumberFormat("en-US", {
+  const formatUSD = (num) => {
+    if (!num)
+      num = 0
+    return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
     }).format(num);
+  }
+
 
   const formattedPrice = formatUSD(price);
   const holdingsMarketValue = formatUSD(
@@ -251,8 +259,10 @@ const Stock = () => {
       };
 
       const updatedAccount = await trade(accountId, order);
-
-      setCash(formatUSD(updatedAccount.data.cash));
+      
+      setCash(updatedAccount.data.cash);
+      refreshHoldings();
+      console.log(cash);
       alert(
         `Successfully placed ${mode} order for ${shares} shares of ${stockTicker}.`
       );
@@ -603,20 +613,21 @@ const Stock = () => {
                 {/* Buying power */}
                 <div className="text-center mt-3">
                   <small className="text-secondary">
-                    {cash} buying power available
+                    {formatUSD(cash)} buying power available
                   </small>
                 </div>
 
                 {/* Account Type */}
-                {/* <div className="d-flex justify-content-center mt-2">
+                <div className="d-flex justify-content-center mt-2">
                                     <small className="text-secondary">
-                                        Individual investing ·{" "}
                                         <Form.Select size="sm" style={{ display: "inline-block", width: "auto", backgroundColor: "#121212", color: "white", border: "none"}}>
-                                            <option>Individual</option>
-                                            <option>Retirement</option>
+                                            <option>Main Account</option>
+                                            <option>Account 2</option>
+                                            <option>Account 3</option>
+                                            {/* TODO: Raj should add accounts here */}
                                         </Form.Select>
                                     </small>
-                                </div> */}
+                                </div>
               </Card.Body>
             </Card>
           </Col>
