@@ -28,6 +28,10 @@ public class Account {
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions = new ArrayList<>();
 
+    @ManyToOne
+    @JoinColumn(name = "tournament_id")  // nullable, not all accounts have tournaments
+    private Tournament tournament;
+
     // Helper
     public void addTransaction(Transaction tx) {
         transactions.add(tx);
@@ -78,6 +82,14 @@ public class Account {
 
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public Tournament getTournament() {
+        return tournament;
+    }
+
+    public void setTournament(Tournament tournament) {
+        this.tournament = tournament;
     }
 
     // Helper methods
