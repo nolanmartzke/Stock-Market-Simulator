@@ -19,7 +19,7 @@ import {
   CartesianGrid,
 } from "recharts";
 import { useParams } from "react-router-dom";
-import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
+import { Button, Container, Form, Row, Col, Card, Modal } from "react-bootstrap";
 import {
   getQuote,
   getMetrics,
@@ -28,6 +28,8 @@ import {
   getProfile,
 } from "../api/StockApi";
 import api, { trade, loadAccount } from "../api/AccountApi";
+import { motion, AnimatePresence } from "framer-motion";
+
 
 /**
  * Stock detail page that loads quote data, fundamentals, price history,
@@ -60,6 +62,9 @@ const Stock = () => {
   const [accountId, setAccountId] = useState(null);
   const [numHoldingShares, setNumHoldingShares] = useState(0);
   const [averageCost, setAverageCost] = useState(0);
+
+  const [tradeConfirmModal, setTradeConfirmModal] = useState(false);
+  const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | notEnoughShares | missingRequiredInput
   
   /**
    * On mount, resolve the authenticated user’s first brokerage account
@@ -240,15 +245,33 @@ const Stock = () => {
   const estimatedCost = (shares * price).toFixed(2);
   const estimatedCostDollars = formatUSD(estimatedCost);
 
+
+  function handleReviewOrder() {
+    if (!shares || shares <= 0) {
+      setReviewButtonStatus("missingRequiredInput")
+      setTimeout(() => setReviewButtonStatus("idle"), 1000);
+      return;
+    }
+    if (mode === "buy" && shares * price > cash){
+      setReviewButtonStatus("notEnoughBP")
+      setTimeout(() => setReviewButtonStatus("idle"), 1500);
+      return;
+    }
+    if (mode === "sell" && shares > numHoldingShares){
+      setReviewButtonStatus("notEnoughShares")
+      setTimeout(() => setReviewButtonStatus("idle"), 1500);
+      return;
+    }
+
+    setTradeConfirmModal(true); // passed inital checks
+  }
   /**
    * Validates the share count, assembles a trade payload, and posts it
    * to the backend. On success, refreshes cash and clears the ticket.
    */
   const handleSubmitOrder = async () => {
-    if (!shares || shares <= 0) {
-      alert("Please enter a valid number of shares.");
-      return;
-    }
+
+    setTradeConfirmModal(false);
 
     try {
       const order = {
@@ -522,6 +545,7 @@ const Stock = () => {
                     Buy {stockTicker}
                   </button>
                   <button
+                    disabled={numHoldingShares === 0}
                     type="button"
                     onClick={() => setMode("sell")}
                     className={`flex-fill py-1 rounded-pill border-0 transition ${
@@ -601,14 +625,45 @@ const Stock = () => {
                   <h5>{estimatedCostDollars}</h5>
                 </div>
 
-                {/* Review Button */}
-                <Button
-                  variant="success"
-                  className="bg-success w-100 border-0 rounded-pill fw-bold text-white py-3"
-                  onClick={handleSubmitOrder}
+                      
+                <motion.button // idle | notEnoughBP | notEnoughShares | missingRequiredInput
+                  className=" w-100 border-0 rounded-pill fw-bold text-white py-3"
+                  style={{
+                    borderRadius: "12px",
+                    backgroundColor: {
+                      idle: "var(--bs-success)",
+                      notEnoughBP: "var(--bs-danger)",
+                      notEnoughShares: "var(--bs-danger)",
+                      missingRequiredInput: "var(--bs-danger)",
+                    }[reviewButtonStatus],
+                  }}
+                  // animation upon click
+                  whileTap={{ scale: 0.95 }}
+                  onClick={handleReviewOrder}
                 >
-                  Review Order
-                </Button>
+                  <AnimatePresence mode="wait">
+                    <motion.span // fades the text in and out
+                      key={reviewButtonStatus}
+                      initial={{ opacity: 0 }}
+                      animate={{ opacity: 1, transition: { duration: 0.1 } }}
+                      exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                    >
+                      {
+                        reviewButtonStatus === "idle"
+                          ? "Review Order"
+                          : reviewButtonStatus === "notEnoughBP"
+                          ? "Not Enough Cash"
+                          : reviewButtonStatus === "notEnoughShares"
+                          ? "Not Enough Shares"
+                          : reviewButtonStatus === "missingRequiredInput"
+                          ? "Enter Shares"
+                          : "Review Order" // default
+                      }
+                    </motion.span>
+                  </AnimatePresence>
+                </motion.button>
+
+        
 
                 {/* Buying power */}
                 <div className="text-center mt-3">
@@ -619,15 +674,15 @@ const Stock = () => {
 
                 {/* Account Type */}
                 <div className="d-flex justify-content-center mt-2">
-                                    <small className="text-secondary">
-                                        <Form.Select size="sm" style={{ display: "inline-block", width: "auto", backgroundColor: "#121212", color: "white", border: "none"}}>
-                                            <option>Main Account</option>
-                                            <option>Account 2</option>
-                                            <option>Account 3</option>
-                                            {/* TODO: Raj should add accounts here */}
-                                        </Form.Select>
-                                    </small>
-                                </div>
+                  <small className="text-secondary">
+                      <Form.Select size="sm" style={{ display: "inline-block", width: "auto", backgroundColor: "#121212", color: "white", border: "none"}}>
+                          <option>Main Account</option>
+                          <option>Account 2</option>
+                          <option>Account 3</option>
+                          {/* TODO: Raj should add accounts here */}
+                      </Form.Select>
+                  </small>
+                </div>
               </Card.Body>
             </Card>
           </Col>
@@ -773,6 +828,64 @@ const Stock = () => {
             </Col>
           </Row>
         )}
+
+        {/* Public/private confirmation modal */}
+        <Modal
+          show={tradeConfirmModal}
+          onHide={() => setTradeConfirmModal(false)}
+          centered
+          backdrop="static"
+          className="modern-trade-modal"
+        >
+          <Modal.Header
+            closeButton
+            className="bg-dark bg-gradient border-0 text-white px-4 py-3 rounded-top shadow-lg"
+          >
+            <Modal.Title className="fw-bold text-uppercase">
+              Confirm {ticker} Order
+            </Modal.Title>
+          </Modal.Header>
+
+          <Modal.Body className="bg-dark text-white px-4 py-4 border-top border-secondary-subtle">
+            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Action</span>
+              <span className="fw-semibold text-uppercase text-white">
+                {mode === "buy" ? "Buy" : "Sell"}
+              </span>
+            </div>
+            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Quantity</span>
+              <span className="fw-semibold text-white">{shares || 0} shares</span>
+            </div>
+            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Order Type</span>
+              <span className="fw-semibold text-white">Market</span>
+            </div>
+            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Market Price</span>
+              <span className="fw-semibold text-white">{formattedPrice}</span>
+            </div>
+            <div className="d-flex justify-content-between align-items-center mb-1 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Total</span>
+              <span className="fw-semibold text-white">{estimatedCostDollars}</span>
+            </div>
+    
+          </Modal.Body>
+
+          <Modal.Footer className="bg-dark border-0 d-flex flex-column flex-sm-row align-items-stretch gap-3 px-4 pb-4">
+            <Button className="w-100 text-uppercase fw-semibold rounded-pill py-2 btn-light"
+              onClick={() => setTradeConfirmModal(false) }>Cancel</Button>
+            <Button
+                className="w-100 text-uppercase fw-bold rounded-pill py-3 shadow-lg"
+                onClick={handleSubmitOrder}
+            >
+                Place Order
+            </Button>
+          </Modal.Footer>
+               
+        </Modal>
+        
+
       </Container>
     </div>
   );
