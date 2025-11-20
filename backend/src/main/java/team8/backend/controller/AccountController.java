@@ -186,4 +186,30 @@ public class AccountController {
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
     }
+
+    @DeleteMapping("/{accountId}")
+    public ResponseEntity<Void> deleteAccount(@PathVariable Long accountId) {
+        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        if (accountOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        accountRepository.delete(accountOpt.get());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{accountId}/rename")
+    public ResponseEntity<AccountDTO> renameAccount(
+            @PathVariable Long accountId,
+            @RequestParam String name
+    ) {
+        Optional<Account> accOpt = accountRepository.findById(accountId);
+        if (accOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Account account = accOpt.get();
+        account.setName(name);
+        accountRepository.save(account);
+
+        return ResponseEntity.ok(AccountDTO.fromEntity(account));
+    }
 }
