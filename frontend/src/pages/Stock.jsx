@@ -64,7 +64,7 @@ const Stock = () => {
   const [averageCost, setAverageCost] = useState(0);
 
   const [tradeConfirmModal, setTradeConfirmModal] = useState(false);
-  const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | missingRequiredInput | successfulClick
+  const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | notEnoughShares | missingRequiredInput
   
   /**
    * On mount, resolve the authenticated user’s first brokerage account
@@ -248,11 +248,22 @@ const Stock = () => {
 
   function handleReviewOrder() {
     if (!shares || shares <= 0) {
-      alert("Please enter a valid number of shares.");
+      setReviewButtonStatus("missingRequiredInput")
+      setTimeout(() => setReviewButtonStatus("idle"), 1000);
+      return;
+    }
+    if (mode === "buy" && shares * price > cash){
+      setReviewButtonStatus("notEnoughBP")
+      setTimeout(() => setReviewButtonStatus("idle"), 1500);
+      return;
+    }
+    if (mode === "sell" && shares > numHoldingShares){
+      setReviewButtonStatus("notEnoughShares")
+      setTimeout(() => setReviewButtonStatus("idle"), 1500);
       return;
     }
 
-    setTradeConfirmModal(true);
+    setTradeConfirmModal(true); // passed inital checks
   }
   /**
    * Validates the share count, assembles a trade payload, and posts it
@@ -615,38 +626,37 @@ const Stock = () => {
                 </div>
 
                       
-                <motion.button // idle | notEnoughBP | missingRequiredInput | successfulClick
+                <motion.button // idle | notEnoughBP | notEnoughShares | missingRequiredInput
                   className=" w-100 border-0 rounded-pill fw-bold text-white py-3"
                   style={{
                     borderRadius: "12px",
                     backgroundColor: {
                       idle: "var(--bs-success)",
-                      successfulClick: "var(--bs-success)",
                       notEnoughBP: "var(--bs-danger)",
+                      notEnoughShares: "var(--bs-danger)",
                       missingRequiredInput: "var(--bs-danger)",
                     }[reviewButtonStatus],
                   }}
                   // animation upon click
                   whileTap={{ scale: 0.95 }}
-                  animate={{ scale: reviewButtonStatus === "successfulClick" ? [1, 1.1, 1] : 1 }}
                   onClick={handleReviewOrder}
                 >
                   <AnimatePresence mode="wait">
                     <motion.span // fades the text in and out
                       key={reviewButtonStatus}
                       initial={{ opacity: 0 }}
-                      animate={{ opacity: 1 }}
-                      exit={{ opacity: 0 }}
+                      animate={{ opacity: 1, transition: { duration: 0.1 } }}
+                      exit={{ opacity: 0, transition: { duration: 0.1 } }}
                     >
                       {
                         reviewButtonStatus === "idle"
                           ? "Review Order"
-                          : reviewButtonStatus === "successfulClick"
-                          ? "✅ Success"
                           : reviewButtonStatus === "notEnoughBP"
-                          ? "Invalid Credentials"
+                          ? "Not Enough Cash"
+                          : reviewButtonStatus === "notEnoughShares"
+                          ? "Not Enough Shares"
                           : reviewButtonStatus === "missingRequiredInput"
-                          ? "Account Not Found"
+                          ? "Enter Shares"
                           : "Review Order" // default
                       }
                     </motion.span>
