@@ -837,14 +837,33 @@ const Stock = () => {
           backdrop="static"
         >
           <Modal.Header closeButton className="bg-dark border-0 text-white">
-            <Modal.Title>Confirm Order</Modal.Title>
+            <Modal.Title>Confirm {ticker} Order</Modal.Title>
           </Modal.Header>
 
           <Modal.Body className="bg-dark text-white">
-            <p>INFO </p>
-            <p>INFO </p>
-            <p>INFO </p>
-            <p>INFO </p>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="text-secondary">Action</span>
+              <span className="fw-semibold text-uppercase">
+                {mode === "buy" ? "Buy" : "Sell"}
+              </span>
+            </div>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="text-secondary">Symbol</span>
+              <span className="fw-semibold">{stockTicker || "—"}</span>
+            </div>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="text-secondary">Quantity</span>
+              <span className="fw-semibold">{shares || 0} shares</span>
+            </div>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="text-secondary">Order Type</span>
+              <span className="fw-semibold">Market</span>
+            </div>
+            <div className="d-flex justify-content-between align-items-center mb-2">
+              <span className="text-secondary">Market Price</span>
+              <span className="fw-semibold">{formattedPrice}</span>
+            </div>
+    
           </Modal.Body>
 
           <Modal.Footer className="bg-dark border-0">
