@@ -835,42 +835,48 @@ const Stock = () => {
           onHide={() => setTradeConfirmModal(false)}
           centered
           backdrop="static"
+          className="modern-trade-modal"
         >
-          <Modal.Header closeButton className="bg-dark border-0 text-white">
-            <Modal.Title>Confirm {ticker} Order</Modal.Title>
+          <Modal.Header
+            closeButton
+            className="bg-dark bg-gradient border-0 text-white px-4 py-3 rounded-top shadow-lg"
+          >
+            <Modal.Title className="fw-bold text-uppercase">
+              Confirm {ticker} Order
+            </Modal.Title>
           </Modal.Header>
 
-          <Modal.Body className="bg-dark text-white">
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <span className="text-secondary">Action</span>
-              <span className="fw-semibold text-uppercase">
+          <Modal.Body className="bg-dark text-white px-4 py-4 border-top border-secondary-subtle">
+            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Action</span>
+              <span className="fw-semibold text-uppercase text-white">
                 {mode === "buy" ? "Buy" : "Sell"}
               </span>
             </div>
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <span className="text-secondary">Symbol</span>
-              <span className="fw-semibold">{stockTicker || "—"}</span>
+            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Quantity</span>
+              <span className="fw-semibold text-white">{shares || 0} shares</span>
             </div>
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <span className="text-secondary">Quantity</span>
-              <span className="fw-semibold">{shares || 0} shares</span>
+            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Order Type</span>
+              <span className="fw-semibold text-white">Market</span>
             </div>
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <span className="text-secondary">Order Type</span>
-              <span className="fw-semibold">Market</span>
+            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Market Price</span>
+              <span className="fw-semibold text-white">{formattedPrice}</span>
             </div>
-            <div className="d-flex justify-content-between align-items-center mb-2">
-              <span className="text-secondary">Market Price</span>
-              <span className="fw-semibold">{formattedPrice}</span>
+            <div className="d-flex justify-content-between align-items-center mb-1 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
+              <span className="text-uppercase text-white-50 small">Total</span>
+              <span className="fw-semibold text-white">{estimatedCostDollars}</span>
             </div>
     
           </Modal.Body>
 
-          <Modal.Footer className="bg-dark border-0">
-            <Button onClick={() => {
-                setTradeConfirmModal(false);
-            }}>Cancel</Button>
+          <Modal.Footer className="bg-dark border-0 d-flex flex-column flex-sm-row align-items-stretch gap-3 px-4 pb-4">
+            <Button className="w-100 text-uppercase fw-semibold rounded-pill py-2 btn-light"
+              onClick={() => setTradeConfirmModal(false) }>Cancel</Button>
             <Button
+                className="w-100 text-uppercase fw-bold rounded-pill py-3 shadow-lg"
                 onClick={handleSubmitOrder}
             >
                 Place Order
