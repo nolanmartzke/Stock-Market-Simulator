@@ -1,6 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import { Search, PlusCircle, ArrowRightCircle } from "lucide-react";
-import { searchBar, getQuote } from "../api/StockApi";
+import {
+  Search,
+  ArrowRightCircle,
+  ArrowUpRight,
+  ArrowDownRight,
+} from "lucide-react";
+import { searchBar, getQuote, search } from "../api/StockApi";
 import { useNavigate } from "react-router-dom";
 import api, { loadAccount, trade } from "../api/AccountApi";
 import { Form } from "react-bootstrap";
@@ -25,6 +30,23 @@ const Trade = () => {
   const [ticker, setTicker] = useState("");
   const [orderType, setOrderType] = useState("buy");
   const [selectedStock, setSelectedStock] = useState(null);
+
+  const [dayChange, setDayChange] = useState("positive");
+  const [dayChangeDollars, setDayChangeDollars] = useState(0);
+  const [dayChangePercent, setDayChangePercent] = useState(0);
+  const [quote, setQuote] = useState([]);
+
+  const formatUSD = (value) => {
+    if (typeof value !== "number" || Number.isNaN(value)) {
+      return "--";
+    }
+    return value.toLocaleString("en-US", {
+      style: "currency",
+      currency: "USD",
+      minimumFractionDigits: 2,
+      maximumFractionDigits: 2,
+    });
+  };
 
   /** 
    * On mount, grab the authenticated user from localStorage and fetch
@@ -90,6 +112,82 @@ const Trade = () => {
 
     return () => clearTimeout(timer.current);
   }, [query]);
+
+  useEffect(() => {
+      search(query)
+        .then((response) => response.data)
+        .then((data) => {
+          console.log(data);
+          setStockName(data.description);
+          setTicker(data.symbol);
+          return data.symbol;
+        })
+        .then((ticker) => {
+          getQuote(ticker)
+            .then((response) => response.data)
+            .then((data) => {
+              console.log(data);
+              setPrice(data.c);
+              setQuote(data);
+            })
+            .catch((err) => console.log(err));
+  
+          getMetrics(ticker)
+            .then((response) => response.data)
+            .then((data) => {
+              console.log(data);
+              setMetrics(data);
+            })
+            .catch((err) => console.log(err));
+  
+          getHistory(ticker, "2Y")
+            .then((response) => response.data)
+            .then((data) => {
+              setHistory(data.results);
+            })
+            .catch((err) => console.log(err));
+  
+          // fetch company profile from backend (/profile2)
+          getProfile(ticker)
+            .then((response) => response.data)
+            .then((data) => {
+              setProfile(data);
+            })
+            .catch((err) => {
+              console.log("getProfile error", err);
+              setProfile(null);
+            });
+        })
+        .catch((err) => console.log(err));
+    }, [query]);
+  
+    /**
+     * Derive the day-change badges whenever the latest quote updates.
+     */
+    useEffect(() => {
+      if (
+        typeof quote?.d !== "number" ||
+        Number.isNaN(quote.d) ||
+        typeof quote?.dp !== "number" ||
+        Number.isNaN(quote.dp)
+      ) {
+        setDayChange(null);
+        setDayChangeDollars("--");
+        setDayChangePercent("--");
+        return;
+      }
+
+      if (quote.d >= 0) {
+        setDayChange("positive");
+        setDayChangeDollars(`+${formatUSD(quote.d)}`);
+        setDayChangePercent(`+${quote.dp}%`);
+      } else {
+        setDayChange("negative");
+        setDayChangeDollars(`${formatUSD(quote.d)}`);
+        setDayChangePercent(`${quote.dp}%`);
+      }
+    }, [quote]);
+  
 
   /**
    * Navigate to the Stock page when a suggestion is clicked.
@@ -205,6 +303,7 @@ const Trade = () => {
                             const price = quoteRes.data.c;
 
                             setTicker(s.symbol);
+                            setQuote(quoteRes.data);
                             setSelectedStock({
                               symbol: s.symbol,
                               name: s.description,
@@ -236,11 +335,51 @@ const Trade = () => {
               {selectedStock && (
                 <div className="alert alert-info d-flex justify-content-between align-items-center">
                   <div>
-                    <strong>{selectedStock.symbol}</strong> — {selectedStock.name}
+                    <strong>{selectedStock.symbol}</strong> - {selectedStock.name}
                   </div>
-                  <span className="fw-semibold text-success">
-                    ${selectedStock.price?.toFixed(2)}
-                  </span>
+                  <div className="text-center">
+                    <span
+                      className={`fw-semibold d-block fs-3 ${
+                        dayChange === "negative"
+                          ? "text-danger"
+                          : dayChange === "positive"
+                          ? "text-success"
+                          : "text-body"
+                      }`}
+                    >
+                      ${selectedStock.price?.toFixed(2)}
+                    </span>
+                    {typeof quote?.dp === "number" &&
+                      typeof quote?.d === "number" && (
+                        <div className="d-flex justify-content-center gap-2 mt-2 fw-semibold">
+                          <span
+                            className={`badge rounded-pill d-inline-flex align-items-center gap-2 ${
+                              dayChange === "positive"
+                                ? "bg-success-subtle text-success"
+                                : "bg-danger-subtle text-danger"
+                            }`}
+                            style={{ fontSize: "0.85rem" }}
+                          >
+                            {dayChange === "positive" ? (
+                              <ArrowUpRight size={14} />
+                            ) : (
+                              <ArrowDownRight size={14} />
+                            )}
+                            {dayChangePercent}
+                          </span>
+                          <span
+                            className={`badge rounded-pill ${
+                              dayChange === "positive"
+                                ? "bg-success-subtle text-success"
+                                : "bg-danger-subtle text-danger"
+                            }`}
+                            style={{ fontSize: "0.85rem" }}
+                          >
+                            {dayChangeDollars}
+                          </span>
+                        </div>
+                      )}
+                  </div>
                 </div>
               )}
                 <h5 className="mb-3">Order Information</h5>
@@ -340,15 +479,31 @@ const Trade = () => {
                           <td>
                             <button
                               className="btn btn-sm btn-outline-danger"
-                              onClick={() => {
+                              onClick={async () => {
                                 setTicker(holding.stockTicker);
                                 setShares(Math.abs(holding.shares));
                                 setOrderType("sell");
-                                setSelectedStock({
-                                  symbol: holding.stockTicker,
-                                  name: holding.stockTicker,
-                                  price: holding.averagePrice,
-                                });
+                                try {
+                                  const quoteRes = await getQuote(
+                                    holding.stockTicker
+                                  );
+                                  setQuote(quoteRes.data);
+                                  setSelectedStock({
+                                    symbol: holding.stockTicker,
+                                    name: holding.stockTicker,
+                                    price: quoteRes.data.c,
+                                  });
+                                } catch (error) {
+                                  console.error(
+                                    "Failed to fetch quote when closing holding:",
+                                    error
+                                  );
+                                  setSelectedStock({
+                                    symbol: holding.stockTicker,
+                                    name: holding.stockTicker,
+                                    price: holding.averagePrice,
+                                  });
+                                }
                                 window.scrollTo({ top: 0, behavior: "smooth" });
                               }}
                             >
