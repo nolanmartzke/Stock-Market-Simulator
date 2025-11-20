@@ -674,15 +674,15 @@ const Stock = () => {
 
                 {/* Account Type */}
                 <div className="d-flex justify-content-center mt-2">
-                                    <small className="text-secondary">
-                                        <Form.Select size="sm" style={{ display: "inline-block", width: "auto", backgroundColor: "#121212", color: "white", border: "none"}}>
-                                            <option>Main Account</option>
-                                            <option>Account 2</option>
-                                            <option>Account 3</option>
-                                            {/* TODO: Raj should add accounts here */}
-                                        </Form.Select>
-                                    </small>
-                                </div>
+                  <small className="text-secondary">
+                      <Form.Select size="sm" style={{ display: "inline-block", width: "auto", backgroundColor: "#121212", color: "white", border: "none"}}>
+                          <option>Main Account</option>
+                          <option>Account 2</option>
+                          <option>Account 3</option>
+                          {/* TODO: Raj should add accounts here */}
+                      </Form.Select>
+                  </small>
+                </div>
               </Card.Body>
             </Card>
           </Col>
@@ -850,10 +850,8 @@ const Stock = () => {
           <Modal.Footer className="bg-dark border-0">
             <Button onClick={() => {
                 setTradeConfirmModal(false);
-                // setPendingVisibility(null);
             }}>Cancel</Button>
             <Button
-                // disabled={pendingVisibility === null}
                 onClick={handleSubmitOrder}
             >
                 Place Order
