@@ -10,6 +10,7 @@ import team8.backend.entity.User;
 import team8.backend.repository.UserRepository;
 import team8.backend.repository.AccountRepository;
 import team8.backend.entity.Account;
+import team8.backend.dto.AccountDTO;
 import team8.backend.dto.UserDTO;
 
 import java.time.LocalDateTime;
@@ -49,7 +50,7 @@ public class UserController {
         User savedUser = userRepository.save(user);
 
         // Create primary account with 10000 cash
-        Account primaryAccount = new Account(savedUser, 10000.0);
+        Account primaryAccount = new Account(savedUser, "Primary Account", 10000.0);
         accountRepository.save(primaryAccount);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(UserDTO.fromEntity(savedUser));
@@ -95,6 +96,45 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userRepository.findAll();
         List<UserDTO> dtos = users.stream().map(UserDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @PostMapping("/{userId}/accounts")
+    public ResponseEntity<AccountDTO> createAdditionalAccount(
+            @PathVariable Long userId,
+            @RequestParam String name  // frontend sends ?name=MyAccount
+    ) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User user = optionalUser.get();
+
+        // Create account with provided name, 10000 initial cash
+        Account newAccount = new Account(user, name, 10000.0);
+        accountRepository.save(newAccount);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(AccountDTO.fromEntity(newAccount));
+    }
+
+    @GetMapping("/{userId}/accounts")
+    public ResponseEntity<List<AccountDTO>> getAccountsForUser(@PathVariable Long userId) {
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User user = optionalUser.get();
+
+        List<AccountDTO> dtos = accountRepository.findByUser(user)
+                .stream()
+                .map(AccountDTO::fromEntity)
+                .toList();
+
         return ResponseEntity.ok(dtos);
     }
 }
