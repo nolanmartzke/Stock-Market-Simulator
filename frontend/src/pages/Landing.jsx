@@ -132,13 +132,30 @@ export default function Landing() {
 
                 {/* CTAs */}
                 <div className="d-flex gap-3 fade-in-up d5">
-                  <Link
+
+                  {
+
+                    !auth? 
+                    <Link
                     className="btn btn-danger btn-lg"
                     to="/signup"
                     style={{ borderRadius: "12px" }}
-                  >
-                    Get started
-                  </Link>
+                    >
+                      Get started
+                    </Link>
+
+                    :
+
+                    <Link
+                    className="btn btn-danger btn-lg"
+                    to="/dashboard"
+                    style={{ borderRadius: "12px" }}
+                    >
+                      Go to Dashboard
+                    </Link>
+
+                  }
+                  
                   <a
                     className="btn btn-outline-light btn-lg"
                     href="#how"
