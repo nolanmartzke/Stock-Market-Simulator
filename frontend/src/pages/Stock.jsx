@@ -590,7 +590,7 @@ const Stock = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart
                       data={filteredHistory}
-                      margin={{ top: 20, right: 20, left: -10, bottom: 20 }}
+                      margin={{ top: 20, right: 10, left: -10, bottom: 20 }}
                     >
                       <defs>
                         <linearGradient id="priceLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
