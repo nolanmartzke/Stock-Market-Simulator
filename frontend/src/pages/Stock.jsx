@@ -30,6 +30,8 @@ import {
 import api, { trade, loadAccount } from "../api/AccountApi";
 import { motion, AnimatePresence } from "framer-motion";
 
+import { Toaster, toast } from "sonner";
+
 
 /**
  * Stock detail page that loads quote data, fundamentals, price history,
@@ -286,18 +288,19 @@ const Stock = () => {
       setCash(updatedAccount.data.cash);
       refreshHoldings();
       console.log(cash);
-      alert(
-        `Successfully placed ${mode} order for ${shares} shares of ${stockTicker}.`
-      );
+      toast.success("Successfully Executed!")
       setShares(0);
     } catch (error) {
       console.error(error);
-      alert(error.response?.data || "Failed to execute trade.");
+      toast.success("Failed to execute trade.")
     }
   };
 
   return (
     <div className="container-fluid">
+
+      <Toaster position="bottom-middle" />
+
       {/* stock name and price */}
       <Container className="py-2 pb-0 px-3">
         <Card
