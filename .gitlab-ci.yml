@@ -59,3 +59,4 @@ test_backend:
       - backend/build/reports/tests/test
   only:
     - branches
+    - merge_requests
