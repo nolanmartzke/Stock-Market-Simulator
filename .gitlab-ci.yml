@@ -1,5 +1,6 @@
 stages:
   - lint
+  - test
 
 # Only try to normalize/make executable the gradle wrapper if it exists in backend/
 before_script:
@@ -37,5 +38,24 @@ lint_backend:
       - backend/build/reports/checkstyle/
     when: always
     expire_in: 7 days
+  only:
+    - branches
+
+# Run backend unit tests and collect JUnit reports
+test_backend:
+  stage: test
+  image: eclipse-temurin:21-jdk
+  tags:
+    - csl
+  script:
+    - cd backend
+    - chmod +x ./gradlew || true
+    - ./gradlew clean test --no-daemon
+  artifacts:
+    when: always
+    expire_in: 7 days
+    paths:
+      - backend/build/test-results/test
+      - backend/build/reports/tests/test
   only:
     - branches
