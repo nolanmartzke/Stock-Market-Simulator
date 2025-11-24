@@ -292,14 +292,44 @@ const Stock = () => {
       setShares(0);
     } catch (error) {
       console.error(error);
-      toast.success("Failed to execute trade.")
+      toast.error("Failed to execute trade.")
     }
   };
 
   return (
     <div className="container-fluid">
 
-      <Toaster position="bottom-middle" />
+      <Toaster
+        position="bottom-center"
+        theme="dark"
+        richColors
+        closeButton
+        expand
+        offset={12}
+        toastOptions={{
+          duration: 3200,
+          className: "border-0",
+          descriptionClassName: "text-white-50",
+          style: {
+            background:
+              "linear-gradient(135deg, rgba(9,20,45,0.95), rgba(16,80,120,0.9))",
+            color: "#f8fbff",
+            border: "1px solid rgba(255,255,255,0.18)",
+            outline: "2px solid rgba(255,255,255,0.12)",
+            outlineOffset: "2px",
+            boxShadow: "0 18px 55px rgba(0,0,0,0.35)",
+            borderRadius: "14px",
+            backdropFilter: "blur(8px)",
+            fontSize: "25px",
+            lineHeight: "1.45",
+            padding: "14px 0px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+          },
+        }}
+      />
 
       {/* stock name and price */}
       <Container className="py-2 pb-0 px-3">
