@@ -573,27 +573,7 @@ const Stock = () => {
                 className="d-flex flex-column justify-content-center align-items-center"
                 style={{ background: "transparent", color: "#f5f9ff" }}
               >
-                <div className="w-100 d-flex align-items-center justify-content-between px-1">
-                  <div
-                    className="text-uppercase small fw-semibold"
-                    style={{ letterSpacing: "0.12em", color: "rgba(229, 238, 255, 0.9)" }}
-                  >
-                    Price Journey
-                  </div>
-                  <div
-                    className="px-3 py-1 rounded-pill"
-                    style={{
-                      background:
-                        "linear-gradient(120deg, rgba(56,189,248,0.24), rgba(94,234,212,0.18))",
-                      color: "#0b1120",
-                      fontSize: "0.85rem",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                      boxShadow: "0 8px 20px rgba(0,0,0,0.25)",
-                    }}
-                  >
-                    Live overview
-                  </div>
-                </div>
+               
                 <div
                   style={{
                     width: "100%",
@@ -610,7 +590,7 @@ const Stock = () => {
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart
                       data={filteredHistory}
-                      margin={{ top: 10, right: 20, left: -10, bottom: 0 }}
+                      margin={{ top: 20, right: 20, left: -10, bottom: 20 }}
                     >
                       <defs>
                         <linearGradient id="priceLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
@@ -640,6 +620,7 @@ const Stock = () => {
                         tick={{ fill: "rgba(226,232,240,0.95)", fontSize: 12 }}
                         tickLine={{ stroke: "rgba(226,232,240,0.3)" }}
                         axisLine={{ stroke: "rgba(255,255,255,0.3)" }}
+                        tickMargin={10}
                         minTickGap={10}
                       />
                       <YAxis
@@ -648,6 +629,7 @@ const Stock = () => {
                         tick={{ fill: "rgba(226,232,240,0.95)", fontSize: 12 }}
                         tickLine={{ stroke: "rgba(226,232,240,0.3)" }}
                         axisLine={{ stroke: "rgba(255,255,255,0.3)" }}
+                        tickMargin={12}
                         width={70}
                       />
                       <Tooltip
