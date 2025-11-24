@@ -82,7 +82,7 @@ public class AccountControllerIntegrationTest {
 
         testAccount = new Account();
         testAccount.setUser(testUser);
-        testAccount.setCash(10_000.0);
+        testAccount.setCash(10000.0);
         accountRepository.save(testAccount);
     }
 

@@ -10,6 +10,7 @@ import team8.backend.entity.User;
 import team8.backend.repository.UserRepository;
 import team8.backend.repository.AccountRepository;
 import team8.backend.entity.Account;
+import team8.backend.dto.AccountDTO;
 import team8.backend.dto.UserDTO;
 
 import java.time.LocalDateTime;
@@ -49,7 +50,7 @@ public class UserController {
         User savedUser = userRepository.save(user);
 
         // Create primary account with 10000 cash
-        Account primaryAccount = new Account(savedUser, 10000.0);
+        Account primaryAccount = new Account(savedUser, "Primary Account", 10000.0);
         accountRepository.save(primaryAccount);
 
         return ResponseEntity.status(HttpStatus.CREATED).body(UserDTO.fromEntity(savedUser));
@@ -86,6 +87,64 @@ public class UserController {
         return ResponseEntity.ok(UserDTO.fromEntity(user));
     }
 
+
+    /**
+     * Change name 
+     *
+     * @param changeUser user entity
+     * @param newName new name
+     * @return 200 on success, 404 if not found
+     */
+    @PatchMapping("/changename")
+    public ResponseEntity<UserDTO> changeName(@RequestBody User changeUser, @RequestParam(name = "newName") String newName) {
+        Optional<User> optionalUser = userRepository.findAll()
+                .stream()
+                .filter(u -> u.getEmail().equals(changeUser.getEmail()))
+                .findFirst();
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User user = optionalUser.get();
+        user.setName(newName);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(UserDTO.fromEntity(user));
+    }
+
+    /**
+     * Change password 
+     *
+     * @param changeUser user entity (just email)
+     * @param oldPassword old password
+     * @param newPassword new password
+     * @return 200 on success, 404 if user not found, 403 if wrong old password
+     */
+    @PatchMapping("/changepassword")
+    public ResponseEntity<UserDTO> changePassword(@RequestBody User changeUser, @RequestParam(name = "oldPassword") String oldPassword, @RequestParam(name = "newPassword") String newPassword) {
+        Optional<User> optionalUser = userRepository.findAll()
+                .stream()
+                .filter(u -> u.getEmail().equals(changeUser.getEmail()))
+                .findFirst();
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        User user = optionalUser.get();
+
+        // ensure old pass is correct
+        if (!PasswordUtils.checkPassword(oldPassword, user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        String newHashedPass = PasswordUtils.hashPassword(newPassword);
+        user.setPassword(newHashedPass);
+        userRepository.save(user);
+        
+        return ResponseEntity.ok(UserDTO.fromEntity(user));
+    }
+
     /**
      * Retrieve all users (admin/testing use).
      *
@@ -95,6 +154,45 @@ public class UserController {
     public ResponseEntity<List<UserDTO>> getAllUsers() {
         List<User> users = userRepository.findAll();
         List<UserDTO> dtos = users.stream().map(UserDTO::fromEntity).toList();
+        return ResponseEntity.ok(dtos);
+    }
+
+    @PostMapping("/{userId}/accounts")
+    public ResponseEntity<AccountDTO> createAdditionalAccount(
+            @PathVariable Long userId,
+            @RequestParam String name  // frontend sends ?name=MyAccount
+    ) {
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User user = optionalUser.get();
+
+        // Create account with provided name, 10000 initial cash
+        Account newAccount = new Account(user, name, 10000.0);
+        accountRepository.save(newAccount);
+
+        return ResponseEntity
+                .status(HttpStatus.CREATED)
+                .body(AccountDTO.fromEntity(newAccount));
+    }
+
+    @GetMapping("/{userId}/accounts")
+    public ResponseEntity<List<AccountDTO>> getAccountsForUser(@PathVariable Long userId) {
+
+        Optional<User> optionalUser = userRepository.findById(userId);
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User user = optionalUser.get();
+
+        List<AccountDTO> dtos = accountRepository.findByUser(user)
+                .stream()
+                .map(AccountDTO::fromEntity)
+                .toList();
+
         return ResponseEntity.ok(dtos);
     }
 }

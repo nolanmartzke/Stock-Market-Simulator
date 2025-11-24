@@ -1,8 +1,9 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { changeName, changePassword} from "../api/AuthAPI";
 
 /**
  * Account page that shows read-only profile data and placeholder forms
@@ -10,8 +11,74 @@ import { useAuth } from "../context/AuthContext";
  * when the user signs out.
  */
 const Account = () => {
-  const { auth, logout } = useAuth();
+  const { auth, logout, login } = useAuth();
   const navigate = useNavigate();
+
+  const [newName, setNewName] = useState();
+
+  const [oldPassword, setOldPassword] = useState("");
+  const [newPassword, setNewPassword] = useState("");
+  const [newPasswordConfirm, setNewPasswordConfirm] = useState("");
+
+  const [errorMessage, setErrorMessage] = useState("");
+  const [passwordButtonStatus, setPasswordButtonStatus] = useState(false);
+
+  const [updatePasswordText, setUpdatePasswordText] = useState("Update password");
+
+
+  useEffect( () => {
+    setNewName(auth?.name ?? "");
+  }, [auth])
+
+  useEffect( () => {
+
+    setPasswordButtonStatus(false);
+
+    if (!newPassword)
+      setErrorMessage("");
+    else if (newPassword.length < 8)
+      setErrorMessage("Password Must Be Atleast 8 Characters");
+    else if (newPasswordConfirm && newPassword != newPasswordConfirm)
+      setErrorMessage("Passwords Do Not Match");
+    else {
+      setErrorMessage("");
+      setPasswordButtonStatus(true)
+    }
+
+  }, [oldPassword, newPassword, newPasswordConfirm])
+
+
+  function handleNameChange() {
+    changeName(auth.email, newName)
+      .then(res => {
+        if (res.status === 200)
+          login(res.data);
+      })
+  }
+
+  function clickedUpdatePassword() {
+
+    setUpdatePasswordText("Updating...");
+
+    changePassword(auth.email, oldPassword, newPassword)
+      .then(res => {
+        if (res.status === 200){
+          login(res.data);
+          setUpdatePasswordText("Successfully Updated");
+        }
+      })
+      .catch(err => {
+        if (err.response?.status === 403)
+          setUpdatePasswordText("Wrong Old Password");
+        else
+          setUpdatePasswordText("Error");
+      })
+      .finally(() => {
+        setTimeout(() => setUpdatePasswordText("Update password"), 1500);
+      })
+      
+
+  }
 
   /**
    * Clears the auth context/local storage and returns the user to the
@@ -43,16 +110,17 @@ const Account = () => {
 
                 {/* Edit Profile (placeholder) */}
                 <h2 className="h6 text-uppercase text-secondary mb-3">
-                  Edit Profile (coming soon)
+                  Edit Profile
                 </h2>
+
+
                 <div className="mb-3">
                   <label className="form-label fw-medium">Name</label>
                   <input
                     className="form-control form-control-lg"
                     style={{ borderRadius: "12px" }}
-                    value={auth?.name ?? ""}
-                    disabled
-                    readOnly
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
                   />
                 </div>
                 <div className="mb-2">
@@ -68,16 +136,18 @@ const Account = () => {
                 <button
                   className="btn btn-primary mt-2"
                   style={{ borderRadius: "12px" }}
-                  disabled
+                  disabled={newName == auth?.name}
+                  onClick={handleNameChange}
                 >
                   Save changes
                 </button>
+
 
                 <hr className="my-4" />
 
                 {/* Change Password (placeholder) */}
                 <h2 className="h6 text-uppercase text-secondary mb-3">
-                  Change Password (coming soon)
+                  Change Password
                 </h2>
                 <div className="row g-3">
                   <div className="col-12">
@@ -88,8 +158,9 @@ const Account = () => {
                       type="password"
                       className="form-control form-control-lg"
                       style={{ borderRadius: "12px" }}
-                      placeholder="••••••••"
-                      disabled
+                      placeholder="Enter Current Password"
+                      value={oldPassword}
+                      onChange={(e) => setOldPassword(e.target.value)}
                     />
                   </div>
                   <div className="col-md-6">
@@ -99,7 +170,9 @@ const Account = () => {
                       className="form-control form-control-lg"
                       style={{ borderRadius: "12px" }}
                       placeholder="Min 8 chars"
-                      disabled
+                      disabled={!oldPassword}
+                      value={newPassword}
+                      onChange={(e) => setNewPassword(e.target.value)}
                     />
                   </div>
                   <div className="col-md-6">
@@ -111,20 +184,23 @@ const Account = () => {
                       className="form-control form-control-lg"
                       style={{ borderRadius: "12px" }}
                       placeholder="Match new password"
-                      disabled
+                      disabled={!oldPassword}
+                      value={newPasswordConfirm}
+                      onChange={(e) => setNewPasswordConfirm(e.target.value)}
                     />
                   </div>
                 </div>
-                <small className="text-secondary d-block mt-2">
-                  Requirements will appear here (length, character mix, etc.).
-                </small>
+                <div className="text-danger mt-2" style={{ height: "20px" }}>
+                  {errorMessage}
+                </div>
                 <motion.button
                   whileTap={{ scale: 0.95 }}
-                  className="btn btn-outline-secondary w-100 mt-3"
+                  className="btn btn-primary w-100 mt-3"
                   style={{ borderRadius: 12 }}
-                  disabled
+                  onClick={clickedUpdatePassword}
+                  disabled={!passwordButtonStatus}
                 >
-                  Update password
+                  {updatePasswordText}
                 </motion.button>
 
                 <hr className="my-4" />

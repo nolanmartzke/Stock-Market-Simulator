@@ -1,34 +1,13 @@
-import React, { useEffect, useState } from "react";
-import {
-  Search,
-  PlusCircle,
-  ArrowRightCircle,
-  ArrowUpRight,
-  ArrowDownRight,
-  TrendingUp,
-  Layers,
-  CircleDollarSign,
-} from "lucide-react";
-import {
-  LineChart,
-  Line,
-  XAxis,
-  YAxis,
-  Tooltip,
-  ResponsiveContainer,
-  CartesianGrid,
-} from "recharts";
+import React, { useEffect, useMemo, useState } from "react";
+import { Search, PlusCircle, ArrowRightCircle, ArrowUpRight, ArrowDownRight, TrendingUp, Layers, CircleDollarSign, } from "lucide-react";
+import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, } from "recharts";
 import { useParams } from "react-router-dom";
 import { Button, Container, Form, Row, Col, Card, Modal } from "react-bootstrap";
-import {
-  getQuote,
-  getMetrics,
-  search,
-  getHistory,
-  getProfile,
-} from "../api/StockApi";
+import { getQuote, getMetrics, search, getHistory, getProfile, } from "../api/StockApi";
 import api, { trade, loadAccount } from "../api/AccountApi";
 import { motion, AnimatePresence } from "framer-motion";
+
+import { Toaster, toast } from "sonner";
 
 
 /**
@@ -233,6 +212,156 @@ const Stock = () => {
     }).format(num);
   }
 
+  const formatDateTick = (value) => {
+    const dateObj = new Date(value);
+    if (Number.isNaN(dateObj)) return value;
+
+    const month = dateObj.toLocaleString("en-US", { month: "short" });
+    const day = dateObj.getDate();
+    const year = dateObj.getFullYear().toString().slice(-2);
+
+    switch (range) {
+      case "1W":
+        return `${month} ${day}`;
+      case "1M":
+      case "3M":
+        return `${month} ${day}`;
+      case "YTD":
+        return month;
+      case "1Y":
+        return `${month} '${year}`;
+      case "2Y":
+        return `${month} '${year}`;
+      default:
+        return `${month} ${day}`;
+    }
+  };
+
+  const formatTooltipLabel = (value) => {
+    const dateObj = new Date(value);
+    if (Number.isNaN(dateObj)) return value;
+    return dateObj.toLocaleDateString("en-US", {
+      month: "short",
+      day: "numeric",
+      year: "numeric",
+    });
+  };
+
+  const renderTooltip = ({ active, payload, label }) => {
+    if (!active || !payload?.length) return null;
+    const price = payload[0]?.value ?? payload[payload.length - 1]?.value;
+    return (
+      <div
+        style={{
+          background: "rgba(9,14,26,0.9)",
+          border: "1px solid rgba(148,163,184,0.2)",
+          borderRadius: "12px",
+          boxShadow: "0 20px 55px rgba(0,0,0,0.35)",
+          color: "#e8f1ff",
+          backdropFilter: "blur(4px)",
+          padding: "10px 12px",
+        }}
+      >
+        <div style={{ marginBottom: 6, fontWeight: 600 }}>
+          {formatTooltipLabel(label)}
+        </div>
+        <div style={{ fontWeight: 600 }}>{formatUSD(price)}</div>
+      </div>
+    );
+  };
+
+  const chartTicks = useMemo(() => {
+    if (!filteredHistory?.length) return [];
+
+    const parsed = filteredHistory
+      .map((p) => ({ ...p, dateObj: new Date(p.date) }))
+      .filter((p) => !Number.isNaN(p.dateObj))
+      .sort((a, b) => a.dateObj - b.dateObj);
+
+    const ensureLast = (list, lastDate) => {
+      if (lastDate && list[list.length - 1] !== lastDate) list.push(lastDate);
+      return list;
+    };
+
+    // Collapse to one tick per month using the first available date in that month.
+    const monthMap = new Map();
+    parsed.forEach((p) => {
+      const key = `${p.dateObj.getFullYear()}-${p.dateObj.getMonth()}`;
+      const existing = monthMap.get(key);
+      if (!existing || p.dateObj < existing.dateObj) {
+        monthMap.set(key, { date: p.date, dateObj: p.dateObj });
+      }
+    });
+    const months = Array.from(monthMap.values()).sort(
+      (a, b) => a.dateObj - b.dateObj
+    );
+
+    if (range === "YTD") {
+      const step = 2; // every 2 months
+      const ticks = months
+        .filter((_, idx) => idx % step === 0)
+        .map((m) => m.date);
+      return ensureLast(ticks, months[months.length - 1]?.date);
+    }
+
+    if (range === "1Y") {
+      if (!months.length) return [];
+      const step = 2; // every 2 months
+      const ticks = months
+        .filter((_, idx) => idx % step === 0)
+        .map((m) => m.date);
+      return ensureLast(ticks, months[months.length - 1]?.date);
+    }
+
+    if (range === "2Y") {
+      if (!months.length) return [];
+      const step = Math.max(1, Math.round(months.length / 6)); // aim ~6 ticks
+      const ticks = months
+        .filter((_, idx) => idx % step === 0)
+        .map((m) => m.date);
+      return ensureLast(ticks, months[months.length - 1]?.date);
+    }
+
+    const minGapInDays =
+      {
+        "1W": 1,
+        "1M": 5,
+        "3M": 12,
+      }[range] || 30;
+
+    const ticks = [];
+    let lastTickDate = null;
+
+    parsed.forEach((point) => {
+      const currentDate = point.dateObj;
+      if (!lastTickDate) {
+        ticks.push(point.date);
+        lastTickDate = currentDate;
+        return;
+      }
+
+      const daysSinceLast =
+        Math.abs(currentDate - lastTickDate) / (1000 * 60 * 60 * 24);
+
+      if (daysSinceLast >= minGapInDays) {
+        ticks.push(point.date);
+        lastTickDate = currentDate;
+      }
+    });
+
+    return ensureLast(ticks, parsed[parsed.length - 1]?.date);
+  }, [filteredHistory, range]);
+
+  const formatPriceTick = (value) => {
+    const num = Number(value);
+    if (Number.isNaN(num)) return value;
+    const formatted = num.toLocaleString("en-US", {
+      minimumFractionDigits: num >= 50 ? 0 : 2,
+      maximumFractionDigits: 2,
+    });
+    return `$${formatted}`;
+  };
+
 
   const formattedPrice = formatUSD(price);
   const holdingsMarketValue = formatUSD(
@@ -286,18 +415,49 @@ const Stock = () => {
       setCash(updatedAccount.data.cash);
       refreshHoldings();
       console.log(cash);
-      alert(
-        `Successfully placed ${mode} order for ${shares} shares of ${stockTicker}.`
-      );
+      toast.success("Successfully Executed!")
       setShares(0);
     } catch (error) {
       console.error(error);
-      alert(error.response?.data || "Failed to execute trade.");
+      toast.error("Failed to execute trade.")
     }
   };
 
   return (
     <div className="container-fluid">
+
+      <Toaster
+        position="bottom-center"
+        theme="dark"
+        richColors
+        closeButton
+        expand
+        offset={12}
+        toastOptions={{
+          duration: 3200,
+          className: "border-0",
+          descriptionClassName: "text-white-50",
+          style: {
+            background:
+              "linear-gradient(135deg, rgba(9,20,45,0.95), rgba(16,80,120,0.9))",
+            color: "#f8fbff",
+            border: "1px solid rgba(255,255,255,0.18)",
+            outline: "2px solid rgba(255,255,255,0.12)",
+            outlineOffset: "2px",
+            boxShadow: "0 18px 55px rgba(0,0,0,0.35)",
+            borderRadius: "14px",
+            backdropFilter: "blur(8px)",
+            fontSize: "28px",
+            lineHeight: "1.45",
+            padding: "14px 10px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "10px",
+          },
+        }}
+      />
+
       {/* stock name and price */}
       <Container className="py-2 pb-0 px-3">
         <Card
@@ -398,51 +558,135 @@ const Stock = () => {
           {/* Graph */}
           <Col xs={12} md={12} xl={8} className="p-3">
             <Card
-              className="bg-gradient shadow-lg border-0 h-100"
+              className="shadow-lg border-0 h-100"
               style={{
-                backgroundColor: "#011936",
-                color: "white",
-                borderRadius: "10px",
+                backgroundColor: "#0a1324",
+                backgroundImage:
+                  "radial-gradient(circle at 18% 22%, rgba(96,165,250,0.18), transparent 26%), radial-gradient(circle at 82% 12%, rgba(14,165,233,0.22), transparent 22%), linear-gradient(145deg, #0a1324 0%, #0d2340 52%, #0b1a33 100%)",
+                color: "#f5f9ff",
+                borderRadius: "16px",
+                border: "1px solid rgba(255,255,255,0.08)",
+                boxShadow: "0 24px 70px rgba(0,0,0,0.6)",
               }}
             >
-              <Card.Body className="d-flex flex-column justify-content-center align-items-center">
+              <Card.Body
+                className="d-flex flex-column justify-content-center align-items-center"
+                style={{ background: "transparent", color: "#f5f9ff" }}
+              >
+               
                 <div
                   style={{
                     width: "100%",
                     minWidth: 0,
                     height: 400,
-                    marginTop: 20,
+                    marginTop: 10,
+                    background:
+                      "linear-gradient(180deg, rgba(9,12,24,0.92) 0%, rgba(7,12,22,0.9) 40%, rgba(4,7,15,0.92) 100%)",
+                    borderRadius: "14px",
+                    padding: "8px 6px 2px",
+                    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)",
                   }}
                 >
                   <ResponsiveContainer width="100%" height="100%">
-                    <LineChart data={filteredHistory}>
-                      <CartesianGrid strokeDasharray="3 3" />
-                      <XAxis dataKey="date" />
-                      <YAxis domain={["auto", "auto"]} />
+                    <ComposedChart
+                      data={filteredHistory}
+                      margin={{ top: 20, right: 10, left: -10, bottom: 20 }}
+                    >
+                      <defs>
+                        <linearGradient id="priceLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                          <stop offset="0%" stopColor="#38bdf8" />
+                          <stop offset="50%" stopColor="#22c55e" />
+                          <stop offset="100%" stopColor="#a855f7" />
+                        </linearGradient>
+                        <linearGradient id="priceAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="rgba(56,189,248,0.32)" />
+                          <stop offset="45%" stopColor="rgba(34,197,94,0.22)" />
+                          <stop offset="100%" stopColor="rgba(10,31,54,0)" />
+                        </linearGradient>
+                        <filter id="priceShadow" x="-20%" y="-20%" width="140%" height="140%">
+                          <feDropShadow
+                            dx="0"
+                            dy="10"
+                            stdDeviation="12"
+                            floodColor="#38bdf8"
+                            floodOpacity="0.28"
+                          />
+                        </filter>
+                      </defs>
+                      <XAxis
+                        dataKey="date"
+                        ticks={chartTicks}
+                        tickFormatter={formatDateTick}
+                        tick={{ fill: "rgba(226,232,240,0.95)", fontSize: 12 }}
+                        tickLine={{ stroke: "rgba(226,232,240,0.3)" }}
+                        axisLine={{ stroke: "rgba(255,255,255,0.3)" }}
+                        tickMargin={10}
+                        minTickGap={10}
+                      />
+                      <YAxis
+                        domain={["auto", "auto"]}
+                        tickFormatter={formatPriceTick}
+                        tick={{ fill: "rgba(226,232,240,0.95)", fontSize: 12 }}
+                        tickLine={{ stroke: "rgba(226,232,240,0.3)" }}
+                        axisLine={{ stroke: "rgba(255,255,255,0.3)" }}
+                        tickMargin={12}
+                        width={70}
+                      />
                       <Tooltip
-                        formatter={(value, name, props) => {
-                          const date = props?.payload?.date;
-                          const price = `$${value.toFixed(2)}`;
-                          return [`${price} on ${date}`];
+                        content={renderTooltip}
+                        cursor={{
+                          stroke: "rgba(226,232,240,0.5)",
+                          strokeWidth: 1.2,
+                          strokeDasharray: "5 5",
                         }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="price"
+                        stroke="none"
+                        fill="url(#priceAreaGradient)"
+                        fillOpacity={1}
+                        opacity={0.7}
+                        isAnimationActive={true}
                       />
                       <Line
                         type="monotone"
                         dataKey="price"
-                        stroke="#22C55E"
-                        strokeWidth={2}
+                        stroke="url(#priceLineGradient)"
+                        strokeWidth={3.5}
                         dot={false}
+                        activeDot={{
+                          r: 6,
+                          fill: "#0ea5e9",
+                          stroke: "#e2e8f0",
+                          strokeWidth: 2,
+                          filter: "url(#priceShadow)",
+                        }}
+                        strokeLinecap="round"
+                        filter="url(#priceShadow)"
                       />
-                    </LineChart>
+                    </ComposedChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="d-flex gap-2 mb-2">
+                <div className="d-flex flex-wrap gap-2 mb-2 mt-3 justify-content-center">
                   {["1W", "1M", "3M", "YTD", "1Y", "2Y"].map((r) => (
                     <button
                       key={r}
-                      className={`btn btn-sm ${
-                        range === r ? "btn-success" : "btn-outline-success"
-                      }`}
+                      className="btn btn-sm border-0 fw-semibold"
+                      style={{
+                        background:
+                          range === r
+                            ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
+                            : "rgba(255,255,255,0.08)",
+                        color: range === r ? "#0b1120" : "rgba(232,241,255,0.9)",
+                        boxShadow:
+                          range === r
+                            ? "0 12px 30px rgba(14,165,233,0.35)"
+                            : "inset 0 0 0 1px rgba(255,255,255,0.12)",
+                        borderRadius: "10px",
+                        padding: "8px 14px",
+                        letterSpacing: "0.04em",
+                      }}
                       onClick={() => setRange(r)}
                     >
                       {r}
