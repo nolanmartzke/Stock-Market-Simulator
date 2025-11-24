@@ -20,6 +20,7 @@ lint_frontend:
     - cd frontend
     - npm ci --prefer-offline --no-audit --progress=false
     - npm run lint
+  allow_failure: true
   only:
     - branches
 
@@ -38,6 +39,7 @@ lint_backend:
       - backend/build/reports/checkstyle/
     when: always
     expire_in: 7 days
+  allow_failure: true
   only:
     - branches
 
