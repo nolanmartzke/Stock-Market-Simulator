@@ -87,6 +87,64 @@ public class UserController {
         return ResponseEntity.ok(UserDTO.fromEntity(user));
     }
 
+
+    /**
+     * Change name 
+     *
+     * @param changeUser user entity
+     * @param newName new name
+     * @return 200 on success, 404 if not found
+     */
+    @PatchMapping("/changename")
+    public ResponseEntity<UserDTO> changeName(@RequestBody User changeUser, @RequestParam(name = "newName") String newName) {
+        Optional<User> optionalUser = userRepository.findAll()
+                .stream()
+                .filter(u -> u.getEmail().equals(changeUser.getEmail()))
+                .findFirst();
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User user = optionalUser.get();
+        user.setName(newName);
+        userRepository.save(user);
+
+        return ResponseEntity.ok(UserDTO.fromEntity(user));
+    }
+
+    /**
+     * Change password 
+     *
+     * @param changeUser user entity (just email)
+     * @param oldPassword old password
+     * @param newPassword new password
+     * @return 200 on success, 404 if user not found, 403 if wrong old password
+     */
+    @PatchMapping("/changepassword")
+    public ResponseEntity<UserDTO> changePassword(@RequestBody User changeUser, @RequestParam(name = "oldPassword") String oldPassword, @RequestParam(name = "newPassword") String newPassword) {
+        Optional<User> optionalUser = userRepository.findAll()
+                .stream()
+                .filter(u -> u.getEmail().equals(changeUser.getEmail()))
+                .findFirst();
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+        User user = optionalUser.get();
+
+        // ensure old pass is correct
+        if (!PasswordUtils.checkPassword(oldPassword, user.getPassword())) {
+            return ResponseEntity.status(HttpStatus.FORBIDDEN).build();
+        }
+
+        String newHashedPass = PasswordUtils.hashPassword(newPassword);
+        user.setPassword(newHashedPass);
+        userRepository.save(user);
+        
+        return ResponseEntity.ok(UserDTO.fromEntity(user));
+    }
+
     /**
      * Retrieve all users (admin/testing use).
      *
