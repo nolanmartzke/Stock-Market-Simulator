@@ -37,3 +37,11 @@ export function signIn(email, password) {
   return api.post('/login', { email, password });
 }
 
+
+/**
+ * Change Name
+ */
+export function changeName(email, newName) {
+
+  return api.patch('/changename', { email }, { params: { newName } });
+}

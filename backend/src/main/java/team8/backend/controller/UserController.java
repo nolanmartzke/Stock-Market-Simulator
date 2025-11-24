@@ -87,6 +87,34 @@ public class UserController {
         return ResponseEntity.ok(UserDTO.fromEntity(user));
     }
 
+
+    /**
+     * Change name 
+     *
+     * @param changeUser user entity
+     * @param newName new name
+     * @return 200 on success, 404 if not found
+     */
+    @PatchMapping("/changename")
+    public ResponseEntity<UserDTO> changeName(@RequestBody User changeUser, @RequestParam(name = "newName") String newName) {
+        Optional<User> optionalUser = userRepository.findAll()
+                .stream()
+                .filter(u -> u.getEmail().equals(changeUser.getEmail()))
+                .findFirst();
+
+        if (optionalUser.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
+        }
+
+        User user = optionalUser.get();
+
+        user.setName(newName);
+
+        userRepository.save(user);
+
+        return ResponseEntity.ok(UserDTO.fromEntity(user));
+    }
+
     /**
      * Retrieve all users (admin/testing use).
      *

@@ -1,8 +1,9 @@
-import React from "react";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, LogOut } from "lucide-react";
 import { motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
+import { changeName } from "../api/AuthAPI";
 
 /**
  * Account page that shows read-only profile data and placeholder forms
@@ -10,8 +11,23 @@ import { useAuth } from "../context/AuthContext";
  * when the user signs out.
  */
 const Account = () => {
-  const { auth, logout } = useAuth();
+  const { auth, logout, login } = useAuth();
   const navigate = useNavigate();
+
+  const [newName, setNewName] = useState();
+
+
+  useEffect( () => {
+    setNewName(auth?.name ?? "");
+  }, [auth])
+
+  function handleNameChange() {
+    changeName(auth.email, newName)
+      .then(res => {
+        if (res.status === 200)
+          login(res.data);
+      })
+  }
 
   /**
    * Clears the auth context/local storage and returns the user to the
@@ -43,16 +59,17 @@ const Account = () => {
 
                 {/* Edit Profile (placeholder) */}
                 <h2 className="h6 text-uppercase text-secondary mb-3">
-                  Edit Profile (coming soon)
+                  Edit Profile
                 </h2>
+
+
                 <div className="mb-3">
                   <label className="form-label fw-medium">Name</label>
                   <input
                     className="form-control form-control-lg"
                     style={{ borderRadius: "12px" }}
-                    value={auth?.name ?? ""}
-                    disabled
-                    readOnly
+                    value={newName}
+                    onChange={(e) => setNewName(e.target.value)}
                   />
                 </div>
                 <div className="mb-2">
@@ -68,10 +85,13 @@ const Account = () => {
                 <button
                   className="btn btn-primary mt-2"
                   style={{ borderRadius: "12px" }}
-                  disabled
+                  disabled={newName == auth?.name}
+                  onClick={handleNameChange}
                 >
                   Save changes
                 </button>
+
+
 
                 <hr className="my-4" />
 
