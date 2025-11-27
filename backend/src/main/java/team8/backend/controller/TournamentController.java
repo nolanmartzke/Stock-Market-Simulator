@@ -15,6 +15,7 @@ import team8.backend.repository.AccountRepository;
 import team8.backend.repository.TournamentRepository;
 import team8.backend.repository.UserRepository;
 
+import java.time.LocalDateTime;
 import java.util.List;
 import java.util.Optional;
 import java.util.stream.Collectors;
@@ -35,6 +36,8 @@ private AccountRepository accountRepository;
 
 @PostMapping
 public ResponseEntity<TournamentDTO> createTournament(@RequestBody Tournament tournament) {
+    if (tournament.getStartDate() == null) tournament.setStartDate(LocalDateTime.now());
+    if (tournament.getEndDate() == null) tournament.setEndDate(LocalDateTime.now().plusDays(7));
     Tournament saved = tournamentRepository.save(tournament);
     return ResponseEntity.status(HttpStatus.CREATED).body(TournamentDTO.fromEntity(saved));
 }
@@ -99,9 +102,10 @@ public ResponseEntity<List<TournamentLeaderboardDTO>> getLeaderboard(@PathVariab
     List<TournamentLeaderboardDTO> leaderboard = tournament.getAccounts()
             .stream()
             .map(acc -> new TournamentLeaderboardDTO(
-                    acc.getName(),
-                    acc.getCash(),
-                    acc.getHoldings().stream().mapToDouble(h -> h.getShares() * h.getAveragePrice()).sum()
+                acc.getName(),
+                acc.getCash(),
+                acc.getHoldings().stream().mapToDouble(h -> h.getShares() * h.getAveragePrice()).sum(),
+                acc.getHoldings().stream().mapToInt(h -> h.getShares()).sum() // totalStocks
             ))
             .sorted((a,b) -> Double.compare(b.getTotalHoldingValue() + b.getCash(), a.getTotalHoldingValue() + a.getCash()))
             .collect(Collectors.toList());
