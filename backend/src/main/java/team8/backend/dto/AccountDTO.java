@@ -7,6 +7,7 @@ import java.util.stream.Collectors;
 public class AccountDTO {
     private Long id;
     private Long userId; // just the user ID
+    private String name;
     private double cash;
     private List<HoldingDTO> holdings;
     private List<TransactionDTO> transactions;
@@ -15,9 +16,10 @@ public class AccountDTO {
 
     public AccountDTO() {}
 
-    public AccountDTO(Long id, Long userId, double cash, List<HoldingDTO> holdings) {
+    public AccountDTO(Long id, Long userId, String name, double cash, List<HoldingDTO> holdings) {
         this.id = id;
         this.userId = userId;
+        this.name = name;
         this.cash = cash;
         this.holdings = holdings;
     }
@@ -27,6 +29,7 @@ public class AccountDTO {
         AccountDTO dto = new AccountDTO();
         dto.setId(a.getId());
         dto.setUserId(a.getUser() != null ? a.getUser().getId() : null);
+        dto.setName(a.getName());
         dto.setCash(a.getCash());
 
         dto.setHoldings(
@@ -50,6 +53,7 @@ public class AccountDTO {
     // getters & setters
     public Long getId() { return id; }
     public Long getUserId() { return userId; }
+    public String getName() { return name; } 
     public double getCash() { return cash; }
     public List<HoldingDTO> getHoldings() { return holdings; }
     public List<TransactionDTO> getTransactions() { return transactions; }
@@ -58,6 +62,7 @@ public class AccountDTO {
 
     public void setId(Long id) { this.id = id; }
     public void setUserId(Long userId) { this.userId = userId; }
+    public void setName(String name) { this.name = name; }
     public void setCash(double cash) { this.cash = cash; }
     public void setHoldings(List<HoldingDTO> holdings) { this.holdings = holdings; }
     public void setTransactions(List<TransactionDTO> transactions) { this.transactions = transactions; }

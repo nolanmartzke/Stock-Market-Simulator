@@ -261,7 +261,7 @@ export default function NavBar() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             className="form-control"
-            placeholder="Search symbol or company"
+            placeholder="Search for Stock"
             aria-label="Quick symbol search"
           />
         </div>
