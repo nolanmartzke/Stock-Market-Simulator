@@ -1,6 +1,5 @@
 #!/usr/bin/env bash
 
-# Run frontend linting and stream results to the terminal
 set -euo pipefail
 
 SCRIPT_DIR="$(cd "$(dirname "${BASH_SOURCE[0]}")" && pwd)"
