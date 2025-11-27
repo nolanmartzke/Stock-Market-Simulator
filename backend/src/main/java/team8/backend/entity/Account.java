@@ -95,7 +95,7 @@ public class Account {
     public void setTournament(Tournament tournament) {
         this.tournament = tournament;
     }
-    
+
     public String getName() {
         return name;
     }
