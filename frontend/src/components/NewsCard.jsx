@@ -45,7 +45,7 @@ export default function NewsCard({ category = 'general', pageSize = 10 }) {
 
   useEffect(() => {
     if (page > totalPages) setPage(1)
-  }, [totalPages])
+  }, [totalPages, page])
 
   const startIdx = (page - 1) * pageSize
   const pageItems = news.slice(startIdx, startIdx + pageSize)
