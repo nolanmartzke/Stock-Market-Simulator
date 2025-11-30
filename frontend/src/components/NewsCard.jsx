@@ -10,7 +10,12 @@ function formatDate(unix) {
   }
 }
 
-export default function NewsCard({ category = 'general', pageSize = 10 }) {
+export default function NewsCard({
+  category = 'general',
+  pageSize = 10,
+  heading = 'Related News',
+  subtitle = 'Top headlines related to popular stocks.'
+}) {
   const [news, setNews] = useState([])
   const [loading, setLoading] = useState(false)
   const [error, setError] = useState(null)
@@ -20,6 +25,8 @@ export default function NewsCard({ category = 'general', pageSize = 10 }) {
     let mounted = true
     setLoading(true)
     setError(null)
+    setNews([]) // clear existing so old articles don't flash during category switches
+    setPage(1)
     getNews(category)
       .then((res) => {
         if (!mounted) return
@@ -54,8 +61,8 @@ export default function NewsCard({ category = 'general', pageSize = 10 }) {
     <div>
       <div className="card">
         <div className="card-body">
-          <h5 className="card-title">Related News</h5>
-          <p className="text-muted">Top headlines related to popular stocks.</p>
+          <h5 className="card-title mb-1">{heading}</h5>
+          <p className="text-muted small mb-3">{subtitle}</p>
 
           {loading && <div className="text-center py-3">Loading news...</div>}
           {error && <div className="text-danger">Error loading news.</div>}
@@ -64,24 +71,26 @@ export default function NewsCard({ category = 'general', pageSize = 10 }) {
             <div className="text-muted">No news available.</div>
           )}
 
-          <ul className="list-unstyled">
-            {pageItems.map((item) => (
-              <li key={item.id} className="mb-3">
-                <a href={item.url} target="_blank" rel="noreferrer" className="d-flex text-decoration-none text-dark">
-                  {item.image ? (
-                    <img src={item.image} alt="thumb" style={{ width: 84, height: 56, objectFit: 'cover' }} className="me-3 rounded" />
-                  ) : (
-                    <div style={{ width: 84, height: 56 }} className="me-3 bg-light rounded" />
-                  )}
+          {!loading && (
+            <ul className="list-unstyled">
+              {pageItems.map((item) => (
+                <li key={item.id} className="mb-3">
+                  <a href={item.url} target="_blank" rel="noreferrer" className="d-flex text-decoration-none text-dark">
+                    {item.image ? (
+                      <img src={item.image} alt="thumb" style={{ width: 84, height: 56, objectFit: 'cover' }} className="me-3 rounded" />
+                    ) : (
+                      <div style={{ width: 84, height: 56 }} className="me-3 bg-light rounded" />
+                    )}
 
-                  <div>
-                    <div className="fw-semibold">{item.headline}</div>
-                    <div className="text-muted small">{item.source} • {formatDate(item.datetime)}</div>
-                  </div>
-                </a>
-              </li>
-            ))}
-          </ul>
+                    <div>
+                      <div className="fw-semibold">{item.headline}</div>
+                      <div className="text-muted small">{item.source} • {formatDate(item.datetime)}</div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
 
           {/* Pagination controls */}
           {totalPages > 1 && (

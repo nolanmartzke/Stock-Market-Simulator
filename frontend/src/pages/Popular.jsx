@@ -1,33 +1,63 @@
-import React from 'react';
+import React, { useState } from 'react';
 import NewsCard from '../components/NewsCard';
 
+const topicFilters = [
+	{ label: 'All Market News', category: 'general', hint: 'Broad market headlines and sentiment.' },
+	{ label: 'Forex & Macro', category: 'forex', hint: 'Currencies, rates, and macro shifts.' },
+	{ label: 'Crypto', category: 'crypto', hint: 'Digital assets, blockchain, and tokens.' },
+	{ label: 'M&A / Deals', category: 'merger', hint: 'Acquisitions, IPO chatter, and deal flow.' }
+];
+
 const Popular = () => {
+	const [activeTopic, setActiveTopic] = useState(topicFilters[0]);
+
 	return (
 		<div className="container py-4">
-			<h1 className="mb-4">Popular</h1>
+			<h1 className="mb-2">Popular</h1>
+			<p className="text-muted mb-4">Dial in the topics you care about and browse the latest headlines.</p>
 
-			<div className="row">
-				{/* Left column: topics / filters */}
-				<aside className="col-12 col-md-3 mb-4">
-					<div className="card">
+			<div className="row g-4 justify-content-center">
+				{/* Center column: topic filters + news */}
+				<main className="col-12 col-xl-8">
+					<div className="card mb-3">
 						<div className="card-body">
-							<h5 className="card-title">Topics</h5>
-							<p className="text-muted">Filters, trending sectors, or watchlists.</p>
-							<ul className="list-unstyled">
-								<li className="py-2">• Trending: Technology</li>
-								<li className="py-2">• Watchlist: Top Growth</li>
-								<li className="py-2">• Sector: Healthcare</li>
-							</ul>
+							<div className="d-flex flex-wrap justify-content-between align-items-start gap-3">
+								<div>
+									<h5 className="card-title mb-1">Topics</h5>
+									<p className="text-muted small mb-0">Use filters to refocus the news feed.</p>
+								</div>
+								<div className="d-flex flex-wrap gap-2">
+									{topicFilters.map((topic) => {
+										const isActive = topic.category === activeTopic.category;
+										return (
+											<button
+												key={topic.category}
+												className={`btn btn-sm ${isActive ? 'btn-dark' : 'btn-outline-secondary'}`}
+												onClick={() => setActiveTopic(topic)}
+											>
+												{topic.label}
+											</button>
+										);
+									})}
+								</div>
+							</div>
 						</div>
 					</div>
-				</aside>
 
-				{/* Main column: popular stocks */}
-				<main className="col-12 col-md-6 mb-4">
+					<NewsCard
+						category={activeTopic.category}
+						pageSize={8}
+						heading={`${activeTopic.label} News`}
+						subtitle={activeTopic.hint}
+					/>
+				</main>
+
+				{/* Right column: popular stocks */}
+				<aside className="col-12 col-xl-4">
 					<div className="card mb-3">
 						<div className="card-body">
 							<h5 className="card-title">Most Popular Stocks</h5>
-							<p className="text-muted">A curated list of stocks people are viewing. (Template)</p>
+							<p className="text-muted small">A curated list of stocks people are watching.</p>
 
 							<div className="row gy-3">
 								{[1, 2, 3, 4].map((i) => (
@@ -47,18 +77,6 @@ const Popular = () => {
 							</div>
 						</div>
 					</div>
-
-					<div className="card">
-						<div className="card-body">
-							<h6 className="card-title">Notes</h6>
-							<p className="text-muted small">This is just template. Replace the mapped items with real API data eventually</p>
-						</div>
-					</div>
-				</main>
-
-				{/* Right column: news (NewsCard) */}
-				<aside className="col-12 col-md-3 mb-4">
-					<NewsCard category="general" pageSize={6} />
 				</aside>
 			</div>
 		</div>
