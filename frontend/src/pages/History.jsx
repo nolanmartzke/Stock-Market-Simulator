@@ -23,7 +23,7 @@ export default function History() {
       .then((res) => {
         const list = Array.isArray(res.data) ? res.data : [];
         setAccounts(list);
-        if (!accountId && list.length) setAccountId(list[0].id);
+        setAccountId((prev) => prev ?? (list[0]?.id ?? null));
       })
       .catch((err) => {
         console.error("Accounts fetch failed", err);

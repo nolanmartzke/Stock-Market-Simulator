@@ -5,13 +5,13 @@ import team8.backend.entity.Holding;
 public class HoldingDTO {
     private Long id;
     private String stockTicker;
-    private int shares;
+    private double shares;
     private double averagePrice;
     private Long accountId; // just the account ID to avoid recursion
 
     public HoldingDTO() {}
 
-    public HoldingDTO(Long id, String stockTicker, int shares, double averagePrice, Long accountId) {
+    public HoldingDTO(Long id, String stockTicker, double shares, double averagePrice, Long accountId) {
         this.id = id;
         this.stockTicker = stockTicker;
         this.shares = shares;
@@ -33,13 +33,13 @@ public class HoldingDTO {
     // getters & setters
     public Long getId() { return id; }
     public String getStockTicker() { return stockTicker; }
-    public int getShares() { return shares; }
+    public double getShares() { return shares; }
     public double getAveragePrice() { return averagePrice; }
     public Long getAccountId() { return accountId; }
     
     public void setId(Long id) { this.id = id; }
     public void setStockTicker(String stockTicker) { this.stockTicker = stockTicker; }
-    public void setShares(int shares) { this.shares = shares; }
+    public void setShares(double shares) { this.shares = shares; }
     public void setAveragePrice(double averagePrice) { this.averagePrice = averagePrice; }
     public void setAccountId(Long accountId) { this.accountId = accountId; }
 }

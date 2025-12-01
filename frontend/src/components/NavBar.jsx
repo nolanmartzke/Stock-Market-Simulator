@@ -17,7 +17,7 @@ import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
 import { searchBar } from "../api/StockApi";
 import { useAuth } from "../context/AuthContext";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { Offcanvas } from "react-bootstrap";
 
 export default function NavBar() {
@@ -181,7 +181,7 @@ export default function NavBar() {
             </Link>
 
             <div className="d-flex justify-content-center mt-4">
-              <motion.button
+              <Motion.button
                 className="btn btn-danger btn-medium w-10 fw-medium text-white"
                 style={{
                   borderRadius: "12px",
@@ -193,7 +193,7 @@ export default function NavBar() {
                 }}
               >
                 Logout
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
         ) : (

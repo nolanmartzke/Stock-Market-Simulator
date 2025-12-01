@@ -19,7 +19,7 @@ public class Holding {
     private String stockTicker;
 
     @Column(name = "shares", nullable = false)
-    private int shares;
+    private double shares;
 
     @Column(name = "average_price", nullable = false)
     private double averagePrice;
@@ -27,7 +27,7 @@ public class Holding {
     // Constructors
     public Holding() {}
 
-    public Holding(Account account, String stockTicker, int shares, double averagePrice) {
+    public Holding(Account account, String stockTicker, double shares, double averagePrice) {
         this.account = account;
         this.stockTicker = stockTicker;
         this.shares = shares;
@@ -55,11 +55,11 @@ public class Holding {
         this.stockTicker = stockTicker;
     }
 
-    public int getShares() {
+    public double getShares() {
         return shares;
     }
 
-    public void setShares(int shares) {
+    public void setShares(double shares) {
         this.shares = shares;
     }
 
