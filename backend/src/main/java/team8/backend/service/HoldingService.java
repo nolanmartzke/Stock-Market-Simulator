@@ -34,14 +34,14 @@ public class HoldingService {
 
     // Add or update a holding (Buy)
     @Transactional
-    public HoldingDTO addOrUpdateHolding(Account account, String ticker, int shares, double purchasePrice) {
+    public HoldingDTO addOrUpdateHolding(Account account, String ticker, double shares, double purchasePrice) {
         Holding existing = holdingRepository.findByAccountIdAndStockTicker(account.getId(), ticker);
 
         Holding saved;
         if (existing != null) {
             // Update existing holding (recalculate average price)
             double totalCost = existing.getAveragePrice() * existing.getShares() + purchasePrice * shares;
-            int newShareCount = existing.getShares() + shares;
+            double newShareCount = existing.getShares() + shares;
             existing.setShares(newShareCount);
             existing.setAveragePrice(totalCost / newShareCount);
             saved = holdingRepository.save(existing);
@@ -56,7 +56,7 @@ public class HoldingService {
 
     // Update after a sell transaction
     @Transactional
-    public void updateAfterSell(Account account, String ticker, int sharesToSell) {
+    public void updateAfterSell(Account account, String ticker, double sharesToSell) {
         Holding existing = holdingRepository.findByAccountIdAndStockTicker(account.getId(), ticker);
 
         if (existing == null) {
@@ -67,7 +67,7 @@ public class HoldingService {
             throw new IllegalArgumentException("Not enough shares to sell for " + ticker);
         }
 
-        int remainingShares = existing.getShares() - sharesToSell;
+        double remainingShares = existing.getShares() - sharesToSell;
 
         if (remainingShares == 0) {
             account.getHoldings().remove(existing);

@@ -92,7 +92,7 @@ public class AccountController {
             return ResponseEntity.badRequest().body("Invalid trade parameters.");
         }
 
-        int shares = sharesNum.intValue();
+        double shares = sharesNum.doubleValue();
         double price = priceNum.doubleValue();
 
         if (shares <= 0 || price <= 0) {
@@ -157,13 +157,13 @@ public class AccountController {
         List<Account> accounts = accountRepository.findByUser(userOpt.get());
         double totalCash = accounts.stream().mapToDouble(Account::getCash).sum();
 
-        Map<String, Integer> totalStocks = accounts.stream()
-                .flatMap(a -> a.getHoldings().stream())
-                .collect(Collectors.toMap(
-                        Holding::getStockTicker,
-                        Holding::getShares,
-                        Integer::sum
-                ));
+        Map<String, Double> totalStocks = accounts.stream()
+        .flatMap(a -> a.getHoldings().stream())
+        .collect(Collectors.toMap(
+                Holding::getStockTicker,
+                Holding::getShares,
+                Double::sum
+        ));
 
         Map<String, Object> response = Map.of(
                 "totalCash", totalCash,
