@@ -10,13 +10,13 @@ public class TransactionDTO {
     private Long accountId;
     private String action;
     private String stockTicker;
-    private int shares;
+    private double shares;
     private double price;
     private LocalDateTime timestamp;
 
     public TransactionDTO() {}
 
-    public TransactionDTO(Long id, Long accountId, String action, String stockTicker, int shares, double price, LocalDateTime timestamp) {
+    public TransactionDTO(Long id, Long accountId, String action, String stockTicker, double shares, double price, LocalDateTime timestamp) {
         this.id = id;
         this.accountId = accountId;
         this.action = action;
@@ -57,8 +57,8 @@ public class TransactionDTO {
     public String getStockTicker() { return stockTicker; }
     public void setStockTicker(String stockTicker) { this.stockTicker = stockTicker; }
 
-    public int getShares() { return shares; }
-    public void setShares(int shares) { this.shares = shares; }
+    public double getShares() { return shares; }
+    public void setShares(double shares) { this.shares = shares; }
 
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }

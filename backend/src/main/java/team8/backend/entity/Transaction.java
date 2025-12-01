@@ -22,7 +22,7 @@ public class Transaction {
     private String stockTicker;
 
     @Column(nullable = false)
-    private int shares;
+    private double shares;
 
     @Column(nullable = false)
     private double price; // price per share at trade
@@ -32,7 +32,7 @@ public class Transaction {
 
     public Transaction() {}
 
-    public Transaction(Account account, String action, String stockTicker, int shares, double price, LocalDateTime timestamp) {
+    public Transaction(Account account, String action, String stockTicker, double shares, double price, LocalDateTime timestamp) {
         this.account = account;
         this.action = action;
         this.stockTicker = stockTicker;
@@ -54,8 +54,8 @@ public class Transaction {
     public String getStockTicker() { return stockTicker; }
     public void setStockTicker(String stockTicker) { this.stockTicker = stockTicker; }
 
-    public int getShares() { return shares; }
-    public void setShares(int shares) { this.shares = shares; }
+    public double getShares() { return shares; }
+    public void setShares(double shares) { this.shares = shares; }
 
     public double getPrice() { return price; }
     public void setPrice(double price) { this.price = price; }
