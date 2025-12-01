@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
 import { User, LogOut } from "lucide-react";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { changeName, changePassword} from "../api/AuthAPI";
 
@@ -193,7 +193,7 @@ const Account = () => {
                 <div className="text-danger mt-2" style={{ height: "20px" }}>
                   {errorMessage}
                 </div>
-                <motion.button
+                <Motion.button
                   whileTap={{ scale: 0.95 }}
                   className="btn btn-primary w-100 mt-3"
                   style={{ borderRadius: 12 }}
@@ -201,12 +201,12 @@ const Account = () => {
                   disabled={!passwordButtonStatus}
                 >
                   {updatePasswordText}
-                </motion.button>
+                </Motion.button>
 
                 <hr className="my-4" />
 
                 {/* Logout (existing behavior) */}
-                <motion.button
+                <Motion.button
                   whileTap={{ scale: 0.95 }}
                   onClick={handleLogout}
                   className="btn btn-outline-secondary w-100 fw-medium"
@@ -214,7 +214,7 @@ const Account = () => {
                 >
                   <LogOut size={18} className="me-2" />
                   Log out
-                </motion.button>
+                </Motion.button>
               </div>
             </div>
           </div>

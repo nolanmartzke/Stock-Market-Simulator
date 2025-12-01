@@ -1,11 +1,11 @@
-import React, { useEffect, useMemo, useState } from "react";
+import React, { useCallback, useEffect, useMemo, useState } from "react";
 import { Search, PlusCircle, ArrowRightCircle, ArrowUpRight, ArrowDownRight, TrendingUp, Layers, CircleDollarSign, } from "lucide-react";
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, } from "recharts";
 import { useParams } from "react-router-dom";
 import { Button, Container, Form, Row, Col, Card, Modal } from "react-bootstrap";
 import { getQuote, getMetrics, search, getHistory, getProfile, } from "../api/StockApi";
 import api, { trade, loadAccount } from "../api/AccountApi";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 import { Toaster, toast } from "sonner";
 
@@ -63,36 +63,36 @@ const Stock = () => {
       .catch((err) => console.error("Failed to load accounts", err));
   }, []);
 
-  function refreshHoldings() {
-    if (!accountId) return;
-    if (!ticker) return;
+const refreshHoldings = useCallback(() => {
+  if (!accountId) return;
+  if (!ticker) return;
 
-    loadAccount(accountId)
-      .then((response) => response.data)
-      .then((data) => {
-        if (!data.holdings) return;
-        setCash(data.cash)
+  loadAccount(accountId)
+    .then((response) => response.data)
+    .then((data) => {
+      if (!data.holdings) return;
+      setCash(data.cash)
 
-        const currHolding = data.holdings.find((h) => h.stockTicker === ticker);
-        if (!currHolding) {
-          setNumHoldingShares(0);
-          setAverageCost(null);
-        } else {
-          setNumHoldingShares(currHolding.shares);
-          setAverageCost(currHolding.averagePrice);
-        }
+      const currHolding = data.holdings.find((h) => h.stockTicker === ticker);
+      if (!currHolding) {
+        setNumHoldingShares(0);
+        setAverageCost(null);
+      } else {
+        setNumHoldingShares(currHolding.shares);
+        setAverageCost(currHolding.averagePrice);
+      }
 
-        console.log(data);
-      })
-      .catch((err) => console.log(err));
-  } 
+      console.log(data);
+    })
+    .catch((err) => console.log(err));
+}, [accountId, ticker]); 
   /**
    * Whenever the account or ticker changes, refresh holdings so we can
    * show share count and average cost for the selected symbol.
    */
   useEffect(() => {
     refreshHoldings();
-  }, [accountId, ticker, query]);
+  }, [accountId, ticker, query, refreshHoldings]);
 
   /**
    * Respond to route changes by loading quotes, metrics, history, and
@@ -870,7 +870,7 @@ const Stock = () => {
                 </div>
 
                       
-                <motion.button // idle | notEnoughBP | notEnoughShares | missingRequiredInput
+                <Motion.button // idle | notEnoughBP | notEnoughShares | missingRequiredInput
                   className=" w-100 border-0 rounded-pill fw-bold text-white py-3"
                   style={{
                     borderRadius: "12px",
@@ -886,7 +886,7 @@ const Stock = () => {
                   onClick={handleReviewOrder}
                 >
                   <AnimatePresence mode="wait">
-                    <motion.span // fades the text in and out
+                    <Motion.span // fades the text in and out
                       key={reviewButtonStatus}
                       initial={{ opacity: 0 }}
                       animate={{ opacity: 1, transition: { duration: 0.1 } }}
@@ -903,9 +903,9 @@ const Stock = () => {
                           ? "Enter Shares"
                           : "Review Order" // default
                       }
-                    </motion.span>
+                    </Motion.span>
                   </AnimatePresence>
-                </motion.button>
+                </Motion.button>
 
         
 

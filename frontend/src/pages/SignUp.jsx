@@ -2,7 +2,7 @@ import React, { useState } from "react";
 import { ArrowLeft, UserPlus, User, Lock, Shield } from "lucide-react";
 import { signUp } from "../api/AuthAPI";
 import { useNavigate, Link } from "react-router-dom";
-import { motion, AnimatePresence } from "framer-motion";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 function SignUp() {
   const [email, setEmail] = useState("");
@@ -113,7 +113,7 @@ function SignUp() {
                 />
               </div>
 
-              <motion.button
+              <Motion.button
                 type="submit"
                 disabled={status === "loading"}
                 className="btn btn-success w-100 fw-medium text-white"
@@ -132,7 +132,7 @@ function SignUp() {
                 animate={{ scale: status === "success" ? [1, 1.1, 1] : 1 }}
               >
                 <AnimatePresence mode="wait">
-                  <motion.span // fades the text in and out
+                  <Motion.span // fades the text in and out
                     key={status}
                     initial={{ opacity: 0 }}
                     animate={{ opacity: 1 }}
@@ -149,9 +149,9 @@ function SignUp() {
                         ? "Unknown Error"
                         : "Create Account" // default
                     }
-                  </motion.span>
+                  </Motion.span>
                 </AnimatePresence>
-              </motion.button>
+              </Motion.button>
             </form>
 
             {/* Footer */}

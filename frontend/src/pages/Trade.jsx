@@ -5,7 +5,7 @@ import {
   ArrowUpRight,
   ArrowDownRight,
 } from "lucide-react";
-import { searchBar, getQuote, search } from "../api/StockApi";
+import { searchBar, getQuote, search, getMetrics, getHistory, getProfile } from "../api/StockApi";
 import { useNavigate } from "react-router-dom";
 import api, { loadAccount, trade } from "../api/AccountApi";
 import { Form } from "react-bootstrap";
@@ -18,11 +18,14 @@ const Trade = () => {
   const [query, setQuery] = useState("");
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
-  const [account, setAccount] = useState(null);
-  const [accountLoading, setAccountLoading] = useState(false);
   const [holdings, setHoldings] = useState([]);
   const timer = useRef(null);
   const navigate = useNavigate();
+  const [, setStockName] = useState("");
+  const [, setPrice] = useState(0);
+  const [, setMetrics] = useState(null);
+  const [, setHistory] = useState([]);
+  const [, setProfile] = useState(null);
 
   const [accountId, setAccountId] = useState(null);
 
@@ -73,17 +76,14 @@ const Trade = () => {
   useEffect(() => {
     console.log("useEffect triggered for accountId:", accountId);
     if (!accountId) return;
-    setAccountLoading(true);
     loadAccount(accountId)
       .then((res) => {
-        setAccount(res.data);
         setHoldings(res.data.holdings || []);
         console.log("Loaded holdings:", res.data.holdings);
       })
       .catch((err) => console.error("Error loading account:", err))
       .finally(() => {
         console.log("Finished loading account");
-        setAccountLoading(false);
       });
   }, [accountId]);
 
