@@ -11,6 +11,8 @@ public class AccountDTO {
     private double cash;
     private List<HoldingDTO> holdings;
     private List<TransactionDTO> transactions;
+    private Long tournamentId;
+    private String tournamentName;
 
     public AccountDTO() {}
 
@@ -42,6 +44,9 @@ public class AccountDTO {
                 : List.of()
         );
 
+        dto.setTournamentId(a.getTournament() != null ? a.getTournament().getId() : null);
+        dto.setTournamentName(a.getTournament() != null ? a.getTournament().getName() : null);
+
         return dto;
     }
 
@@ -52,6 +57,8 @@ public class AccountDTO {
     public double getCash() { return cash; }
     public List<HoldingDTO> getHoldings() { return holdings; }
     public List<TransactionDTO> getTransactions() { return transactions; }
+    public Long getTournamentId() { return tournamentId; }
+    public String getTournamentName() { return tournamentName; }
 
     public void setId(Long id) { this.id = id; }
     public void setUserId(Long userId) { this.userId = userId; }
@@ -59,4 +66,6 @@ public class AccountDTO {
     public void setCash(double cash) { this.cash = cash; }
     public void setHoldings(List<HoldingDTO> holdings) { this.holdings = holdings; }
     public void setTransactions(List<TransactionDTO> transactions) { this.transactions = transactions; }
+    public void setTournamentId(Long tournamentId) { this.tournamentId = tournamentId; }
+    public void setTournamentName(String tournamentName) { this.tournamentName = tournamentName; }
 }
