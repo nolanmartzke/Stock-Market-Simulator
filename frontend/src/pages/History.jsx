@@ -35,19 +35,20 @@ const styles = {
     minHeight: "100vh",
     padding: "3rem clamp(1.25rem, 4vw, 4rem)",
     background:
-      "radial-gradient(circle at 20% 20%, rgba(255,255,255,0.9), transparent 50%), #f4f5f7",
+      "radial-gradient(160% 140% at 80% 0%, rgba(92,99,255,0.12), transparent 40%), radial-gradient(140% 120% at 10% 80%, rgba(14,165,233,0.12), transparent 45%), linear-gradient(135deg, #0b0f1e 0%, #05060d 100%)",
     fontFamily:
-      '"SF Pro Display", "SF Pro Text", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
-    color: "#050505",
+      '"Inter", "SF Pro Display", -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif',
+    color: "#e7ecf7",
   },
   panel: {
     maxWidth: 1100,
     margin: "0 auto",
-    background: "rgba(255,255,255,0.92)",
-    borderRadius: "30px",
+    background: "rgba(13, 17, 38, 0.82)",
+    borderRadius: "24px",
     padding: "2.5rem clamp(1.5rem, 3vw, 3rem)",
-    boxShadow: "0 30px 60px rgba(12, 12, 20, 0.12)",
-    backdropFilter: "blur(20px)",
+    boxShadow: "0 30px 70px rgba(0, 0, 0, 0.35)",
+    border: "1px solid rgba(255,255,255,0.08)",
+    backdropFilter: "blur(14px)",
   },
   headerRow: {
     display: "flex",
@@ -61,7 +62,7 @@ const styles = {
     textTransform: "uppercase",
     letterSpacing: "0.35em",
     fontSize: "0.7rem",
-    color: "#9a9aa3",
+    color: "rgba(232, 237, 255, 0.65)",
     marginBottom: "0.5rem",
   },
   title: {
@@ -72,7 +73,7 @@ const styles = {
   },
   subtitle: {
     margin: 0,
-    color: "#5a5a62",
+    color: "#aeb8de",
     maxWidth: 520,
     lineHeight: 1.5,
   },
@@ -86,28 +87,29 @@ const styles = {
     fontSize: "0.75rem",
     letterSpacing: "0.2em",
     textTransform: "uppercase",
-    color: "#898995",
+    color: "rgba(232,237,255,0.6)",
   },
   select: {
-    borderRadius: "999px",
+    borderRadius: "14px",
     padding: "0.85rem 1rem",
-    border: "1px solid rgba(0,0,0,0.1)",
+    border: "1px solid rgba(255,255,255,0.12)",
     fontFamily: "inherit",
-    backgroundColor: "#fff",
+    backgroundColor: "rgba(255,255,255,0.04)",
     fontSize: "1rem",
+    color: "#e7ecf7",
   },
   alert: {
     marginBottom: "1.25rem",
     borderRadius: "16px",
     padding: "0.9rem 1rem",
-    background: "rgba(255, 225, 225, 0.9)",
-    color: "#b3261e",
+    background: "rgba(239, 68, 68, 0.12)",
+    color: "#fca5a5",
     fontWeight: 500,
   },
   state: {
     textAlign: "center",
     padding: "2rem 1rem",
-    color: "#6a6a72",
+    color: "#9aa6d4",
   },
   tableWrapper: {
     overflowX: "auto",
@@ -122,7 +124,7 @@ const styles = {
     textTransform: "uppercase",
     letterSpacing: "0.15em",
     fontSize: "0.72rem",
-    color: "#9a9aa4",
+    color: "rgba(232,237,255,0.6)",
     padding: "0 1rem 0.75rem 0",
     textAlign: "left",
   },
@@ -130,24 +132,24 @@ const styles = {
     textTransform: "uppercase",
     letterSpacing: "0.15em",
     fontSize: "0.72rem",
-    color: "#9a9aa4",
+    color: "rgba(232,237,255,0.6)",
     padding: "0 1rem 0.75rem 1rem",
     textAlign: "right",
   },
   td: {
     padding: "1rem 1rem 1rem 0",
-    borderTop: "1px solid rgba(15,15,20,0.08)",
+    borderTop: "1px solid rgba(255,255,255,0.06)",
     verticalAlign: "middle",
   },
   tdRight: {
     padding: "1rem 1rem",
-    borderTop: "1px solid rgba(15,15,20,0.08)",
+    borderTop: "1px solid rgba(255,255,255,0.06)",
     verticalAlign: "middle",
     textAlign: "right",
   },
   tdLast: {
     padding: "1rem 0 1rem 4rem",
-    borderTop: "1px solid rgba(15,15,20,0.08)",
+    borderTop: "1px solid rgba(255,255,255,0.06)",
     verticalAlign: "middle",
   },
   ticker: {
@@ -157,7 +159,7 @@ const styles = {
   },
   subtext: {
     fontSize: "0.84rem",
-    color: "#8c8c95",
+    color: "#9aa6d4",
     marginTop: "0.15rem",
   },
   numeric: {
@@ -252,15 +254,19 @@ const getPillStyle = (action) => {
   if (lowered === "buy") {
     return {
       ...base,
-      backgroundColor: "rgba(25, 206, 123, 0.15)",
-      color: "#056647",
+      backgroundImage: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+      color: "#0b1023",
+      boxShadow: "0 8px 18px rgba(14,165,233,0.25)",
+      border: "1px solid rgba(255,255,255,0.18)",
     };
   }
   if (lowered === "sell") {
     return {
       ...base,
-      backgroundColor: "rgba(255, 107, 107, 0.2)",
-      color: "#b3261e",
+      backgroundImage: "linear-gradient(135deg, #ef4444, #f97316)",
+      color: "#0b1023",
+      boxShadow: "0 8px 18px rgba(239,68,68,0.3)",
+      border: "1px solid rgba(255,255,255,0.18)",
     };
   }
   return { ...base, backgroundColor: "rgba(15,15,20,0.08)", color: "#2f2f36" };
