@@ -31,7 +31,13 @@ import static org.assertj.core.api.Assertions.assertThat;
                 "spring.datasource.driver-class-name=org.h2.Driver",
                 "spring.jpa.database-platform=org.hibernate.dialect.H2Dialect",
                 "spring.jpa.hibernate.ddl-auto=create",
-                "spring.jpa.show-sql=true"
+                "spring.jpa.show-sql=true",
+                "MYSQL_DATABASE=testdb",
+                "MYSQL_USER=testuser",
+                "MYSQL_ROOT_PASSWORD=rootpass",
+                "MYSQL_PASSWORD=testpass",
+                "FINNHUB_API_KEY=dummy_finnhub_key",
+                "MASSIVE_API_KEY=dummy_massive_key"
         }
 )
 public class HoldingControllerIntegrationTest {
