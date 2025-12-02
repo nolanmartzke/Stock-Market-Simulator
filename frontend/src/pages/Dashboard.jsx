@@ -219,12 +219,12 @@ const Dashboard = () => {
               <Card.Body className="p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <div className="text-uppercase section-sub small">Holdings</div>
+                    <div className="text-uppercase section-sub small">Current</div>
                     <h4 className="section-heading mb-0">Positions</h4>
                   </div>
-                  <span className="pill-gradient small">{positionCount} assets</span>
+                  <span className="pill-gradient text-white">{positionCount} assets</span>
                 </div>
-                <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex justify-content-between align-items-center m-4">
                   <span className="section-sub">Cash on hand</span>
                   <span className="fw-semibold text-light">{formattedCashBalance}</span>
                 </div>

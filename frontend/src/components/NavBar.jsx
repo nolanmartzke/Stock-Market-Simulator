@@ -165,7 +165,7 @@ export default function NavBar() {
                 onClick={onLinkClick}
               >
                 <img
-                  src="https://placehold.co/40x40/007bff/ffffff?text=TW"
+                  src={`https://placehold.co/40x40/6B8EF0/ffffff?text=${auth.name?.toUpperCase()?.[0]}`}
                   alt="User Avatar"
                   className="avatar"
                 />

@@ -116,7 +116,7 @@ export default function Landing() {
               {/* Left column: Copy + CTAs */}
               <div className="col-lg-6 mb-5 mb-lg-0">
                 {/* Badge */}
-                <span className="badge text-bg-danger mb-3">Auth live now</span>
+                <span className="badge text-bg-danger mb-3">Get Started Now</span>
 
                 {/* Headline with fade-in-up spans */}
                 <h1 id="hero-heading" className="display-3 fw-bold mb-4">
