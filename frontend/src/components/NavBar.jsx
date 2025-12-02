@@ -56,19 +56,16 @@ export default function NavBar() {
   ];
 
   const navStyle = {
-    width: "250px",
+    width: "270px",
     minHeight: "100vh",
     position: "fixed",
     top: 0,
     left: 0,
     zIndex: 1000,
-    boxShadow: "2px 0 15px rgba(0, 0, 0, 0.1)",
-    borderTopRightRadius: "20px",
-    borderBottomRightRadius: "20px",
   };
 
   const linkClass =
-    "d-flex align-items-center rounded-lg p-3 text-decoration-none transition-colors duration-200";
+    "d-flex align-items-center rounded-3 p-3 text-decoration-none nav-link-modern";
 
   const { auth, logout } = useAuth();
   const navigate = useNavigate();
@@ -81,23 +78,35 @@ export default function NavBar() {
   // Reusable nav content for both desktop sidebar and mobile drawer
   const NavContent = ({ onLinkClick }) => (
     <>
-      <div className="mb-5 px-1 pt-2">
+      <div className="nav-glow one" />
+      <div className="nav-glow two" />
+
+      <div className="mb-5 pt-2 position-relative">
         <Link
-          className="navbar-brand fw-bold fs-4 text-dark d-flex align-items-center"
+          className="brand-mark text-decoration-none d-flex align-items-center gap-3"
           to="/"
           onClick={onLinkClick}
         >
-          <span className="me-2 text-danger">TRD</span>
-          <span className="text-secondary">Wars</span>
+          <span className="brand-logo shadow-sm">TW</span>
+          <span>
+            <div className="fw-bold fs-5">TRD Wars</div>
+            <div className="brand-subtitle small">Trade. Learn. Compete.</div>
+          </span>
         </Link>
+        <div className="d-flex align-items-center gap-2 mt-3">
+          <span className="pill-gradient small">Live</span>
+          <span className="stat-chip py-1 px-2">
+            <Zap size={14} className="text-warning" /> Market pulse
+          </span>
+        </div>
       </div>
 
-      <div className="mb-3 px-1">
+      <div className="mb-3">
         <SearchInline onNavigate={() => { if (onLinkClick) onLinkClick(); }} />
       </div>
 
-      <div className="flex-grow-1">
-        <h6 className="text-uppercase text-muted fw-semibold mb-2 px-1">
+      <div className="flex-grow-1 position-relative">
+        <h6 className="text-uppercase nav-section-label fw-semibold mb-2">
           Main
         </h6>
         <ul className="nav nav-pills flex-column mb-4">
@@ -109,11 +118,7 @@ export default function NavBar() {
                   to={item.link}
                   onClick={onLinkClick}
                   className={({ isActive }) =>
-                    `${linkClass} ${
-                      isActive
-                        ? "bg-red-100 text-danger fw-semibold"
-                        : "text-gray-600 hover:bg-gray-100"
-                    } w-100`
+                    `${linkClass} ${isActive ? "active fw-semibold" : ""} w-100`
                   }
                 >
                   <Icon className="me-3" size={20} />
@@ -124,7 +129,7 @@ export default function NavBar() {
           })}
         </ul>
 
-        <h6 className="text-uppercase text-muted fw-semibold mb-2 px-1">
+        <h6 className="text-uppercase nav-section-label fw-semibold mb-2">
           Support
         </h6>
         <ul className="nav nav-pills flex-column">
@@ -137,18 +142,14 @@ export default function NavBar() {
                     to={item.link}
                     onClick={onLinkClick}
                     className={({ isActive }) =>
-                      `${linkClass} ${
-                        isActive
-                          ? "bg-red-100 text-danger fw-semibold"
-                          : "text-gray-600 hover:bg-gray-100"
-                      } w-100`
+                      `${linkClass} ${isActive ? "active fw-semibold" : ""} w-100`
                     }
                   >
                     <Icon className="me-3" size={20} />
                     {item.name}
                   </NavLink>
                 ) : (
-                  <a className={`${linkClass} text-gray-600 w-100`} href="#">
+                  <a className={`${linkClass} w-100`} href="#">
                     <Icon className="me-3" size={20} />
                     {item.name}
                   </a>
@@ -159,9 +160,9 @@ export default function NavBar() {
         </ul>
       </div>
 
-      <div className="mt-auto pt-3 border-top border-light">
+      <div className="mt-auto pt-3 nav-footer position-relative">
         {auth ? (
-          <div className="flex align-items-center justify-content-between p-2 w-100">
+          <div className="d-flex align-items-center justify-content-between p-2 w-100">
             <Link
               className="d-flex align-items-center p-2 text-decoration-none"
               to="/account"
@@ -175,7 +176,7 @@ export default function NavBar() {
                 />
               </div>
               <div>
-                <div className="fw-semibold text-dark">{auth.name}</div>
+                <div className="fw-semibold text-light">{auth.name}</div>
                 <div className="text-muted small">{auth.email}</div>
               </div>
             </Link>
@@ -201,17 +202,18 @@ export default function NavBar() {
             {navItemsAccount.map((item) => {
               const Icon = item.icon;
               return (
-                <Link
-                  key={item.name}
-                  to={item.link}
-                  onClick={onLinkClick}
-                  className={`${linkClass} w-100`}
-                >
-                  <li className="nav-item mb-1">
+                <li className="nav-item mb-1" key={item.name}>
+                  <NavLink
+                    to={item.link}
+                    onClick={onLinkClick}
+                    className={({ isActive }) =>
+                      `${linkClass} ${isActive ? "active fw-semibold" : ""} w-100`
+                    }
+                  >
                     <Icon className="me-3" size={20} />
                     {item.name}
-                  </li>
-                </Link>
+                  </NavLink>
+                </li>
               );
             })}
           </ul>
@@ -255,15 +257,17 @@ export default function NavBar() {
 
     return (
       <div className="position-relative">
-        <div className="input-group">
-          <span className="input-group-text"><Search size={16} /></span>
-          <input
-            value={q}
-            onChange={(e) => setQ(e.target.value)}
-            className="form-control"
-            placeholder="Search for Stock"
-            aria-label="Quick symbol search"
-          />
+        <div className="nav-search p-2">
+          <div className="input-group">
+            <span className="input-group-text"><Search size={16} /></span>
+            <input
+              value={q}
+              onChange={(e) => setQ(e.target.value)}
+              className="form-control"
+              placeholder="Search for Stock"
+              aria-label="Quick symbol search"
+            />
+          </div>
         </div>
 
         {q && suggestions && suggestions.length > 0 && (
@@ -285,16 +289,15 @@ export default function NavBar() {
     <>
       {/* Mobile header (≤ md) */}
       <div
-        className="d-md-none position-fixed top-0 start-0 w-100 bg-white"
+        className="d-md-none position-fixed top-0 start-0 w-100 nav-shell"
         style={{
           height: "64px",
           zIndex: 1050,
-          boxShadow: "0 2px 8px rgba(0,0,0,0.08)",
         }}
       >
         <div className="d-flex align-items-center justify-content-between px-3 h-100">
           <button
-            className="btn btn-link p-2"
+            className="btn btn-link p-2 text-light"
             onClick={toggleMenu}
             aria-label="Toggle navigation menu"
             aria-expanded={isMobileMenuOpen}
@@ -303,9 +306,9 @@ export default function NavBar() {
           >
             <Menu size={24} />
           </button>
-          <Link to="/" className="fw-bold fs-5 text-decoration-none">
-            <span className="text-danger">TRD</span>
-            <span className="text-secondary">Wars</span>
+          <Link to="/" className="fw-bold fs-5 text-decoration-none text-light">
+            <span className="text-gradient">TRD</span>
+            <span className="ms-1 text-light">Wars</span>
           </Link>
           <div style={{ width: "44px" }} />
         </div>
@@ -314,7 +317,7 @@ export default function NavBar() {
       {/* Desktop sidebar (≥ md) */}
       <nav
         style={navStyle}
-        className="d-none d-md-flex bg-white p-4 flex-column"
+        className="d-none d-md-flex nav-shell p-4 flex-column"
       >
         <NavContent />
       </nav>
@@ -329,9 +332,10 @@ export default function NavBar() {
         scroll={false}
         backdrop
         aria-labelledby="mobile-drawer-title"
+        className="nav-shell text-light"
       >
-        <Offcanvas.Header closeButton>
-          <Offcanvas.Title id="mobile-drawer-title">Navigation</Offcanvas.Title>
+        <Offcanvas.Header closeButton closeVariant="white">
+          <Offcanvas.Title id="mobile-drawer-title" className="text-light">Navigation</Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body className="d-flex flex-column">
           <NavContent onLinkClick={closeMenu} />

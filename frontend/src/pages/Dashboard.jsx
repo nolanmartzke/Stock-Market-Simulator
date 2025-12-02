@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { ArrowUp, ArrowDown } from 'lucide-react';
+import { ArrowUp, ArrowDown, Activity, Wallet, Sparkles, Compass, Plus } from 'lucide-react';
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
 import { loadDashboard } from '../api/AccountApi';
@@ -85,41 +85,17 @@ const Dashboard = () => {
 
   const formattedPortfolioValue = formatUSD(portfolioValue);
   const formattedCashBalance = formatUSD(cashBalance);
+  const positionCount = positions ? Object.keys(positions).length : 0;
 
   return (
-    <Container className="py-4">
-      {/* portfolio value + welcome */}
-      <Container className="p-3">
-        <Card
-          className="bg-gradient shadow-lg border-0 p-3"
-          style={{
-            backgroundColor: "#000000ff",
-            color: "white",
-            borderRadius: "10px",
-          }}
-        >
-          <Card.Body
-            className="d-flex justify-content-between align-items-center"
-            style={{ paddingLeft: "5%", paddingRight: "5%" }}
-          >
-            <div className="text-end px-4 py-3 rounded-4 border">
-              <h2 className="mb-0 fw-semibold" style={{ fontSize: "2.5rem" }}>
-                {formattedPortfolioValue}
-              </h2>
-              <div
-                className={`d-inline-flex align-items-center gap-2 mt-2 px-2 py-1 rounded-pill fw-semibold ${
-                  dayChange === "positive"
-                    ? "bg-success-subtle text-success"
-                    : "bg-danger-subtle text-danger"
-                }`}
-                style={{
-                  boxShadow:
-                    dayChange === "positive"
-                      ? "0 10px 24px rgba(34, 197, 94, 0.25)"
-                      : "0 10px 24px rgba(239, 68, 68, 0.25)",
-                  fontSize: "0.8rem",
-                }}
-              >
+    <Container fluid className="dashboard-page py-4">
+      <div className="container-xl d-flex flex-column gap-4">
+        <div className="glass-panel gradient-border dashboard-hero p-4 p-lg-5">
+          <div className="d-flex flex-wrap align-items-start justify-content-between gap-4">
+            <div>
+              <div className="pill-gradient text-uppercase small mb-2 d-inline-flex">Portfolio</div>
+              <h1 className="display-5 mb-1 text-light">{formattedPortfolioValue}</h1>
+              <div className={`metric-pill mt-2 ${dayChange === "positive" ? "positive" : "negative"}`}>
                 {dayChange === "positive" ? (
                   <ArrowUp size={16} />
                 ) : (
@@ -129,58 +105,68 @@ const Dashboard = () => {
                 <span className="opacity-75">({dayChangePercent})</span>
               </div>
             </div>
-            <div className="flex-grow-1 text-center">
-              <h1 className="mb-0 fw-semibold" style={{ fontSize: "3rem" }}>
-                Welcome {firstName}!
-              </h1>
+            <div className="text-end">
+              <div className="text-gradient fw-semibold">Welcome back, {firstName || "trader"}.</div>
+              <div className="stat-chip mt-2">
+                <Wallet size={16} /> Cash: {formattedCashBalance}
+              </div>
+              <div className="stat-chip mt-2">
+                <Compass size={16} /> Holdings: {positionCount} tickers
+              </div>
             </div>
-          </Card.Body>
-        </Card>
-      </Container>
+          </div>
+          <div className="d-flex flex-wrap gap-2 mt-4">
+            <span className="stat-chip">
+              <Activity size={14} /> Live market feed
+            </span>
+            <span className="stat-chip">
+              <Sparkles size={14} /> Personalized insights on deck
+            </span>
+          </div>
+        </div>
 
-      <Container>
-        <Row>
-          {/* Graph + Everything else */}
-          <Col xs={12} md={12} xl={8} className="p-3">
-            <Card
-              className="bg-gradient shadow-lg border-0"
-              style={{
-                backgroundColor: "#011936",
-                color: "white",
-                borderRadius: "10px",
-                minHeight: "500px",
-              }}
-            >
-              <Card.Body className="d-flex flex-column justify-content-center align-items-center">
-                <h5 className="mb-4 fw-bold">Stock Graph</h5>
-                <div>[ Graph Placeholder ]</div>
+        <Row className="g-4">
+          <Col xs={12} xl={8} className="d-flex flex-column gap-4">
+            <Card className="glass-panel gradient-border h-100">
+              <Card.Body className="p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <div className="text-uppercase text-muted small">Live chart</div>
+                    <h5 className="mb-0 text-light">Market pulse</h5>
+                  </div>
+                  <span className="pill-gradient small">Realtime</span>
+                </div>
+                <div className="chart-placeholder w-100">
+                  <div className="fw-semibold">Your graph will live here</div>
+                  <div className="text-muted small">Plug in indicators and overlays to customize.</div>
+                </div>
               </Card.Body>
             </Card>
 
-            <Card
-              className="my-4 bg-gradient shadow-lg border-0"
-              style={{
-                backgroundColor: "#183962ff",
-                color: "white",
-                borderRadius: "10px",
-                minHeight: "300px",
-              }}
-            >
-              <Card.Body className="d-flex flex-column align-items-center">
-                <h5 className="py-4 fw-bold">Watchlist</h5>
+            <Card className="glass-panel gradient-border">
+              <Card.Body className="p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <div className="text-uppercase text-muted small">Watchlist</div>
+                    <h5 className="mb-0 text-light">Stay on top</h5>
+                  </div>
+                  <span className="stat-chip"><Plus size={14} /> Add from Trade</span>
+                </div>
+                <div className="watchlist-empty">
+                  Create a curated set of tickers to track intraday moves, news, and alerts.
+                </div>
               </Card.Body>
             </Card>
 
-            <Card
-              className="my-4 bg-gradient shadow-lg border-0 py-2"
-              style={{
-                backgroundColor: "#183962ff",
-                color: "white",
-                borderRadius: "10px",
-                minHeight: "300px",
-              }}
-            >
-              <Card.Body>
+            <Card className="glass-panel gradient-border">
+              <Card.Body className="p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <div className="text-uppercase text-muted small">News</div>
+                    <h5 className="mb-0 text-light">Market headlines</h5>
+                  </div>
+                  <span className="pill-gradient small">Realtime</span>
+                </div>
                 <NewsCard
                   category="general"
                   pageSize={5}
@@ -192,55 +178,42 @@ const Dashboard = () => {
             </Card>
           </Col>
 
-          {/* Postions card */}
-          <Col xs={12} md={12} xl={4} className="p-3">
-            <Card
-              className="bg-gradient shadow-lg border-0 px-2"
-              style={{
-                backgroundColor: "black",
-                color: "white",
-                borderRadius: "10px",
-                minHeight: "600px",
-              }}
-            >
-              <Card.Body>
-                <h2 className="text-center my-3">Positions</h2>
-                <hr className="border border-secondary mb-3" />
-                <div className="py-1 d-flex justify-content-between px-2">
-                  <h5>Cash</h5>
-                  <h5>{formattedCashBalance}</h5>
+          <Col xs={12} xl={4}>
+            <Card className="glass-panel gradient-border positions-card h-100">
+              <Card.Body className="p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <div className="text-uppercase text-muted small">Holdings</div>
+                    <h4 className="text-light mb-0">Positions</h4>
+                  </div>
+                  <span className="pill-gradient small">{positionCount} assets</span>
                 </div>
-                <hr className="border border-secondary mb-1" />
-
-                {positions && (
-                  <div className="py-3 px-1">
-                    {Object.entries(positions).map(([ticker, count]) => (
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <span className="text-muted">Cash on hand</span>
+                  <span className="fw-semibold text-light">{formattedCashBalance}</span>
+                </div>
+                <div className="d-grid gap-2">
+                  {positions && Object.keys(positions).length > 0 ? (
+                    Object.entries(positions).map(([ticker, count]) => (
                       <Link
                         to={`/stocks/${ticker}`}
                         key={ticker}
-                        className="text-decoration-none text-white"
+                        className="text-decoration-none text-light"
                       >
-                        <div className="position-card d-flex justify-content-between align-items-center rounded-3 py-2 px-3 mb-2">
+                        <div className="position-row d-flex justify-content-between align-items-center">
                           <div>
-                            <h5 className="fw-bold">{ticker}</h5>
-                            <p
-                              className="mb-1 ps-2"
-                              style={{ fontSize: "0.9rem" }}
-                            >
-                              {" "}
-                              {count} shares
-                            </p>
+                            <div className="fw-bold">{ticker}</div>
+                            <div className="text-muted small mb-0">{count} shares</div>
                           </div>
-                          <div>
-                            <h5>
+                          <div className="text-end">
+                            <div className="fw-semibold">
                               {quotes[ticker]
                                 ? formatUSD(quotes[ticker].c)
                                 : "$0.00"}
-                            </h5>
-                            <p
-                              className="mb-0 text-end"
+                            </div>
+                            <div
+                              className="small"
                               style={{
-                                fontSize: "0.8rem",
                                 color:
                                   quotes[ticker]?.dp > 0
                                     ? "#22C55E"
@@ -252,18 +225,22 @@ const Dashboard = () => {
                               {quotes[ticker]
                                 ? formatPercent(quotes[ticker].dp)
                                 : "0.00%"}
-                            </p>
+                            </div>
                           </div>
                         </div>
                       </Link>
-                    ))}
-                  </div>
-                )}
+                    ))
+                  ) : (
+                    <div className="watchlist-empty">
+                      No open positions yet. Start trading to see your holdings appear here.
+                    </div>
+                  )}
+                </div>
               </Card.Body>
             </Card>
           </Col>
         </Row>
-      </Container>
+      </div>
     </Container>
   );
 };
