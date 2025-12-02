@@ -1,14 +1,11 @@
 import React, { useState, useEffect, useRef } from "react";
-import {
-  Search,
-  ArrowRightCircle,
-  ArrowUpRight,
-  ArrowDownRight,
-} from "lucide-react";
+import { Search, ArrowRightCircle, ArrowUpRight, ArrowDownRight, Plus, Minus, RefreshCcw } from "lucide-react";
 import { searchBar, getQuote, search, getMetrics, getHistory, getProfile } from "../api/StockApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api, { loadAccount, trade } from "../api/AccountApi";
 import { Form } from "react-bootstrap";
+import { Toaster, toast } from "sonner";
+import { motion as Motion, AnimatePresence } from "framer-motion";
 
 /**
  * Trade page that fetches the user’s first account, supports symbol
@@ -19,6 +16,7 @@ const Trade = () => {
   const [suggestions, setSuggestions] = useState([]);
   const [loading, setLoading] = useState(false);
   const [holdings, setHoldings] = useState([]);
+  const [cash, setCash] = useState(0);
   const timer = useRef(null);
   const navigate = useNavigate();
   const [, setStockName] = useState("");
@@ -33,6 +31,7 @@ const Trade = () => {
   const [ticker, setTicker] = useState("");
   const [orderType, setOrderType] = useState("buy");
   const [selectedStock, setSelectedStock] = useState(null);
+  const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | notEnoughShares | missingRequiredInput
 
   const [dayChange, setDayChange] = useState("positive");
   const [dayChangeDollars, setDayChangeDollars] = useState(0);
@@ -79,6 +78,7 @@ const Trade = () => {
     loadAccount(accountId)
       .then((res) => {
         setHoldings(res.data.holdings || []);
+        setCash(res.data.cash || 0);
         console.log("Loaded holdings:", res.data.holdings);
       })
       .catch((err) => console.error("Error loading account:", err))
@@ -214,18 +214,27 @@ const Trade = () => {
    */
   async function handleOrderSubmit() {
     if (!ticker || shares <= 0 || !orderType) {
-      alert("Please fill in all order details.");
+      setReviewButtonStatus("missingRequiredInput");
+      setTimeout(() => setReviewButtonStatus("idle"), 1200);
       return;
     }
     if (!accountId) {
-      alert("No account selected!");
+      setReviewButtonStatus("missingRequiredInput");
+      setTimeout(() => setReviewButtonStatus("idle"), 1200);
       return;
     }
 
-    const quoteRes = await getQuote(ticker);
-    const price = quoteRes.data.c;
+    const holdingShares =
+      holdings.find((h) => h.stockTicker === ticker)?.shares || 0;
+    if (orderType === "sell" && shares > Math.abs(holdingShares)) {
+      setReviewButtonStatus("notEnoughShares");
+      setTimeout(() => setReviewButtonStatus("idle"), 1200);
+      return;
+    }
 
     try {
+      const quoteRes = await getQuote(ticker);
+      const price = quoteRes.data.c;
       const order = {
         action: orderType.toLowerCase(),
         ticker: ticker,
@@ -233,297 +242,469 @@ const Trade = () => {
         price: price,
       };
 
-      console.log("Submitting order:", {
-        action: orderType,
-        ticker,
-        shares,
-        price
-      });
-      
+      if (orderType === "buy" && price * shares > cash) {
+        setReviewButtonStatus("notEnoughBP");
+        setTimeout(() => setReviewButtonStatus("idle"), 1200);
+        return;
+      }
+
       const res = await trade(accountId, order);
       console.log("Trade placed:", res.data, accountId);
 
-      alert(
-        `Successfully placed ${orderType.toUpperCase()} order for ${shares} shares of ${ticker.toUpperCase()}`
+      toast.success(
+        `${orderType === "buy" ? "Bought" : "Sold"} ${shares} ${ticker.toUpperCase()} @ ${formatUSD(price)}`
       );
 
       loadAccount(accountId)
-        .then((res) => setHoldings(res.data.holdings || []))
-        .catch(console.error);
+        .then((res) => {
+          setHoldings(res.data.holdings || []);
+          setCash(res.data.cash || 0);
+        })
+        .catch((err) => console.error(err));
 
       setTicker("");
       setShares(0);
-      setOrderType("");
+      setOrderType("buy");
+      setSelectedStock(null);
+      setReviewButtonStatus("idle");
     } catch (error) {
       console.error("Trade failed:", error);
-      alert(error.response?.data || "Failed to place order.");
+      setReviewButtonStatus("missingRequiredInput");
+      setTimeout(() => setReviewButtonStatus("idle"), 1200);
+      toast.error(error.response?.data || "Failed to place order.");
     }
   }
 
-  return (
-    <div className="container-fluid py-4">
-      <div className="container">
-        <section className="card mb-4">
-          <div className="card-body p-4">
-            <h2 className="h4 fw-bold mb-3">Trade</h2>
-            <p className="text-muted mb-3">
-              Search for a stock here to begin placing an order.
-            </p>
+  const estimatedCost = selectedStock?.price && shares > 0 ? selectedStock.price * shares : null;
 
-            <div className="row g-3 align-items-center mb-4">
-              <div className="col-auto flex-grow-1 position-relative">
-                <div className="input-group">
-                  <span className="input-group-text">
-                    <Search size={18} />
-                  </span>
-                  <input
-                    type="text"
-                    className="form-control"
-                    placeholder="Search symbol or company"
-                    value={query}
-                    onChange={(e) => setQuery(e.target.value)}
-                    onKeyDown={handleKeyDown}
-                    aria-autocomplete="list"
-                  />
+  return (
+    <div
+      className="min-vh-100"
+      style={{
+        background:
+          "radial-gradient(160% 140% at 80% 0%, rgba(92,99,255,0.12), transparent 40%), radial-gradient(140% 120% at 10% 80%, rgba(14,165,233,0.12), transparent 45%), linear-gradient(135deg, #0b0f1e 0%, #05060d 100%)",
+        color: "#e7ecf7",
+      }}
+    >
+      <Toaster
+        position="bottom-center"
+        theme="dark"
+        richColors
+        closeButton
+        expand
+        offset={12}
+        toastOptions={{
+          duration: 3200,
+          className: "border-0",
+          descriptionClassName: "text-white-50",
+          style: {
+            background:
+              "linear-gradient(135deg, rgba(10,15,30,0.95), rgba(20,35,70,0.92))",
+            color: "#f1f5ff",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 20px 55px rgba(0,0,0,0.35)",
+            borderRadius: "16px",
+            backdropFilter: "blur(10px)",
+            fontSize: "16px",
+            lineHeight: "1.35",
+            padding: "12px 14px",
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: "8px",
+          },
+        }}
+      />
+      <div className="container-xl py-4 d-flex flex-column gap-3">
+        <div
+          className="p-4 p-md-5"
+          style={{
+            background: "rgba(13, 17, 38, 0.82)",
+            borderRadius: "24px",
+            border: "1px solid rgba(255,255,255,0.08)",
+            boxShadow: "0 30px 70px rgba(0, 0, 0, 0.35)",
+            backdropFilter: "blur(14px)",
+          }}
+        >
+          <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+            <div>
+              <h1 className="mb-1 text-light">Quick Trade</h1>
+              <p className="mb-0" style={{ color: "#aeb8de" }}>
+                Pull a live quote, set number of shares, and place a buy or sell in seconds.
+              </p>
+            </div>
+          </div>
+
+          <div className="row g-3">
+            <div className="col-12 col-lg-8">
+              <div
+                className="p-3 p-md-4 h-100 d-flex flex-column"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  borderRadius: "18px",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <div className="mb-3">
+                  <div className="text-uppercase small mb-2" style={{ letterSpacing: "0.16em", color: "rgba(232,237,255,0.65)"  }}>
+                    Symbol search
+                  </div>
+                  <div className="position-relative">
+                    <div className="nav-search p-2" style={{ borderRadius: "12px" }}>
+                      <div className="input-group">
+                        <span className="input-group-text"><Search size={16} /></span>
+                        <input
+                          type="text"
+                          className="form-control trade-search-input"
+                          placeholder="Please Enter Stock"
+                          value={query}
+                          onChange={(e) => setQuery(e.target.value)}
+                          onKeyDown={handleKeyDown}
+                          aria-autocomplete="list"
+                        />
+                      </div>
+                    </div>
+
+                    {query && suggestions && suggestions.length > 0 && (
+                      <ul
+                        className="list-group position-absolute w-100 mt-1"
+                        style={{ zIndex: 2000 }}
+                      >
+                        {suggestions.slice(0, 6).map((s) => (
+                          <li
+                            key={s.symbol}
+                            className="list-group-item list-group-item-action"
+                            style={{ cursor: "pointer" }}
+                            onClick={async () => {
+                              try {
+                                const quoteRes = await getQuote(s.symbol);
+                                const priceVal = quoteRes.data.c;
+
+                                setTicker(s.symbol);
+                                setQuote(quoteRes.data);
+                                setSelectedStock({
+                                  symbol: s.symbol,
+                                  name: s.description,
+                                  price: priceVal,
+                                });
+                                setQuery("");
+                                setSuggestions([]);
+                              } catch (error) {
+                                console.error("Failed to fetch quote:", error);
+                                toast.error("Failed to fetch quote for selected symbol.");
+                              }
+                            }}
+                          >
+                            <strong>{s.symbol}</strong>{" "}
+                            <span className="text-muted">{s.description}</span>
+                          </li>
+                        ))}
+                      </ul>
+                    )}
+
+                    {query && loading && (
+                      <div className="small text-light mt-1">Searching...</div>
+                    )}
+                  </div>
                 </div>
 
-                {query && suggestions && suggestions.length > 0 && (
-                  <ul
-                    className="list-group position-absolute w-100 mt-1"
-                    style={{ zIndex: 2000 }}
-                  >
-                    {suggestions.slice(0, 6).map((s) => (
-                      <li
-                        key={s.symbol}
-                        className="list-group-item list-group-item-action"
-                        style={{ cursor: "pointer" }}
-                        onClick={async () => {
-                          try {
-                            const quoteRes = await getQuote(s.symbol);
-                            const price = quoteRes.data.c;
+                {selectedStock && (
+                  <>
+                    <div
+                      className="p-3 rounded-3 mb-3 popular-card"
+                      style={{ background: "rgba(255,255,255,0.04)" }}
+                    >
+                      <Link
+                        key={selectedStock.symbol}
+                        to={`/stocks/${selectedStock.symbol}`}
+                        className="text-decoration-none"
+                      >
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <div className="fw-bold text-light">{selectedStock.symbol}</div>
+                            <div style={{ color: "#aeb8de" }}>{selectedStock.name}</div>
+                          </div>
+                          <div className="text-end">
+                            <div className="fw-semibold text-light fs-4">{formatUSD(selectedStock.price)}</div>
+                            {typeof quote?.dp === "number" && typeof quote?.d === "number" && (
+                              <div className="d-flex justify-content-end gap-2 mt-1 fw-semibold">
+                                <span
+                                  className="badge rounded-pill d-inline-flex align-items-center gap-1"
+                                  style={{
+                                    background:
+                                      dayChange === "positive"
+                                        ? "rgba(34,197,94,0.15)"
+                                        : "rgba(239,68,68,0.15)",
+                                    color: dayChange === "positive" ? "#22c55e" : "#ef4444",
+                                  }}
+                                >
+                                  {dayChange === "positive" ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} {dayChangePercent}
+                                </span>
+                                <span
+                                  className="badge rounded-pill"
+                                  style={{
+                                    background:
+                                      dayChange === "positive"
+                                        ? "rgba(34,197,94,0.15)"
+                                        : "rgba(239,68,68,0.15)",
+                                    color: dayChange === "positive" ? "#22c55e" : "#ef4444",
+                                  }}
+                                >
+                                  {dayChangeDollars}
+                                </span>
+                              </div>
+                            )}
+                          </div>
+                        </div>
+                      </Link>
+                    </div>
 
-                            setTicker(s.symbol);
-                            setQuote(quoteRes.data);
-                            setSelectedStock({
-                              symbol: s.symbol,
-                              name: s.description,
-                              price: price,
-                            });
-                            setQuery("");
-                            setSuggestions([]);
-                          } catch (error) {
-                            console.error("Failed to fetch quote:", error);
-                            alert("Failed to fetch quote for selected symbol.");
-                          }
+                    <div className="d-flex align-items-center gap-5 mt-3 mb-3">
+                      <div className="d-flex flex-fill gap-2">
+                        <button
+                          className="btn btn-sm fw-semibold text-white"
+                          style={{
+                            width: "40%",
+                            borderRadius: "10px",
+                            background:
+                              orderType === "buy"
+                                ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
+                                : "rgba(255,255,255,0.08)",
+                            border: "1px solid rgba(255,255,255,0.12)",
+                            color: orderType === "buy" ? "#0b1023" : "#e7ecf7",
+                            padding: "5px 5px",
+                          }}
+                          onClick={() => setOrderType("buy")}
+                        >
+                          Buy
+                        </button>
+                        <button
+                          className="btn btn-sm fw-semibold text-white"
+                          style={{
+                            width: "40%",
+                            borderRadius: "10px",
+                            background:
+                              orderType === "sell"
+                                ? "linear-gradient(135deg, #ef4444, #f97316)"
+                                : "rgba(255,255,255,0.08)",
+                            border: "1px solid rgba(255,255,255,0.12)",
+                            color: orderType === "sell" ? "#0b1023" : "#e7ecf7",
+                            padding: "10px 12px",
+                          }}
+                          onClick={() => setOrderType("sell")}
+                        >
+                          Sell
+                        </button>
+                      </div>
+
+                      <div className="d-flex align-items-center gap-2" style={{ minWidth: "220px" }}>
+                        <button
+                          className="btn text-light"
+                          style={{ borderRadius: "10px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}
+                          onClick={() => setShares((prev) => Math.max(0, (Number(prev) || 0) - 1))}
+                        >
+                          <Minus size={16} />
+                        </button>
+                        <Form.Control
+                          type="number"
+                          className="no-spin text-center bg-transparent text-light trade-search-input"
+                          style={{
+                            borderRadius: "12px",
+                            border: "1px solid rgba(255,255,255,0.12)",
+                          }}
+                          placeholder="Shares"
+                          onChange={(e) => setShares(Number(e.target.value))}
+                          onFocus={() => {
+                            if (shares === 0) setShares("");
+                          }}
+                          onBlur={() => {
+                            if (shares === "") setShares(0);
+                          }}
+                          value={shares}
+                        />
+                        <button
+                          className="btn text-light"
+                          style={{ borderRadius: "10px", background: "rgba(255,255,255,0.06)", border: "1px solid rgba(255,255,255,0.12)" }}
+                          onClick={() => setShares((prev) => (Number(prev) || 0) + 1)}
+                        >
+                          <Plus size={16} />
+                        </button>
+                      </div>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center mb-3" style={{ color: "#cdd7ff" }}>
+                      <div>Order type</div>
+                      <span className="pill-ghost">Market</span>
+                    </div>
+
+                    <div className="d-flex justify-content-between align-items-center mb-3" style={{ color: "#cdd7ff" }}>
+                      <div>Estimated total</div>
+                      <div className="fw-semibold text-light">{estimatedCost ? formatUSD(estimatedCost) : "--"}</div>
+                    </div>
+
+                    <div className="d-flex justify-content-between gap-5 mt-4">
+                      <button
+                        className="btn text-light"
+                        style={{
+                          borderRadius: "12px",
+                          background: "rgba(255,255,255,0.06)",
+                          border: "1px solid rgba(255,255,255,0.12)",
+                        }}
+                        onClick={() => {
+                          setTicker("");
+                          setShares(0);
+                          setOrderType("buy");
+                          setSelectedStock(null);
+                          setQuote([]);
+                          toast.info("Form reset");
                         }}
                       >
-                        <strong>{s.symbol}</strong>{" "}
-                        <span className="text-muted">{s.description}</span>
-                      </li>
-                    ))}
-                  </ul>
-                )}
-
-                {query && loading && (
-                  <div className="small text-muted mt-1">Searching...</div>
+                        <RefreshCcw size={16} className="me-1" /> Reset
+                      </button>
+                      <Motion.button
+                        whileTap={{ scale: 0.97 }}
+                        className="btn fw-semibold text-white px-4 py-2"
+                        style={{
+                          width: "40%",
+                          borderRadius: "12px",
+                          background: {
+                            idle: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+                            notEnoughBP: "linear-gradient(135deg, #ef4444, #f97316)",
+                            notEnoughShares: "linear-gradient(135deg, #ef4444, #f97316)",
+                            missingRequiredInput: "linear-gradient(135deg, #ef4444, #f97316)",
+                          }[reviewButtonStatus],
+                          border: "none",
+                          boxShadow: "0 14px 40px rgba(14,165,233,0.25)",
+                        }}
+                        onClick={handleOrderSubmit}
+                      >
+                        <AnimatePresence mode="wait">
+                          <Motion.span
+                            key={reviewButtonStatus}
+                            initial={{ opacity: 0 }}
+                            animate={{ opacity: 1, transition: { duration: 0.12 } }}
+                            exit={{ opacity: 0, transition: { duration: 0.12 } }}
+                            className="d-inline-flex align-items-center"
+                          >
+                            {reviewButtonStatus === "idle"
+                              ? "Submit order"
+                              : reviewButtonStatus === "notEnoughBP"
+                              ? "Not enough cash"
+                              : reviewButtonStatus === "notEnoughShares"
+                              ? "Not enough shares"
+                              : "Enter details"}
+                            {reviewButtonStatus === "idle" && <ArrowRightCircle className="ms-2" size={16} />}
+                          </Motion.span>
+                        </AnimatePresence>
+                      </Motion.button>
+                    </div>
+                  </>
                 )}
               </div>
             </div>
 
-            <div className="card shadow-sm">
-              <div className="card-body">
-              {selectedStock && (
-                <div className="alert alert-info d-flex justify-content-between align-items-center">
-                  <div>
-                    <strong>{selectedStock.symbol}</strong> - {selectedStock.name}
-                  </div>
-                  <div className="text-center">
-                    <span
-                      className={`fw-semibold d-block fs-3 ${
-                        dayChange === "negative"
-                          ? "text-danger"
-                          : dayChange === "positive"
-                          ? "text-success"
-                          : "text-body"
-                      }`}
-                    >
-                      ${selectedStock.price?.toFixed(2)}
-                    </span>
-                    {typeof quote?.dp === "number" &&
-                      typeof quote?.d === "number" && (
-                        <div className="d-flex justify-content-center gap-2 mt-2 fw-semibold">
-                          <span
-                            className={`badge rounded-pill d-inline-flex align-items-center gap-2 ${
-                              dayChange === "positive"
-                                ? "bg-success-subtle text-success"
-                                : "bg-danger-subtle text-danger"
-                            }`}
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            {dayChange === "positive" ? (
-                              <ArrowUpRight size={14} />
-                            ) : (
-                              <ArrowDownRight size={14} />
-                            )}
-                            {dayChangePercent}
-                          </span>
-                          <span
-                            className={`badge rounded-pill ${
-                              dayChange === "positive"
-                                ? "bg-success-subtle text-success"
-                                : "bg-danger-subtle text-danger"
-                            }`}
-                            style={{ fontSize: "0.85rem" }}
-                          >
-                            {dayChangeDollars}
-                          </span>
+            <div className="col-12 col-lg-4">
+              <div
+                className="p-3 p-md-4 h-100"
+                style={{
+                  background: "rgba(255,255,255,0.03)",
+                  borderRadius: "18px",
+                  border: "1px solid rgba(255,255,255,0.08)",
+                }}
+              >
+                <div className="text-uppercase small mb-2" style={{ letterSpacing: "0.16em", color: "rgba(232,237,255,0.65)" }}>
+                  Recent Acquisitions
+                </div>
+                <div className="d-grid gap-2">
+                  {holdings && holdings.length > 0 ? (
+                    [...holdings].reverse().slice(0, 5).map((holding) => (
+                      <Link
+                        key={holding.stockTicker}
+                        to={`/stocks/${holding.stockTicker}`}
+                        className="text-decoration-none popular-card p-3 rounded-3 d-flex justify-content-between align-items-center"
+                      >
+                        <div>
+                          <div className="fw-bold text-light">{holding.stockTicker}</div>
+                          <div style={{ color: "#aeb8de" }}>{holding.shares} shares</div>
                         </div>
-                      )}
-                  </div>
-                </div>
-              )}
-                <h5 className="mb-3">Order Information</h5>
-                <div className="text-muted mb-2">Enter the number of shares to {orderType || "buy/sell"}:</div>
-                <Form.Control
-                  type="number"
-                  className="mb-3"
-                  placeholder="Quantity"
-                  onChange={(e) => setShares(Number(e.target.value))}
-                  onFocus={() => {
-                    if (shares === 0) setShares("");
-                  }}
-                  onBlur={() => {
-                    if (shares === "") setShares(0);
-                  }}
-                  value={shares}
-                />
-                {selectedStock && shares > 0 && (
-                  <div className="text-muted mb-3">
-                    Estimated cost: ${(selectedStock.price * shares).toFixed(2)}
-                  </div>
-                )}
-
-                <div className="d-flex mb-3">
-                  <button
-                    className={`btn flex-fill me-2 ${
-                      orderType === "buy" ? "btn-success" : "btn-outline-success"
-                    }`}
-                    onClick={() => setOrderType("buy")}
-                  >
-                    Buy
-                  </button>
-                  <button
-                    className={`btn flex-fill ${
-                      orderType === "sell" ? "btn-danger" : "btn-outline-danger"
-                    }`}
-                    onClick={() => setOrderType("sell")}
-                  >
-                    Sell
-                  </button>
-                </div>
-
-                <div className="d-flex justify-content-end">
-                  <button 
-                    className="btn btn-outline-secondary me-2"
-                    onClick={() => {
-                      setTicker("");
-                      setShares(0);
-                      setOrderType("");
-                    }}
-                  >
-                    Reset
-                  </button>
-                  <button 
-                    className={`btn d-flex align-items-center ${
-                      orderType === "buy" ? "btn-success" : "btn-danger"
-                    }`}
-                    onClick={handleOrderSubmit}
-                  >
-                    {orderType === "buy" ? "Buy" : "Sell"} {ticker || "Stock"}
-                    <ArrowRightCircle className="ms-2" size={16} />
-                  </button>
+                        <div className="d-flex gap-2">
+                          <button
+                            className="btn btn-sm text-light"
+                            style={{
+                              borderRadius: "10px",
+                              background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+                              border: "none",
+                            }}
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              setTicker(holding.stockTicker);
+                              setShares(1);
+                              setOrderType("buy");
+                              try {
+                                const quoteRes = await getQuote(holding.stockTicker);
+                                setQuote(quoteRes.data);
+                                setSelectedStock({
+                                  symbol: holding.stockTicker,
+                                  name: holding.stockTicker,
+                                  price: quoteRes.data.c,
+                                });
+                              } catch (error) {
+                                console.error("Failed to fetch quote when buying holding:", error);
+                                setSelectedStock({
+                                  symbol: holding.stockTicker,
+                                  name: holding.stockTicker,
+                                  price: holding.averagePrice,
+                                });
+                              }
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                          >
+                            Buy
+                          </button>
+                          <button
+                            className="btn btn-sm text-light"
+                            style={{
+                              borderRadius: "10px",
+                              background: "linear-gradient(135deg, #ef4444, #f97316)",
+                              border: "none",
+                            }}
+                            onClick={async (e) => {
+                              e.preventDefault();
+                              setTicker(holding.stockTicker);
+                              setShares(Math.abs(holding.shares));
+                              setOrderType("sell");
+                              try {
+                                const quoteRes = await getQuote(holding.stockTicker);
+                                setQuote(quoteRes.data);
+                                setSelectedStock({
+                                  symbol: holding.stockTicker,
+                                  name: holding.stockTicker,
+                                  price: quoteRes.data.c,
+                                });
+                              } catch (error) {
+                                console.error("Failed to fetch quote when closing holding:", error);
+                                setSelectedStock({
+                                  symbol: holding.stockTicker,
+                                  name: holding.stockTicker,
+                                  price: holding.averagePrice,
+                                });
+                              }
+                              window.scrollTo({ top: 0, behavior: "smooth" });
+                            }}
+                          >
+                            Sell
+                          </button>
+                        </div>
+                      </Link>
+                    ))
+                  ) : (
+                    <div style={{ color: "#aeb8de" }}>No holdings yet.</div>
+                  )}
                 </div>
               </div>
             </div>
           </div>
-        </section>
-
-        <section className="card">
-          <div className="card-body p-4">
-            <h3 className="h5 fw-semibold mb-3">Recent Orders</h3>
-            {/* Holdings display */}
-            <div className="table-responsive">
-              <table className="table table-striped">
-                <thead>
-                  <tr>
-                    <th>Symbol</th>
-                    <th>Side</th>
-                    <th>Qty</th>
-                    <th>Price</th>
-                    <th>Status</th>
-                    <th>Actions</th>
-                  </tr>
-                </thead>
-                <tbody>
-                  {holdings.length > 0 ? (
-                    [...holdings]
-                      .reverse()
-                      .slice(0, 5)
-                      .map((holding) => (
-                        <tr key={holding.stockTicker}>
-                          <td>{holding.stockTicker}</td>
-                          <td>{holding.shares > 0 ? "LONG" : "SHORT"}</td>
-                          <td>{holding.shares}</td>
-                          <td>${holding.averagePrice?.toFixed(2) ?? "--"}</td>
-                          <td>OPEN</td>
-                          <td>
-                            <button
-                              className="btn btn-sm btn-outline-danger"
-                              onClick={async () => {
-                                setTicker(holding.stockTicker);
-                                setShares(Math.abs(holding.shares));
-                                setOrderType("sell");
-                                try {
-                                  const quoteRes = await getQuote(
-                                    holding.stockTicker
-                                  );
-                                  setQuote(quoteRes.data);
-                                  setSelectedStock({
-                                    symbol: holding.stockTicker,
-                                    name: holding.stockTicker,
-                                    price: quoteRes.data.c,
-                                  });
-                                } catch (error) {
-                                  console.error(
-                                    "Failed to fetch quote when closing holding:",
-                                    error
-                                  );
-                                  setSelectedStock({
-                                    symbol: holding.stockTicker,
-                                    name: holding.stockTicker,
-                                    price: holding.averagePrice,
-                                  });
-                                }
-                                window.scrollTo({ top: 0, behavior: "smooth" });
-                              }}
-                            >
-                              Close
-                            </button>
-                          </td>
-                        </tr>
-                      ))
-                  ) : (
-                    <tr>
-                      <td colSpan="6" className="text-muted text-center">
-                        No holdings yet.
-                      </td>
-                    </tr>
-                  )}
-                </tbody>
-              </table>
-            </div>
-          </div>
-        </section>
+        </div>
       </div>
     </div>
   );

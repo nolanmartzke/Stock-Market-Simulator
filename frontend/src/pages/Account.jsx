@@ -93,129 +93,215 @@ const Account = () => {
   if (!auth) return null;
 
   return (
-    <div className="min-vh-100 bg-light d-flex align-items-center">
+    <div
+      className="min-vh-100 d-flex align-items-center"
+      style={{
+        background:
+          "radial-gradient(160% 140% at 80% 0%, rgba(92,99,255,0.12), transparent 40%), radial-gradient(140% 120% at 10% 80%, rgba(14,165,233,0.12), transparent 45%), linear-gradient(135deg, #0b0f1e 0%, #05060d 100%)",
+        color: "#e7ecf7",
+      }}
+    >
       <div className="container py-4">
         <div className="row justify-content-center">
-          <div className="col-md-8 col-lg-6">
+          <div className="col-md-10 col-lg-8">
             <div
-              className="card shadow-lg border-0"
-              style={{ borderRadius: 20 }}
+              className="p-4 p-md-5"
+              style={{
+                background: "rgba(13, 17, 38, 0.82)",
+                borderRadius: "24px",
+                border: "1px solid rgba(255,255,255,0.08)",
+                boxShadow: "0 30px 70px rgba(0, 0, 0, 0.35)",
+                backdropFilter: "blur(14px)",
+              }}
             >
-              <div className="card-body p-4 p-md-5">
-                {/* Header */}
-                <div className="d-flex align-items-center mb-4">
-                  <User size={28} className="me-2" />
-                  <h1 className="h4 mb-0">Account Settings</h1>
+              {/* Header */}
+              <div className="d-flex align-items-center justify-content-between flex-wrap gap-3 mb-4">
+                <div className="d-flex align-items-center gap-3">
+                  <div
+                    className="d-inline-flex align-items-center justify-content-center rounded-3"
+                    style={{
+                      width: 48,
+                      height: 48,
+                      background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+                      color: "#0b1023",
+                      fontWeight: 800,
+                    }}
+                  >
+                    <User size={24} />
+                  </div>
+                  <div>
+                    <div className="text-uppercase small" style={{ letterSpacing: "0.18em", color: "rgba(232,237,255,0.65)" }}>
+                      Profile
+                    </div>
+                    <h1 className="h4 mb-0 text-light">Account Settings</h1>
+                  </div>
                 </div>
+                <div
+                  className="px-3 py-2 rounded-pill fw-semibold"
+                  style={{
+                    background: "linear-gradient(135deg, #6366f1, #8b5cf6)",
+                    color: "#0b1023",
+                  }}
+                >
+                  Active member
+                </div>
+              </div>
 
-                {/* Edit Profile (placeholder) */}
-                <h2 className="h6 text-uppercase text-secondary mb-3">
+              {/* Edit Profile */}
+              <div className="mb-4">
+                <div className="text-uppercase small mb-2" style={{ letterSpacing: "0.18em", color: "rgba(232,237,255,0.6)" }}>
                   Edit Profile
-                </h2>
-
-
+                </div>
                 <div className="mb-3">
-                  <label className="form-label fw-medium">Name</label>
+                  <label className="form-label fw-medium text-light">Name</label>
                   <input
-                    className="form-control form-control-lg"
-                    style={{ borderRadius: "12px" }}
+                    className="form-control form-control-lg account-input"
+                    style={{
+                      borderRadius: "14px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      color: "#f5f7ff",
+                      caretColor: "#f5f7ff",
+                    }}
                     value={newName}
                     onChange={(e) => setNewName(e.target.value)}
                   />
                 </div>
                 <div className="mb-2">
-                  <label className="form-label fw-medium">Email</label>
+                  <label className="form-label fw-medium text-light">Email</label>
                   <input
-                    className="form-control form-control-lg"
-                    style={{ borderRadius: "12px" }}
+                    className="form-control form-control-lg account-input"
+                    style={{
+                      borderRadius: "14px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      color: "#f5f7ff",
+                      caretColor: "#f5f7ff",
+                    }}
                     value={auth?.email ?? ""}
                     disabled
                     readOnly
                   />
                 </div>
-                <button
-                  className="btn btn-primary mt-2"
-                  style={{ borderRadius: "12px" }}
+                <Motion.button
+                  whileTap={{ scale: 0.96 }}
+                  className="btn w-100 mt-3 py-2 fs-5 fw-semibold text-white"
+                  style={{
+                    borderRadius: "14px",
+                    background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+                    border: "none",
+                    boxShadow: "0 14px 40px rgba(14,165,233,0.25)",
+                  }}
                   disabled={newName == auth?.name}
                   onClick={handleNameChange}
                 >
                   Save changes
-                </button>
-
-
-                <hr className="my-4" />
-
-                {/* Change Password (placeholder) */}
-                <h2 className="h6 text-uppercase text-secondary mb-3">
-                  Change Password
-                </h2>
-                <div className="row g-3">
-                  <div className="col-12">
-                    <label className="form-label fw-medium">
-                      Current password
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control form-control-lg"
-                      style={{ borderRadius: "12px" }}
-                      placeholder="Enter Current Password"
-                      value={oldPassword}
-                      onChange={(e) => setOldPassword(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label fw-medium">New password</label>
-                    <input
-                      type="password"
-                      className="form-control form-control-lg"
-                      style={{ borderRadius: "12px" }}
-                      placeholder="Min 8 chars"
-                      disabled={!oldPassword}
-                      value={newPassword}
-                      onChange={(e) => setNewPassword(e.target.value)}
-                    />
-                  </div>
-                  <div className="col-md-6">
-                    <label className="form-label fw-medium">
-                      Confirm new password
-                    </label>
-                    <input
-                      type="password"
-                      className="form-control form-control-lg"
-                      style={{ borderRadius: "12px" }}
-                      placeholder="Match new password"
-                      disabled={!oldPassword}
-                      value={newPasswordConfirm}
-                      onChange={(e) => setNewPasswordConfirm(e.target.value)}
-                    />
-                  </div>
-                </div>
-                <div className="text-danger mt-2" style={{ height: "20px" }}>
-                  {errorMessage}
-                </div>
-                <Motion.button
-                  whileTap={{ scale: 0.95 }}
-                  className="btn btn-primary w-100 mt-3"
-                  style={{ borderRadius: 12 }}
-                  onClick={clickedUpdatePassword}
-                  disabled={!passwordButtonStatus}
-                >
-                  {updatePasswordText}
-                </Motion.button>
-
-                <hr className="my-4" />
-
-                {/* Logout (existing behavior) */}
-                <Motion.button
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleLogout}
-                  className="btn btn-outline-secondary w-100 fw-medium"
-                  style={{ borderRadius: 12 }}
-                >
-                  <LogOut size={18} className="me-2" />
-                  Log out
                 </Motion.button>
               </div>
+
+              <hr className="my-4 text-white-50" />
+
+              {/* Change Password */}
+              <div className="text-uppercase small mb-3" style={{ letterSpacing: "0.18em", color: "rgba(232,237,255,0.6)" }}>
+                Change Password
+              </div>
+              <div className="row g-3">
+                <div className="col-12">
+                  <label className="form-label fw-medium text-light">
+                    Current password
+                  </label>
+                  <input
+                    type="password"
+                    className="form-control form-control-lg account-input"
+                    style={{
+                      borderRadius: "14px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      color: "#f5f7ff",
+                      caretColor: "#f5f7ff",
+                    }}
+                    placeholder="Enter current password"
+                    value={oldPassword}
+                    onChange={(e) => setOldPassword(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium text-light">New password</label>
+                  <input
+                    type="password"
+                    className="form-control form-control-lg account-input"
+                    style={{
+                      borderRadius: "14px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      color: "#f5f7ff",
+                      caretColor: "#f5f7ff",
+                    }}
+                    placeholder="Min 8 chars"
+                    disabled={!oldPassword}
+                    value={newPassword}
+                    onChange={(e) => setNewPassword(e.target.value)}
+                  />
+                </div>
+                <div className="col-md-6">
+                  <label className="form-label fw-medium text-light">
+                    Confirm new password
+                  </label>
+                  <input
+                    type="password"
+                    className="form-control form-control-lg account-input"
+                    style={{
+                      borderRadius: "14px",
+                      background: "rgba(255,255,255,0.06)",
+                      border: "1px solid rgba(255,255,255,0.14)",
+                      color: "#f5f7ff",
+                      caretColor: "#f5f7ff",
+                    }}
+                    placeholder="Match new password"
+                    disabled={!oldPassword}
+                    value={newPasswordConfirm}
+                    onChange={(e) => setNewPasswordConfirm(e.target.value)}
+                  />
+                </div>
+              </div>
+              <div className="text-danger mt-2" style={{ minHeight: "20px" }}>
+                {errorMessage}
+              </div>
+              <Motion.button
+                whileTap={{ scale: 0.96 }}
+                className="btn w-100 mt-3 fw-semibold py-2 fs-5 text-white"
+                style={{
+                  borderRadius: 14,
+                  background: passwordButtonStatus
+                    ? "linear-gradient(135deg, #6366f1, #8b5cf6)"
+                    : "rgba(255,255,255,0.08)",
+                  border: "none",
+                  color: passwordButtonStatus ? "#0b1023" : "#9aa6d4",
+                  boxShadow: passwordButtonStatus ? "0 14px 40px rgba(99,102,241,0.25)" : "none",
+                }}
+                onClick={clickedUpdatePassword}
+                disabled={!passwordButtonStatus}
+              >
+                {updatePasswordText}
+              </Motion.button>
+
+              <hr className="my-4 text-white-50" />
+
+              {/* Logout */}
+              <Motion.button
+                whileTap={{ scale: 0.96 }}
+                onClick={handleLogout}
+                className="btn w-100 fw-semibold text-white"
+                style={{
+                  borderRadius: 14,
+                  background: "rgba(255,255,255,0.04)",
+                  border: "1px solid rgba(255,255,255,0.12)",
+                  color: "#e7ecf7",
+                }}
+              >
+                <LogOut size={18} className="me-2" />
+                Log out
+              </Motion.button>
             </div>
           </div>
         </div>
