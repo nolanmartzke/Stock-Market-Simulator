@@ -64,8 +64,7 @@ export default function NewsCard({
 
   const content = (
     <>
-      <h5 className="card-title mb-1">{cardHeading}</h5>
-      <p className="text-muted small mb-3">{cardSubtitle}</p>
+
 
       {loading && <div className="text-center py-3">Loading news...</div>}
       {error && <div className="text-danger">Error loading news.</div>}
@@ -86,8 +85,8 @@ export default function NewsCard({
                 )}
 
                 <div>
-                  <div className="fw-semibold">{item.headline}</div>
-                  <div className="text-muted small">{item.source} • {formatDate(item.datetime)}</div>
+                  <div className="fw-semibold text-light">{item.headline}</div>
+                  <div className="small" style={{ color: '#aeb8de' }}>{item.source} • {formatDate(item.datetime)}</div>
                 </div>
               </a>
             </li>
@@ -97,48 +96,37 @@ export default function NewsCard({
 
       {/* Pagination controls */}
       {totalPages > 1 && (
-        <div className="d-flex justify-content-between align-items-center mt-2">
-          <div className="small text-muted">Showing {startIdx + 1}-{Math.min(startIdx + pageSize, total)} of {total}</div>
-          <div>
-            <nav>
-              <ul className="pagination pagination-sm mb-0">
-                <li className={`page-item ${page === 1 ? "disabled" : ""}`}>
-                  <button
-                    className="page-link"
-                    onClick={() => setPage((p) => Math.max(1, p - 1))}
-                  >
-                    Prev
-                  </button>
-                </li>
-                {/* show up to 5 page buttons centered around current page */}
-                {Array.from({ length: totalPages }).map((_, i) => {
-                  const p = i + 1;
-                  // only render nearby pages to avoid long lists
-                  if (Math.abs(p - page) > 2 && p !== 1 && p !== totalPages)
-                    return null;
-                  return (
-                    <li
-                      key={p}
-                      className={`page-item ${p === page ? "active" : ""}`}
-                    >
-                      <button className="page-link" onClick={() => setPage(p)}>
-                        {p}
-                      </button>
-                    </li>
-                  );
-                })}
-                <li
-                  className={`page-item ${page === totalPages ? "disabled" : ""}`}
-                >
-                  <button
-                    className="page-link"
-                    onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
-                  >
-                    Next
-                  </button>
-                </li>
-              </ul>
-            </nav>
+        <div className="d-flex justify-content-between align-items-center mt-3">
+          <div className="small" style={{ color: "#aeb8de" }}>
+            Showing {startIdx + 1}-{Math.min(startIdx + pageSize, total)} of {total}
+          </div>
+          <div className="d-flex align-items-center gap-2">
+            <button
+              className="btn btn-lg text-light"
+              style={{
+                borderRadius: "12px",
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.14)",
+              }}
+              disabled={page === 1}
+              onClick={() => setPage((p) => Math.max(1, p - 1))}
+              aria-label="Previous page"
+            >
+              ‹
+            </button>
+            <button
+              className="btn btn-lg text-light"
+              style={{
+                borderRadius: "12px",
+                background: "rgba(255,255,255,0.08)",
+                border: "1px solid rgba(255,255,255,0.14)",
+              }}
+              disabled={page === totalPages}
+              onClick={() => setPage((p) => Math.min(totalPages, p + 1))}
+              aria-label="Next page"
+            >
+              ›
+            </button>
           </div>
         </div>
       )}

@@ -3,7 +3,7 @@ import NewsCard from '../components/NewsCard';
 import { getQuote } from '../api/StockApi';
 
 const topicFilters = [
-  { label: 'All Market News', category: 'general', hint: 'Broad market headlines and sentiment.' },
+  { label: 'All Market', category: 'general', hint: 'Broad market headlines and sentiment.' },
   { label: 'Forex & Macro', category: 'forex', hint: 'Currencies, rates, and macro shifts.' },
   { label: 'Crypto', category: 'crypto', hint: 'Digital assets, blockchain, and tokens.' },
   { label: 'M&A / Deals', category: 'merger', hint: 'Acquisitions, IPO chatter, and deal flow.' }
@@ -75,13 +75,14 @@ const Popular = () => {
             </div>
             <h1 className="mb-0 text-light">Popular</h1>
             <p className="mb-0" style={{ color: '#aeb8de' }}>
-              Dial in topics, scan headlines, and spot the most-watched tickers.
+              Dive into topics, learn whats new, and track current market conditions.
             </p>
           </div>
         </div>
 
         <div className="row g-4 justify-content-center">
           <main className="col-12 col-xl-8 d-flex flex-column gap-3">
+       
             <div
               className="p-3 p-md-4"
               style={{
@@ -91,16 +92,12 @@ const Popular = () => {
                 boxShadow: '0 20px 50px rgba(0,0,0,0.35)',
               }}
             >
-              <div className="d-flex flex-wrap justify-content-between align-items-start gap-3">
-                <div>
-                  <div className="text-uppercase small" style={{ letterSpacing: '0.16em', color: 'rgba(232,237,255,0.65)' }}>
-                    Topics
-                  </div>
-                  <p className="mb-0" style={{ color: '#aeb8de' }}>
-                    Use filters to refocus the news feed.
-                  </p>
-                </div>
-                <div className="d-flex flex-wrap gap-2">
+            <div className="d-flex flex-wrap justify-content-between align-items-start gap-3">
+              <div>
+                <h5 className="card-title mb-1 text-light">{activeTopic.label} News</h5>
+                <p className="small mb-3" style={{ color: '#aeb8de' }}>{activeTopic.hint}</p>
+              </div>
+              <div className="d-flex flex-wrap gap-2">
                   {topicFilters.map((topic) => {
                     const isActive = topic.category === activeTopic.category;
                     return (
@@ -121,17 +118,6 @@ const Popular = () => {
                   })}
                 </div>
               </div>
-            </div>
-
-            <div
-              className="p-3 p-md-4"
-              style={{
-                background: 'rgba(13,17,38,0.82)',
-                borderRadius: '18px',
-                border: '1px solid rgba(255,255,255,0.08)',
-                boxShadow: '0 20px 50px rgba(0,0,0,0.35)',
-              }}
-            >
               <NewsCard
                 category={activeTopic.category}
                 pageSize={8}
