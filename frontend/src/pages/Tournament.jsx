@@ -138,7 +138,7 @@ const Tournament = () => {
               <Trophy className="me-2 text-warning" size={24} />
               Tournaments
             </h2>
-            <p className="text-muted">Compete with traders worldwide and win amazing prizes</p>
+            <p className="mb-0" style={{ color: '#aeb8de' }}>Compete with traders worldwide and win amazing prizes</p>
           </div>
 
           <div className="row g-4">
