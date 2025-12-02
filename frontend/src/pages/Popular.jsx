@@ -1,6 +1,7 @@
 import React, { useEffect, useMemo, useState } from 'react';
 import NewsCard from '../components/NewsCard';
 import { getQuote } from '../api/StockApi';
+import { Link } from 'react-router-dom';
 
 const topicFilters = [
   { label: 'All Market', category: 'general', hint: 'Broad market headlines and sentiment.' },
@@ -155,10 +156,10 @@ const Popular = () => {
                     const change = quote?.dp;
                     const isUp = (change ?? 0) > 0;
                     return (
-                      <div
+                      <Link
+                        to={`/stocks/${item.ticker}`}
                         key={item.ticker}
-                        className="d-flex justify-content-between align-items-center p-3 rounded-3"
-                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+                        className="text-decoration-none popular-card d-flex justify-content-between align-items-center p-3 rounded-3"
                       >
                         <div>
                           <div className="fw-bold text-light">{item.ticker}</div>
@@ -170,7 +171,7 @@ const Popular = () => {
                             {change !== undefined ? formatPercent(change) : '—'}
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                   })}
                 </div>
@@ -187,10 +188,10 @@ const Popular = () => {
                     const change = quote?.dp;
                     const isUp = (change ?? 0) > 0;
                     return (
-                      <div
+                      <Link
+                        to={`/stocks/${item.ticker}`}
                         key={item.ticker}
-                        className="d-flex justify-content-between align-items-center p-3 rounded-3"
-                        style={{ background: 'rgba(255,255,255,0.03)', border: '1px solid rgba(255,255,255,0.08)' }}
+                        className="text-decoration-none popular-card d-flex justify-content-between align-items-center p-3 rounded-3"
                       >
                         <div>
                           <div className="fw-bold text-light">{item.ticker}</div>
@@ -202,7 +203,7 @@ const Popular = () => {
                             {change !== undefined ? formatPercent(change) : '—'}
                           </div>
                         </div>
-                      </div>
+                      </Link>
                     );
                   })}
                 </div>

@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef } from "react";
 import { Search, ArrowRightCircle, ArrowUpRight, ArrowDownRight, Plus, Minus, RefreshCcw } from "lucide-react";
 import { searchBar, getQuote, search, getMetrics, getHistory, getProfile } from "../api/StockApi";
-import { useNavigate } from "react-router-dom";
+import { useNavigate, Link } from "react-router-dom";
 import api, { loadAccount, trade } from "../api/AccountApi";
 import { Form } from "react-bootstrap";
 import { Toaster, toast } from "sonner";
@@ -411,46 +411,52 @@ const Trade = () => {
                 {selectedStock && (
                   <>
                     <div
-                      className="p-3 rounded-3 mb-3"
-                      style={{ background: "rgba(255,255,255,0.04)", border: "1px solid rgba(255,255,255,0.08)" }}
+                      className="p-3 rounded-3 mb-3 popular-card"
+                      style={{ background: "rgba(255,255,255,0.04)" }}
                     >
-                      <div className="d-flex justify-content-between align-items-center">
-                        <div>
-                          <div className="fw-bold text-light">{selectedStock.symbol}</div>
-                          <div style={{ color: "#aeb8de" }}>{selectedStock.name}</div>
+                      <Link
+                        key={selectedStock.symbol}
+                        to={`/stocks/${selectedStock.symbol}`}
+                        className="text-decoration-none"
+                      >
+                        <div className="d-flex justify-content-between align-items-center">
+                          <div>
+                            <div className="fw-bold text-light">{selectedStock.symbol}</div>
+                            <div style={{ color: "#aeb8de" }}>{selectedStock.name}</div>
+                          </div>
+                          <div className="text-end">
+                            <div className="fw-semibold text-light fs-4">{formatUSD(selectedStock.price)}</div>
+                            {typeof quote?.dp === "number" && typeof quote?.d === "number" && (
+                              <div className="d-flex justify-content-end gap-2 mt-1 fw-semibold">
+                                <span
+                                  className="badge rounded-pill d-inline-flex align-items-center gap-1"
+                                  style={{
+                                    background:
+                                      dayChange === "positive"
+                                        ? "rgba(34,197,94,0.15)"
+                                        : "rgba(239,68,68,0.15)",
+                                    color: dayChange === "positive" ? "#22c55e" : "#ef4444",
+                                  }}
+                                >
+                                  {dayChange === "positive" ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} {dayChangePercent}
+                                </span>
+                                <span
+                                  className="badge rounded-pill"
+                                  style={{
+                                    background:
+                                      dayChange === "positive"
+                                        ? "rgba(34,197,94,0.15)"
+                                        : "rgba(239,68,68,0.15)",
+                                    color: dayChange === "positive" ? "#22c55e" : "#ef4444",
+                                  }}
+                                >
+                                  {dayChangeDollars}
+                                </span>
+                              </div>
+                            )}
+                          </div>
                         </div>
-                        <div className="text-end">
-                          <div className="fw-semibold text-light fs-4">{formatUSD(selectedStock.price)}</div>
-                          {typeof quote?.dp === "number" && typeof quote?.d === "number" && (
-                            <div className="d-flex justify-content-end gap-2 mt-1 fw-semibold">
-                              <span
-                                className="badge rounded-pill d-inline-flex align-items-center gap-1"
-                                style={{
-                                  background:
-                                    dayChange === "positive"
-                                      ? "rgba(34,197,94,0.15)"
-                                      : "rgba(239,68,68,0.15)",
-                                  color: dayChange === "positive" ? "#22c55e" : "#ef4444",
-                                }}
-                              >
-                                {dayChange === "positive" ? <ArrowUpRight size={12} /> : <ArrowDownRight size={12} />} {dayChangePercent}
-                              </span>
-                              <span
-                                className="badge rounded-pill"
-                                style={{
-                                  background:
-                                    dayChange === "positive"
-                                      ? "rgba(34,197,94,0.15)"
-                                      : "rgba(239,68,68,0.15)",
-                                  color: dayChange === "positive" ? "#22c55e" : "#ef4444",
-                                }}
-                              >
-                                {dayChangeDollars}
-                              </span>
-                            </div>
-                          )}
-                        </div>
-                      </div>
+                      </Link>
                     </div>
 
                     <div className="d-flex align-items-center gap-5 mt-3 mb-3">
@@ -612,10 +618,10 @@ const Trade = () => {
                 <div className="d-grid gap-2">
                   {holdings && holdings.length > 0 ? (
                     [...holdings].reverse().slice(0, 5).map((holding) => (
-                      <div
+                      <Link
                         key={holding.stockTicker}
-                        className="p-3 rounded-3 d-flex justify-content-between align-items-center"
-                        style={{ background: "rgba(255,255,255,0.02)", border: "1px solid rgba(255,255,255,0.08)" }}
+                        to={`/stocks/${holding.stockTicker}`}
+                        className="text-decoration-none popular-card p-3 rounded-3 d-flex justify-content-between align-items-center"
                       >
                         <div>
                           <div className="fw-bold text-light">{holding.stockTicker}</div>
@@ -629,7 +635,8 @@ const Trade = () => {
                               background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
                               border: "none",
                             }}
-                            onClick={async () => {
+                            onClick={async (e) => {
+                              e.preventDefault();
                               setTicker(holding.stockTicker);
                               setShares(1);
                               setOrderType("buy");
@@ -661,7 +668,8 @@ const Trade = () => {
                               background: "linear-gradient(135deg, #ef4444, #f97316)",
                               border: "none",
                             }}
-                            onClick={async () => {
+                            onClick={async (e) => {
+                              e.preventDefault();
                               setTicker(holding.stockTicker);
                               setShares(Math.abs(holding.shares));
                               setOrderType("sell");
@@ -684,10 +692,10 @@ const Trade = () => {
                               window.scrollTo({ top: 0, behavior: "smooth" });
                             }}
                           >
-                            Sell All
+                            Sell
                           </button>
                         </div>
-                      </div>
+                      </Link>
                     ))
                   ) : (
                     <div style={{ color: "#aeb8de" }}>No holdings yet.</div>
