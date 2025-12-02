@@ -19,7 +19,7 @@ public class Account {
     private User user;
 
     @Column(nullable = false)
-    private String name;
+    private String name = "Default Account";;
 
     private double cash = 0.0;
 

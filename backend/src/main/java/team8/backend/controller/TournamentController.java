@@ -104,8 +104,7 @@ public ResponseEntity<List<TournamentLeaderboardDTO>> getLeaderboard(@PathVariab
             .map(acc -> new TournamentLeaderboardDTO(
                 acc.getName(),
                 acc.getCash(),
-                acc.getHoldings().stream().mapToDouble(h -> h.getShares() * h.getAveragePrice()).sum(),
-                acc.getHoldings().stream().mapToInt(h -> h.getShares()).sum() // totalStocks
+                acc.getHoldings().stream().mapToDouble(h -> h.getShares() * h.getAveragePrice()).sum()
             ))
             .sorted((a,b) -> Double.compare(b.getTotalHoldingValue() + b.getCash(), a.getTotalHoldingValue() + a.getCash()))
             .collect(Collectors.toList());
