@@ -92,7 +92,7 @@ public class AccountController {
             return ResponseEntity.badRequest().body("Invalid trade parameters.");
         }
 
-        int shares = sharesNum.intValue();
+        double shares = sharesNum.doubleValue();
         double price = priceNum.doubleValue();
 
         if (shares <= 0 || price <= 0) {
@@ -157,13 +157,13 @@ public class AccountController {
         List<Account> accounts = accountRepository.findByUser(userOpt.get());
         double totalCash = accounts.stream().mapToDouble(Account::getCash).sum();
 
-        Map<String, Integer> totalStocks = accounts.stream()
-                .flatMap(a -> a.getHoldings().stream())
-                .collect(Collectors.toMap(
-                        Holding::getStockTicker,
-                        Holding::getShares,
-                        Integer::sum
-                ));
+        Map<String, Double> totalStocks = accounts.stream()
+        .flatMap(a -> a.getHoldings().stream())
+        .collect(Collectors.toMap(
+                Holding::getStockTicker,
+                Holding::getShares,
+                Double::sum
+        ));
 
         Map<String, Object> response = Map.of(
                 "totalCash", totalCash,
@@ -185,5 +185,31 @@ public class AccountController {
                 .map(AccountDTO::fromEntity)
                 .collect(Collectors.toList());
         return ResponseEntity.ok(dtos);
+    }
+
+    @DeleteMapping("/{accountId}")
+    public ResponseEntity<Void> deleteAccount(@PathVariable Long accountId) {
+        Optional<Account> accountOpt = accountRepository.findById(accountId);
+        if (accountOpt.isEmpty()) {
+            return ResponseEntity.notFound().build();
+        }
+
+        accountRepository.delete(accountOpt.get());
+        return ResponseEntity.noContent().build();
+    }
+
+    @PatchMapping("/{accountId}/rename")
+    public ResponseEntity<AccountDTO> renameAccount(
+            @PathVariable Long accountId,
+            @RequestParam String name
+    ) {
+        Optional<Account> accOpt = accountRepository.findById(accountId);
+        if (accOpt.isEmpty()) return ResponseEntity.notFound().build();
+
+        Account account = accOpt.get();
+        account.setName(name);
+        accountRepository.save(account);
+
+        return ResponseEntity.ok(AccountDTO.fromEntity(account));
     }
 }

@@ -18,6 +18,9 @@ public class Account {
     @JoinColumn(name = "user_id", nullable = false)
     private User user;
 
+    @Column(nullable = false)
+    private String name;
+
     private double cash = 0.0;
 
     // One account can have many holdings
@@ -27,6 +30,10 @@ public class Account {
     // One account can have many transactions
     @OneToMany(mappedBy = "account", cascade = CascadeType.ALL, orphanRemoval = true)
     private List<Transaction> transactions = new ArrayList<>();
+
+    @ManyToOne
+    @JoinColumn(name = "tournament_id")  // nullable, not all accounts have tournaments
+    private Tournament tournament;
 
     // Helper
     public void addTransaction(Transaction tx) {
@@ -38,8 +45,9 @@ public class Account {
     // Constructors
     public Account() {}
 
-    public Account(User user, double initialCash) {
+    public Account(User user, String name, double initialCash) {
         this.user = user;
+        this.name = name;
         this.cash = initialCash;
     }
 
@@ -78,6 +86,22 @@ public class Account {
 
     public void setTransactions(List<Transaction> transactions) {
         this.transactions = transactions;
+    }
+
+    public Tournament getTournament() {
+        return tournament;
+    }
+
+    public void setTournament(Tournament tournament) {
+        this.tournament = tournament;
+    }
+
+    public String getName() {
+        return name;
+    }
+
+    public void setName(String name) {
+        this.name = name;
     }
 
     // Helper methods

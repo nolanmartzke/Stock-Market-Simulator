@@ -1,10 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { ArrowUp, ArrowDown } from "lucide-react";
-import { Button, Container, Form, Row, Col, Card } from "react-bootstrap";
+import React, { useEffect, useState } from 'react';
+import { ArrowUp, ArrowDown } from 'lucide-react';
+import { Container, Row, Col, Card } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
-import { loadDashboard } from "../api/AccountApi";
-import { Link } from "react-router-dom";
-import { getQuote } from "../api/StockApi";
+import { loadDashboard } from '../api/AccountApi';
+import { Link } from "react-router-dom"; 
+import { getQuote } from '../api/StockApi';
+import NewsCard from '../components/NewsCard';
+
 
 const Dashboard = () => {
   const { auth } = useAuth();
@@ -15,9 +17,9 @@ const Dashboard = () => {
   const [positions, setPositions] = useState([]);
   const [quotes, setQuotes] = useState({});
 
-  const [dayChange, setDayChange] = useState("positive");
-  const [dayChangeDollars, setDayChangeDollars] = useState("$0.00");
-  const [dayChangePercent, setDayChangePercent] = useState("0%");
+  const dayChange = "positive";
+  const dayChangeDollars = "$0.00";
+  const dayChangePercent = "0%";
 
   useEffect(() => {
     if (!auth) return;
@@ -25,11 +27,15 @@ const Dashboard = () => {
     setFirstName(auth.name.split(" ")[0]);
 
     loadDashboard(auth.id)
-      .then((response) => response.data)
-      .then((data) => {
-        console.log(data);
-        setCashBalance(data.totalCash);
-        setPositions(data.totalStocks);
+      .then(response => response.data)
+      .then(data => {
+          console.log(data);
+          setCashBalance(data.totalCash)
+          // filter so that do not show positions with 0 shares
+          const filteredPositions = Object.fromEntries(
+            Object.entries(data.totalStocks).filter(([, value]) => value !== 0)
+          );
+          setPositions(filteredPositions);
       })
       .catch((err) => console.log(err));
   }, [auth]);
@@ -37,8 +43,8 @@ const Dashboard = () => {
   useEffect(() => {
     if (!positions) return;
 
-    for (const [ticker, numShares] of Object.entries(positions)) {
-      if (!(ticker in quotes)) {
+    for (const [ticker] of Object.entries(positions)) {
+      if (!(ticker in quotes)){
         getQuote(ticker)
           .then((response) => response.data)
           .then((data) => {
@@ -48,7 +54,8 @@ const Dashboard = () => {
           .catch((err) => console.log(err));
       }
     }
-  }, [positions]);
+
+  }, [positions, quotes]);
 
   useEffect(() => {
     if (!positions || !quotes) return;
@@ -60,7 +67,8 @@ const Dashboard = () => {
     }, 0);
 
     setPortfolioValue(cash + equity);
-  }, [positions, quotes]);
+
+  }, [positions, quotes, cashBalance]);
 
   const formatUSD = (num) =>
     new Intl.NumberFormat("en-US", {
@@ -172,8 +180,14 @@ const Dashboard = () => {
                 minHeight: "300px",
               }}
             >
-              <Card.Body className="d-flex flex-column align-items-center">
-                <h5 className="py-4 fw-bold">Market News</h5>
+              <Card.Body>
+                <NewsCard
+                  category="general"
+                  pageSize={5}
+                  title="Market News"
+                  description="Latest market headlines and financial news."
+                  wrapInCard={false}
+                />
               </Card.Body>
             </Card>
           </Col>

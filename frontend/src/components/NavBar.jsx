@@ -17,7 +17,7 @@ import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
 import { searchBar } from "../api/StockApi";
 import { useAuth } from "../context/AuthContext";
-import { motion } from "framer-motion";
+import { motion as Motion } from "framer-motion";
 import { Offcanvas } from "react-bootstrap";
 
 export default function NavBar() {
@@ -35,7 +35,7 @@ export default function NavBar() {
   const navItemsMain = [
     { name: "Dashboard", icon: LineChart, link: "/dashboard" },
     { name: "Popular", icon: TrendingUp, link: "/popular" },
-    { name: "Leaderboard", icon: Trophy, link: "/leaderboard" },
+    { name: "Tournament", icon: Trophy, link: "/tournament" },
     { name: "Trade", icon: Users, link: "/trade" },
     { name: "History", icon: Activity, link: "/history" },
   ];
@@ -181,7 +181,7 @@ export default function NavBar() {
             </Link>
 
             <div className="d-flex justify-content-center mt-4">
-              <motion.button
+              <Motion.button
                 className="btn btn-danger btn-medium w-10 fw-medium text-white"
                 style={{
                   borderRadius: "12px",
@@ -193,7 +193,7 @@ export default function NavBar() {
                 }}
               >
                 Logout
-              </motion.button>
+              </Motion.button>
             </div>
           </div>
         ) : (
@@ -261,7 +261,7 @@ export default function NavBar() {
             value={q}
             onChange={(e) => setQ(e.target.value)}
             className="form-control"
-            placeholder="Search symbol or company"
+            placeholder="Search for Stock"
             aria-label="Quick symbol search"
           />
         </div>
