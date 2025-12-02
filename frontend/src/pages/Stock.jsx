@@ -1,8 +1,8 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { Search, PlusCircle, ArrowRightCircle, ArrowUpRight, ArrowDownRight, TrendingUp, Layers, CircleDollarSign, } from "lucide-react";
+import { ArrowUpRight, ArrowDownRight, TrendingUp, Layers, CircleDollarSign, } from "lucide-react";
 import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, } from "recharts";
 import { useParams } from "react-router-dom";
-import { Button, Container, Form, Row, Col, Card, Modal } from "react-bootstrap";
+import { Button, Form, Row, Col, Modal } from "react-bootstrap";
 import { getQuote, getMetrics, search, getHistory, getProfile, } from "../api/StockApi";
 import api, { trade, loadAccount } from "../api/AccountApi";
 import { motion as Motion, AnimatePresence } from "framer-motion";
@@ -373,6 +373,28 @@ const refreshHoldings = useCallback(() => {
   );
   const estimatedCost = (shares * price).toFixed(2);
   const estimatedCostDollars = formatUSD(estimatedCost);
+  const hour = new Date().getHours();
+  const formatCompact = (num) => {
+    const n = Number(num);
+    if (!n) return "—";
+    const abs = Math.abs(n);
+    if (abs >= 1e12) return `${(n / 1e12).toFixed(2)}T`;
+    if (abs >= 1e9) return `${(n / 1e9).toFixed(2)}B`;
+    if (abs >= 1e6) return `${(n / 1e6).toFixed(2)}M`;
+    if (abs >= 1e3) return `${(n / 1e3).toFixed(2)}K`;
+    return n.toFixed(2);
+  };
+  const marketCapDisplay = profile?.marketCapitalization
+    ? `$${formatCompact(profile.marketCapitalization)}`
+    : "—";
+  const ipoDate = profile?.ipo || "—";
+  const industry = profile?.finnhubIndustry || "—";
+  const exchange = profile?.exchange || stockTicker || query;
+  const currency = profile?.currency || "USD";
+  const website = profile?.weburl || null;
+  const sharesOutstandingDisplay = profile?.shareOutstanding
+    ? `${formatCompact(profile.shareOutstanding)} shares`
+    : "—";
 
 
   function handleReviewOrder() {
@@ -424,8 +446,7 @@ const refreshHoldings = useCallback(() => {
   };
 
   return (
-    <div className="container-fluid">
-
+    <div className="dashboard-page">
       <Toaster
         position="bottom-center"
         theme="dark"
@@ -458,135 +479,74 @@ const refreshHoldings = useCallback(() => {
         }}
       />
 
-      {/* stock name and price */}
-      <Container className="py-2 pb-0 px-3">
-        <Card
-          className="bg-gradient shadow-lg border-0 py-3"
-          style={{
-            backgroundColor: "#01497c",
-            color: "white",
-            borderRadius: "10px",
-          }}
-        >
-          <Card.Body
-            className="d-flex justify-content-between align-items-center"
-            style={{ paddingLeft: "2%", paddingRight: "5%" }}
-          >
-            <div
-              className="text-end px-4 py-3 me-5 rounded-4 border"
-              style={{
-                background:
-                  dayChange === "positive"
-                    ? "linear-gradient(135deg, rgba(34, 197, 94, 0.55), rgba(34, 197, 94, 0.35))"
-                    : "linear-gradient(135deg, rgba(248, 113, 113, 0.55), rgba(248, 113, 113, 0.35))",
-                borderColor:
-                  dayChange === "positive"
-                    ? "rgba(22, 163, 74, 0.25)"
-                    : "rgba(220, 38, 38, 0.25)",
-                boxShadow:
-                  dayChange === "positive"
-                    ? "0 14px 30px rgba(22, 163, 74, 0.18)"
-                    : "0 14px 30px rgba(220, 38, 38, 0.18)",
-              }}
-            >
-              <h2 className="mb-0 fw-semibold" style={{ fontSize: "2.5rem" }}>
-                {formattedPrice}
-              </h2>
-              <div
-                className={`d-inline-flex align-items-center gap-2 mt-2 px-3 py-1 rounded-pill fw-semibold ${
-                  dayChange === "positive"
-                    ? "bg-success-subtle text-success"
-                    : "bg-danger-subtle text-danger"
-                }`}
-                style={{
-                  boxShadow:
-                    dayChange === "positive"
-                      ? "0 10px 24px rgba(34, 197, 94, 0.25)"
-                      : "0 10px 24px rgba(239, 68, 68, 0.25)",
-                }}
-              >
-                <span
-                  className={`d-inline-flex align-items-center justify-content-center rounded-circle border ${
-                    dayChange === "positive"
-                      ? "border-success-subtle text-success"
-                      : "border-danger-subtle text-danger"
-                  }`}
-                  style={{
-                    width: "26px",
-                    height: "26px",
-                    backgroundColor: "white",
-                  }}
-                >
-                  {dayChange === "positive" ? (
-                    <ArrowUpRight size={16} />
-                  ) : (
-                    <ArrowDownRight size={16} />
-                  )}
+      <div className="container-xl py-4 d-flex flex-column gap-4">
+        <div className="glass-panel gradient-border card-arc p-4 p-lg-5">
+          <div className="d-flex flex-wrap justify-content-between align-items-start gap-4">
+            <div className="d-flex align-items-start gap-3 flex-wrap">
+              {profile?.logo ? (
+                <img
+                  src={profile.logo}
+                  alt={`${stockName} logo`}
+                  style={{ width: 72, height: 72, objectFit: "contain", borderRadius: 16, background: "rgba(255,255,255,0.05)", padding: 8 }}
+                />
+              ) : null}
+              <div>
+                <div className="pill-gradient small text-uppercase mb-1 d-inline-flex">
+                  {stockTicker || query}
+                </div>
+                <h2 className="text-light mb-1">{stockName}</h2>
+                <div className="section-sub">{exchange} • {currency}</div>
+              </div>
+            </div>
+            <div className="text-end">
+              <div className="display-5 text-light">{formattedPrice}</div>
+              <div className={`metric-pill mt-2 ${dayChange === "positive" ? "positive" : "negative"}`}>
+                <span className="d-inline-flex align-items-center justify-content-center rounded-circle border" style={{ width: 26, height: 26, backgroundColor: "rgba(255,255,255,0.08)" }}>
+                  {dayChange === "positive" ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
                 </span>
                 <span>{dayChangeDollars}</span>
                 <span className="opacity-75">({dayChangePercent})</span>
               </div>
             </div>
-            <div className="flex-grow-1 text-center">
-              <div className="d-flex align-items-center justify-content-center gap-3">
-                {profile && profile.logo ? (
-                  <img
-                    src={profile.logo}
-                    alt={`${stockName} logo`}
-                    style={{
-                      width: 64,
-                      height: 64,
-                      objectFit: "contain",
-                      borderRadius: 8,
-                    }}
-                  />
-                ) : null}
-                <h1
-                  className="mb-0 fw-semibold text-truncate"
-                  style={{ fontSize: "3rem" }}
-                >
-                  {stockName}
-                </h1>
-              </div>
-            </div>
-          </Card.Body>
-        </Card>
-      </Container>
+          </div>
+        </div>
 
-      <Container>
-        <Row>
-          {/* Graph */}
-          <Col xs={12} md={12} xl={8} className="p-3">
-            <Card
-              className="shadow-lg border-0 h-100"
-              style={{
-                backgroundColor: "#0a1324",
-                backgroundImage:
-                  "radial-gradient(circle at 18% 22%, rgba(96,165,250,0.18), transparent 26%), radial-gradient(circle at 82% 12%, rgba(14,165,233,0.22), transparent 22%), linear-gradient(145deg, #0a1324 0%, #0d2340 52%, #0b1a33 100%)",
-                color: "#f5f9ff",
-                borderRadius: "16px",
-                border: "1px solid rgba(255,255,255,0.08)",
-                boxShadow: "0 24px 70px rgba(0,0,0,0.6)",
-              }}
-            >
-              <Card.Body
-                className="d-flex flex-column justify-content-center align-items-center"
-                style={{ background: "transparent", color: "#f5f9ff" }}
-              >
-               
-                <div
-                  style={{
-                    width: "100%",
-                    minWidth: 0,
-                    height: 400,
-                    marginTop: 10,
-                    background:
-                      "linear-gradient(180deg, rgba(9,12,24,0.92) 0%, rgba(7,12,22,0.9) 40%, rgba(4,7,15,0.92) 100%)",
-                    borderRadius: "14px",
-                    padding: "8px 6px 2px",
-                    boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.05)",
-                  }}
-                >
+        <Row className="g-4">
+          <Col xs={12} xl={8} className="d-flex flex-column gap-4">
+            <div className="glass-panel gradient-border card-arc chart-card">
+              <div className="p-4 h-100 d-flex flex-column">
+                <div className="d-flex justify-content-between align-items-center gap-3">
+                  <div>
+                    <div className="text-uppercase section-sub small">Price history</div>
+                    <h5 className="section-heading mb-0">Market pulse</h5>
+                  </div>
+                  <div className="d-flex flex-wrap gap-2">
+                    {["1W", "1M", "3M", "YTD", "1Y", "2Y"].map((r) => (
+                      <button
+                        key={r}
+                        className="btn btn-sm border-0 fw-semibold"
+                        style={{
+                          background:
+                            range === r
+                              ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
+                              : "rgba(255,255,255,0.08)",
+                          color: range === r ? "#0b1120" : "rgba(232,241,255,0.9)",
+                          boxShadow:
+                            range === r
+                              ? "0 12px 30px rgba(14,165,233,0.35)"
+                              : "inset 0 0 0 1px rgba(255,255,255,0.12)",
+                          borderRadius: "10px",
+                          padding: "8px 12px",
+                          letterSpacing: "0.04em",
+                        }}
+                        onClick={() => setRange(r)}
+                      >
+                        {r}
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                <div className="flex-grow-1 mt-3">
                   <ResponsiveContainer width="100%" height="100%">
                     <ComposedChart
                       data={filteredHistory}
@@ -604,13 +564,7 @@ const refreshHoldings = useCallback(() => {
                           <stop offset="100%" stopColor="rgba(10,31,54,0)" />
                         </linearGradient>
                         <filter id="priceShadow" x="-20%" y="-20%" width="140%" height="140%">
-                          <feDropShadow
-                            dx="0"
-                            dy="10"
-                            stdDeviation="12"
-                            floodColor="#38bdf8"
-                            floodOpacity="0.28"
-                          />
+                          <feDropShadow dx="0" dy="10" stdDeviation="12" floodColor="#38bdf8" floodOpacity="0.28" />
                         </filter>
                       </defs>
                       <XAxis
@@ -647,7 +601,7 @@ const refreshHoldings = useCallback(() => {
                         fill="url(#priceAreaGradient)"
                         fillOpacity={1}
                         opacity={0.7}
-                        isAnimationActive={true}
+                        isAnimationActive
                       />
                       <Line
                         type="monotone"
@@ -668,412 +622,227 @@ const refreshHoldings = useCallback(() => {
                     </ComposedChart>
                   </ResponsiveContainer>
                 </div>
-                <div className="d-flex flex-wrap gap-2 mb-2 mt-3 justify-content-center">
-                  {["1W", "1M", "3M", "YTD", "1Y", "2Y"].map((r) => (
-                    <button
-                      key={r}
-                      className="btn btn-sm border-0 fw-semibold"
-                      style={{
-                        background:
-                          range === r
-                            ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
-                            : "rgba(255,255,255,0.08)",
-                        color: range === r ? "#0b1120" : "rgba(232,241,255,0.9)",
-                        boxShadow:
-                          range === r
-                            ? "0 12px 30px rgba(14,165,233,0.35)"
-                            : "inset 0 0 0 1px rgba(255,255,255,0.12)",
-                        borderRadius: "10px",
-                        padding: "8px 14px",
-                        letterSpacing: "0.04em",
-                      }}
-                      onClick={() => setRange(r)}
-                    >
-                      {r}
-                    </button>
+              </div>
+            </div>
+
+            { numHoldingShares > 0 && 
+              <div className="glass-panel gradient-border card-arc p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <div className="text-uppercase section-sub small">Holdings</div>
+                    <h5 className="section-heading mb-0">Position summary</h5>
+                  </div>
+                  <span className="pill-ghost">{numHoldingShares > 0 ? `${formattedShareCount} shares` : "No position"}</span>
+                </div>
+                <div className="d-grid gap-2">
+                  <div className="d-flex justify-content-between">
+                    <span className="section-sub">Market value</span>
+                    <span className="text-light fw-semibold">{holdingsMarketValue}</span>
+                  </div>
+                  <div className="d-flex justify-content-between">
+                    <span className="section-sub">Average cost</span>
+                    <span className="text-light fw-semibold">{formattedAverageCost}</span>
+                  </div>
+                  <div className="d-flex justify-content-between">
+                    <span className="section-sub">Shares held</span>
+                    <span className="text-light fw-semibold">{formattedShareCount}</span>
+                  </div>
+                </div>
+              </div>
+            }
+
+            {profile && (
+              <div className="glass-panel gradient-border card-arc p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <div className="text-uppercase section-sub small">Company</div>
+                    <h5 className="section-heading mb-0">Profile</h5>
+                  </div>
+                  <span className="pill-gradient small">Overview</span>
+                </div>
+                <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 g-3">
+                  <Col>
+                    <div className="section-sub">Industry</div>
+                    <div className="text-light fw-semibold">{industry}</div>
+                  </Col>
+                  <Col>
+                    <div className="section-sub">Country</div>
+                    <div className="text-light fw-semibold">{profile.country || "—"}</div>
+                  </Col>
+                  <Col>
+                    <div className="section-sub">Market Cap</div>
+                    <div className="text-light fw-semibold">{marketCapDisplay}</div>
+                  </Col>
+                  <Col>
+                    <div className="section-sub">IPO</div>
+                    <div className="text-light fw-semibold">{ipoDate}</div>
+                  </Col>
+                  <Col>
+                    <div className="section-sub">Currency</div>
+                    <div className="text-light fw-semibold">{currency}</div>
+                  </Col>
+                  <Col>
+                    <div className="section-sub">Shares Out.</div>
+                    <div className="text-light fw-semibold">{sharesOutstandingDisplay}</div>
+                  </Col>
+                  <Col>
+                    <div className="section-sub">Phone</div>
+                    <div className="text-light fw-semibold">{profile.phone || "—"}</div>
+                  </Col>
+                  <Col>
+                    <div className="section-sub">Website</div>
+                    {website ? (
+                      <a href={website} target="_blank" rel="noreferrer" className="text-decoration-none text-light fw-semibold">
+                        {website}
+                      </a>
+                    ) : (
+                      <div className="text-light">—</div>
+                    )}
+                  </Col>
+                </div>
+              </div>
+            )}
+
+            {Object.keys(metrics || {}).length > 0 && (
+              <div className="glass-panel gradient-border card-arc p-4">
+                <div className="d-flex justify-content-between align-items-center mb-3">
+                  <div>
+                    <div className="text-uppercase section-sub small">Fundamentals</div>
+                    <h5 className="section-heading mb-0">Key metrics</h5>
+                  </div>
+                  <span className="pill-ghost">Snapshot</span>
+                </div>
+                <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
+                  {Object.entries(metrics).map(([name, value]) => (
+                    <div key={name} className="col">
+                      <div className="p-3 card-arc" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
+                        <div className="text-uppercase section-sub small mb-1">{name}</div>
+                        <div className="text-light fw-semibold">{value}</div>
+                      </div>
+                    </div>
                   ))}
                 </div>
-                {/* shares, average price and portfolio percentage of this stock */}
-                {numHoldingShares > 0 && (
-                  <Card
-                    className="border-0 shadow-lg mt-1 w-100"
-                    style={{
-                      background:
-                        "linear-gradient(135deg, rgba(2,22,46,0.95), rgba(0,10,20,0.92))",
-                      color: "white",
-                      borderRadius: "16px",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    <Card.Body className="d-flex flex-column gap-3">
-                      <div className="d-flex flex-column flex-md-row gap-3 w-100">
-                        <div
-                          className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
-                          style={{
-                            backgroundColor: "rgba(255,255,255,0.04)",
-                            border: "1px solid rgba(255,255,255,0.08)",
-                          }}
-                        >
-                          <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
-                            <TrendingUp size={24} className="text-success" />
-                            <span> Your Equity</span>
-                          </div>
-                          <h4 className="mb-0 fw-semibold text-white text-center">
-                            {holdingsMarketValue}
-                          </h4>
-                        </div>
-                        <div
-                          className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
-                          style={{
-                            backgroundColor: "rgba(255,255,255,0.04)",
-                            border: "1px solid rgba(255,255,255,0.08)",
-                          }}
-                        >
-                          <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
-                            <Layers size={24} className="text-info" />
-                            <span>Shares Held</span>
-                          </div>
-                          <h4 className="mb-0 fw-semibold text-white text-center">
-                            {formattedShareCount} shares
-                          </h4>
-                        </div>
-                        <div
-                          className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
-                          style={{
-                            backgroundColor: "rgba(255,255,255,0.04)",
-                            border: "1px solid rgba(255,255,255,0.08)",
-                          }}
-                        >
-                          <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
-                            <CircleDollarSign
-                              size={24}
-                              className="text-warning"
-                            />
-                            <span>Average Cost</span>
-                          </div>
-                          <h4 className="mb-0 fw-semibold text-white text-center">
-                            {formattedAverageCost}
-                          </h4>
-                        </div>
-                      </div>
-                    </Card.Body>
-                  </Card>
-                )}
-              </Card.Body>
-            </Card>
+              </div>
+            )}
           </Col>
-          {/* Trading panel */}
-          <Col xs={12} md={12} xl={4} className="p-3">
-            <Card
-              className="bg-gradient shadow-lg border-0 h-100 px-4"
-              style={{
-                backgroundColor: "black",
-                color: "white",
-                borderRadius: "10px",
-              }}
-            >
-              <Card.Body>
-                <h2 className="text-center my-3">Trade</h2>
 
-                {/* Buy/Sell */}
-                <div className="d-flex w-100 rounded-pill px-1 py-1 text-white-50 fw-semibold bg-dark">
-                  <button
-                    type="button"
-                    onClick={() => setMode("buy")}
-                    className={`flex-fill py-1 rounded-pill border-0 transition ${
-                      mode === "buy"
-                        ? "bg-success text-white shadow shadow-primary-subtle"
-                        : "bg-transparent text-white-50"
-                    }`}
-                  >
-                    Buy {stockTicker}
-                  </button>
-                  <button
-                    disabled={numHoldingShares === 0}
-                    type="button"
-                    onClick={() => setMode("sell")}
-                    className={`flex-fill py-1 rounded-pill border-0 transition ${
-                      mode === "sell"
-                        ? "bg-danger text-white shadow"
-                        : "bg-transparent text-white-50"
-                    }`}
-                  >
-                    Sell {stockTicker}
-                  </button>
-                </div>
+          <Col xs={12} xl={4} className="d-flex flex-column gap-4">
+            <div className="glass-panel gradient-border card-arc p-4">
+              <div className="d-flex justify-content-between align-items-center mb-3">
+                <h5 className="section-heading mb-0">Trade {stockTicker || query}</h5>
+                <span className="pill-ghost">{mode === "buy" ? "Buying" : "Selling"}</span>
+              </div>
 
-                {/* Order Type / Buy In */}
-                <div className="d-flex justify-content-between align-items-center my-4">
-                  <p>Order type</p>
-                  <Form.Select
-                    size="md w-auto"
-                    style={{
-                      backgroundColor: "#1f1f1f",
-                      color: "white",
-                      border: "none",
-                    }}
-                  >
+              <div className="d-flex w-100 rounded-pill px-1 py-1 text-white-50 fw-semibold" style={{ background: "rgba(255,255,255,0.06)" }}>
+                <button
+                  type="button"
+                  onClick={() => setMode("buy")}
+                  className={`flex-fill py-2 rounded-pill border-0 transition ${mode === "buy" ? "btn-quick-primary" : ""}`}
+                  style={{ color: mode === "buy" ? "#0b1023" : "#dfe3ff", background: mode === "buy" ? "linear-gradient(135deg, #22c55e, #0ea5e9)" : "transparent" }}
+                >
+                  Buy
+                </button>
+                <button
+                  disabled={numHoldingShares === 0}
+                  type="button"
+                  onClick={() => setMode("sell")}
+                  className={`flex-fill py-2 rounded-pill border-0 transition ${mode === "sell" ? "btn-quick-primary" : ""}`}
+                  style={{ color: mode === "sell" ? "#0b1023" : "#dfe3ff", background: mode === "sell" ? "linear-gradient(135deg, #ef4444, #f97316)" : "transparent" }}
+                >
+                  Sell
+                </button>
+              </div>
+
+              <div className="mt-4 d-flex flex-column gap-3">
+                <div className="d-flex justify-content-between align-items-center">
+                  <span className="section-sub">Order type</span>
+                  <Form.Select size="sm" className="bg-dark text-light border-0" style={{ width: "auto" }}>
                     <option>Market order</option>
                     <option>Limit order</option>
                   </Form.Select>
                 </div>
-                <div className="d-flex justify-content-between align-items-center my-4">
-                  <p>Buy In</p>
-                  <Form.Select
-                    size="md w-auto"
-                    style={{
-                      backgroundColor: "#1f1f1f",
-                      color: "white",
-                      border: "none",
-                    }}
-                  >
+                <div className="d-flex justify-content-between align-items-center">
+                  <span className="section-sub">Buy In</span>
+                  <Form.Select size="sm" className="bg-dark text-light border-0" style={{ width: "auto" }}>
                     <option>Shares</option>
                     <option>Dollars</option>
                   </Form.Select>
                 </div>
-
-                {/* Shares/Dollars */}
-                <div className="d-flex justify-content-between align-items-center my-4">
-                  <p>Shares</p>
+                <div className="d-flex justify-content-between align-items-center">
+                  <span className="section-sub">Shares</span>
                   <Form.Control
                     size="sm"
                     type="number"
-                    className="no-spin border-0 w-25"
-                    style={{
-                      backgroundColor: "#1f1f1f",
-                      color: "white",
-                      textAlign: "right",
-                    }}
+                    className="no-spin text-end bg-dark text-light border-0"
+                    style={{ width: "120px" }}
                     onChange={(e) => setShares(Number(e.target.value))}
-                    onFocus={() => {
-                      if (shares === 0) setShares("");
-                    }}
-                    onBlur={() => {
-                      if (shares === "") setShares(0);
-                    }} //
+                    onFocus={() => { if (shares === 0) setShares(""); }}
+                    onBlur={() => { if (shares === "") setShares(0); }}
                     value={shares}
                   />
                 </div>
-
-                {/* Market/Limit Price */}
-                <div className="d-flex justify-content-between align-items-center mt-2">
-                  <p style={{ color: "#4ade80" }}>Market Price</p>
-                  <p>{formattedPrice}</p>
+                <div className="d-flex justify-content-between align-items-center">
+                  <span className="text-success">Market price</span>
+                  <span className="text-light fw-semibold">{formattedPrice}</span>
                 </div>
-
-                <hr className="border border-secondary mb-3" />
-
-                {/* Estimated cost */}
-                <div className="d-flex justify-content-between mb-3">
-                  <h5 style={{ fontWeight: "600" }}>Estimated cost</h5>
-                  <h5>{estimatedCostDollars}</h5>
+                <div className="d-flex justify-content-between align-items-center">
+                  <span className="section-sub">Estimated cost</span>
+                  <span className="text-light fw-semibold">{estimatedCostDollars}</span>
                 </div>
+              </div>
 
-                      
-                <Motion.button // idle | notEnoughBP | notEnoughShares | missingRequiredInput
-                  className=" w-100 border-0 rounded-pill fw-bold text-white py-3"
-                  style={{
-                    borderRadius: "12px",
-                    backgroundColor: {
-                      idle: "var(--bs-success)",
-                      notEnoughBP: "var(--bs-danger)",
-                      notEnoughShares: "var(--bs-danger)",
-                      missingRequiredInput: "var(--bs-danger)",
-                    }[reviewButtonStatus],
-                  }}
-                  // animation upon click
-                  whileTap={{ scale: 0.95 }}
-                  onClick={handleReviewOrder}
-                >
-                  <AnimatePresence mode="wait">
-                    <Motion.span // fades the text in and out
-                      key={reviewButtonStatus}
-                      initial={{ opacity: 0 }}
-                      animate={{ opacity: 1, transition: { duration: 0.1 } }}
-                      exit={{ opacity: 0, transition: { duration: 0.1 } }}
-                    >
-                      {
-                        reviewButtonStatus === "idle"
-                          ? "Review Order"
-                          : reviewButtonStatus === "notEnoughBP"
-                          ? "Not Enough Cash"
-                          : reviewButtonStatus === "notEnoughShares"
-                          ? "Not Enough Shares"
-                          : reviewButtonStatus === "missingRequiredInput"
-                          ? "Enter Shares"
-                          : "Review Order" // default
-                      }
-                    </Motion.span>
-                  </AnimatePresence>
-                </Motion.button>
+              <Motion.button
+                className="w-100 border-0 rounded-3 fw-bold text-white py-3 mt-3"
+                style={{
+                  borderRadius: "14px",
+                  background: {
+                    idle: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+                    notEnoughBP: "linear-gradient(135deg, #ef4444, #f97316)",
+                    notEnoughShares: "linear-gradient(135deg, #ef4444, #f97316)",
+                    missingRequiredInput: "linear-gradient(135deg, #ef4444, #f97316)",
+                  }[reviewButtonStatus],
+                }}
+                whileTap={{ scale: 0.97 }}
+                onClick={handleReviewOrder}
+              >
+                <AnimatePresence mode="wait">
+                  <Motion.span
+                    key={reviewButtonStatus}
+                    initial={{ opacity: 0 }}
+                    animate={{ opacity: 1, transition: { duration: 0.1 } }}
+                    exit={{ opacity: 0, transition: { duration: 0.1 } }}
+                  >
+                    {
+                      reviewButtonStatus === "idle"
+                        ? "Review Order"
+                        : reviewButtonStatus === "notEnoughBP"
+                        ? "Not Enough Cash"
+                        : reviewButtonStatus === "notEnoughShares"
+                        ? "Not Enough Shares"
+                        : "Enter Shares"
+                    }
+                  </Motion.span>
+                </AnimatePresence>
+              </Motion.button>
 
-        
-
-                {/* Buying power */}
-                <div className="text-center mt-3">
-                  <small className="text-secondary">
-                    {formatUSD(cash)} buying power available
-                  </small>
-                </div>
-
-                {/* Account Type */}
-                <div className="d-flex justify-content-center mt-2">
-                  <small className="text-secondary">
-                      <Form.Select size="sm" style={{ display: "inline-block", width: "auto", backgroundColor: "#121212", color: "white", border: "none"}}>
-                          <option>Main Account</option>
-                          <option>Account 2</option>
-                          <option>Account 3</option>
-                          {/* TODO: Raj should add accounts here */}
-                      </Form.Select>
-                  </small>
-                </div>
-              </Card.Body>
-            </Card>
+              <div className="text-center mt-3">
+                <small className="section-sub">{formatUSD(cash)} buying power available</small>
+              </div>
+              <div className="d-flex justify-content-center mt-2">
+                <small className="section-sub">
+                  <Form.Select size="sm" className="bg-dark text-light border-0" style={{ display: "inline-block", width: "auto" }}>
+                    <option>Main Account</option>
+                    <option>Account 2</option>
+                    <option>Account 3</option>
+                  </Form.Select>
+                </small>
+              </div>
+            </div>
           </Col>
         </Row>
-      </Container>
+      </div>
 
-      <Container>
-        {/* Company profile details */}
-        {profile && (
-          <Row>
-            <Col xs={12} className="px-3 py-0">
-              <Card
-                className="bg-gradient shadow-lg border-0 text-white"
-                style={{ backgroundColor: "#0c2f49ff", borderRadius: "15px" }}
-              >
-                <Card.Body className="mx-5 py-4 d-flex flex-column">
-                  <h3
-                    className="mt-2 fw-semibold text-white mb-4 pb-3"
-                    style={{ borderBottom: "2px solid rgba(255,255,255,0.12)" }}
-                  >
-                    Company Profile
-                  </h3>
-                  <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-3 g-2">
-                    <Col>
-                      <p>
-                        <strong>Industry:</strong>{" "}
-                        {profile.finnhubIndustry || "—"}
-                      </p>
-                    </Col>
-                    <Col>
-                      <p>
-                        <strong>Exchange:</strong> {profile.exchange || "—"}
-                      </p>
-                    </Col>
-                    <Col>
-                      <p>
-                        <strong>Country:</strong> {profile.country || "—"}
-                      </p>
-                    </Col>
-                    <Col>
-                      <p>
-                        <strong>Currency:</strong> {profile.currency || "—"}
-                      </p>
-                    </Col>
-                    <Col>
-                      <p>
-                        <strong>Market Cap:</strong>{" "}
-                        {profile.marketCapitalization
-                          ? new Intl.NumberFormat().format(
-                              profile.marketCapitalization
-                            )
-                          : "—"}
-                      </p>
-                    </Col>
-                    <Col>
-                      <p>
-                        <strong>Shares Outstanding:</strong>{" "}
-                        {profile.shareOutstanding
-                          ? new Intl.NumberFormat().format(
-                              Math.round(profile.shareOutstanding)
-                            )
-                          : "—"}
-                      </p>
-                    </Col>
-                    <Col>
-                      <p>
-                        <strong>IPO Date:</strong> {profile.ipo || "—"}
-                      </p>
-                    </Col>
-                    <Col>
-                      <p>
-                        <strong>Phone:</strong> {profile.phone || "—"}
-                      </p>
-                    </Col>
-                    <Col>
-                      <p>
-                        <strong>Website:</strong>{" "}
-                        {profile.weburl ? (
-                          <a
-                            href={profile.weburl}
-                            target="_blank"
-                            rel="noreferrer"
-                            style={{
-                              color: "#fff",
-                              textDecoration: "underline",
-                            }}
-                          >
-                            {profile.weburl}
-                          </a>
-                        ) : (
-                          "—"
-                        )}
-                      </p>
-                    </Col>
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        )}
-
-        {/* metrics */}
-        {Object.keys(metrics || {}).length > 0 && (
-          <Row className="">
-            <Col xs={12} className="py-3">
-              <Card
-                className="border-0 shadow-lg"
-                style={{
-                  background:
-                    "linear-gradient(135deg, #020b1f 0%, #04112a 55%, #071b3d 100%)",
-                  color: "white",
-                  borderRadius: "22px",
-                  border: "1px solid rgba(255,255,255,0.08)",
-                }}
-              >
-                <Card.Body className="p-4 p-md-5">
-                  <h3 className="mb-0 fw-semibold text-white mb-4">
-                    Key Metrics
-                  </h3>
-                  <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-4">
-                    {Object.entries(metrics).map(([name, value]) => (
-                      <div key={name} className="col d-flex">
-                        <div
-                          className="flex-grow-1 py-3 px-2"
-                          style={{
-                            borderTop: "1px solid rgba(255,255,255,0.12)",
-                          }}
-                        >
-                          <p className="text-white-50 text-uppercase small mb-1 fw-semibold">
-                            {" "}
-                            {name}{" "}
-                          </p>
-                          <h4 className="text-white mb-0 fw-semibold">
-                            {" "}
-                            {value}{" "}
-                          </h4>
-                        </div>
-                      </div>
-                    ))}
-                  </div>
-                </Card.Body>
-              </Card>
-            </Col>
-          </Row>
-        )}
-
-        {/* Public/private confirmation modal */}
+      {/* Public/private confirmation modal */}
         <Modal
           show={tradeConfirmModal}
           onHide={() => setTradeConfirmModal(false)}
@@ -1130,7 +899,6 @@ const refreshHoldings = useCallback(() => {
         </Modal>
         
 
-      </Container>
     </div>
   );
 };
