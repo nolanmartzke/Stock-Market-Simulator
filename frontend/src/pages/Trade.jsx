@@ -642,10 +642,11 @@ const Trade = () => {
                               setOrderType("buy");
                               try {
                                 const quoteRes = await getQuote(holding.stockTicker);
+                                const searchResult = await search(holding.stockTicker);
                                 setQuote(quoteRes.data);
                                 setSelectedStock({
                                   symbol: holding.stockTicker,
-                                  name: holding.stockTicker,
+                                  name: searchResult.data.description,
                                   price: quoteRes.data.c,
                                 });
                               } catch (error) {
@@ -676,9 +677,10 @@ const Trade = () => {
                               try {
                                 const quoteRes = await getQuote(holding.stockTicker);
                                 setQuote(quoteRes.data);
+                                const searchResult = await search(holding.stockTicker);
                                 setSelectedStock({
                                   symbol: holding.stockTicker,
-                                  name: holding.stockTicker,
+                                  name: searchResult.data.description,
                                   price: quoteRes.data.c,
                                 });
                               } catch (error) {
