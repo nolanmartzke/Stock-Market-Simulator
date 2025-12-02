@@ -468,3 +468,7 @@ body {
 .account-input::placeholder {
   color: rgba(231, 236, 247, 0.7) !important;
 }
+
+.trade-search-input::placeholder {
+  color: rgba(232, 237, 255, 0.7) !important;
+}
