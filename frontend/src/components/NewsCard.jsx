@@ -78,7 +78,7 @@ export default function NewsCard({
         <ul className="list-unstyled">
           {pageItems.map((item) => (
             <li key={item.id || item.url} className="mb-3">
-              <a href={item.url} target="_blank" rel="noreferrer" className="d-flex text-decoration-none text-dark">
+              <a href={item.url} target="_blank" rel="noreferrer" className="d-flex text-decoration-none text-light">
                 {item.image ? (
                   <img src={item.image} alt="thumb" style={{ width: 84, height: 56, objectFit: 'cover' }} className="me-3 rounded" />
                 ) : (

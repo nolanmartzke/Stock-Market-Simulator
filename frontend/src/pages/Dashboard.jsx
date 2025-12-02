@@ -6,6 +6,7 @@ import { loadDashboard } from '../api/AccountApi';
 import { Link } from "react-router-dom"; 
 import { getQuote } from '../api/StockApi';
 import NewsCard from '../components/NewsCard';
+import { ResponsiveContainer, AreaChart, Area, Tooltip, XAxis, YAxis, CartesianGrid } from 'recharts';
 
 
 const Dashboard = () => {
@@ -86,71 +87,101 @@ const Dashboard = () => {
   const formattedPortfolioValue = formatUSD(portfolioValue);
   const formattedCashBalance = formatUSD(cashBalance);
   const positionCount = positions ? Object.keys(positions).length : 0;
+  const equityValue = positions
+    ? Object.entries(positions).reduce((sum, [ticker, shares]) => {
+        const price = quotes[ticker]?.c ?? 0;
+        return sum + shares * price;
+      }, 0)
+    : 0;
+  const chartData = [
+    { name: "Mon", price: portfolioValue * 0.94 || 11850 },
+    { name: "Tue", price: portfolioValue * 0.97 || 12010 },
+    { name: "Wed", price: portfolioValue * 1.01 || 12240 },
+    { name: "Thu", price: portfolioValue * 1.04 || 12410 },
+    { name: "Fri", price: portfolioValue * 1.02 || 12300 },
+  ];
+  const hour = new Date().getHours();
+  const greeting =
+    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
 
   return (
     <Container fluid className="dashboard-page py-4">
       <div className="container-xl d-flex flex-column gap-4">
-        <div className="glass-panel gradient-border dashboard-hero p-4 p-lg-5">
+        <div className="glass-panel gradient-border dashboard-hero p-4 p-lg-5 card-arc">
           <div className="d-flex flex-wrap align-items-start justify-content-between gap-4">
             <div>
               <div className="pill-gradient text-uppercase small mb-2 d-inline-flex">Portfolio</div>
-              <h1 className="display-5 mb-1 text-light">{formattedPortfolioValue}</h1>
-              <div className={`metric-pill mt-2 ${dayChange === "positive" ? "positive" : "negative"}`}>
-                {dayChange === "positive" ? (
-                  <ArrowUp size={16} />
-                ) : (
-                  <ArrowDown size={16} />
-                )}
-                <span>{dayChangeDollars}</span>
-                <span className="opacity-75">({dayChangePercent})</span>
+
+              <div className="d-flex align-items-center gap-5">
+                <h1 className="display-5 mb-0 text-light">{formattedPortfolioValue}</h1>
+
+                <div className={`metric-pill ${dayChange === "positive" ? "positive" : "negative"}`}>
+                  {dayChange === "positive" ? (
+                    <ArrowUp size={16} />
+                  ) : (
+                    <ArrowDown size={16} />
+                  )}
+                  <span>{dayChangeDollars}</span>
+                  <span className="opacity-75">({dayChangePercent})</span>
+                </div>
               </div>
             </div>
+
             <div className="text-end">
-              <div className="text-gradient fw-semibold">Welcome back, {firstName || "trader"}.</div>
-              <div className="stat-chip mt-2">
-                <Wallet size={16} /> Cash: {formattedCashBalance}
-              </div>
-              <div className="stat-chip mt-2">
-                <Compass size={16} /> Holdings: {positionCount} tickers
-              </div>
+              <div className="text-gradient fw-semibold fs-2">{greeting}, {firstName || "trader"}.</div>
+              
             </div>
           </div>
-          <div className="d-flex flex-wrap gap-2 mt-4">
-            <span className="stat-chip">
-              <Activity size={14} /> Live market feed
-            </span>
-            <span className="stat-chip">
-              <Sparkles size={14} /> Personalized insights on deck
-            </span>
-          </div>
+     
         </div>
 
         <Row className="g-4">
           <Col xs={12} xl={8} className="d-flex flex-column gap-4">
-            <Card className="glass-panel gradient-border h-100">
-              <Card.Body className="p-4">
+            <Card className="glass-panel gradient-border card-arc chart-card">
+              <Card.Body className="p-4 h-100 d-flex flex-column">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <div className="text-uppercase text-muted small">Live chart</div>
-                    <h5 className="mb-0 text-light">Market pulse</h5>
+                    <div className="text-uppercase section-sub small">Live chart</div>
+                    <h5 className="section-heading mb-0">Market pulse</h5>
                   </div>
                   <span className="pill-gradient small">Realtime</span>
                 </div>
-                <div className="chart-placeholder w-100">
-                  <div className="fw-semibold">Your graph will live here</div>
-                  <div className="text-muted small">Plug in indicators and overlays to customize.</div>
+                <div className="flex-grow-1">
+                  <ResponsiveContainer width="100%" height="100%">
+                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                      <defs>
+                        <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
+                          <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.55} />
+                          <stop offset="100%" stopColor="#111827" stopOpacity={0.05} />
+                        </linearGradient>
+                      </defs>
+                      <CartesianGrid stroke="rgba(255,255,255,0.05)" vertical={false} />
+                      <XAxis dataKey="name" tick={{ fill: "#aeb8de" }} axisLine={false} tickLine={false} />
+                      <YAxis tick={{ fill: "#aeb8de" }} axisLine={false} tickLine={false} width={60} />
+                      <Tooltip
+                        contentStyle={{ background: "#0b1023", border: "1px solid rgba(255,255,255,0.08)", borderRadius: 12, color: "#fff" }}
+                      />
+                      <Area
+                        type="monotone"
+                        dataKey="price"
+                        stroke="#60a5fa"
+                        strokeWidth={3}
+                        fill="url(#areaGradient)"
+                      />
+                    </AreaChart>
+                  </ResponsiveContainer>
                 </div>
               </Card.Body>
             </Card>
 
-            <Card className="glass-panel gradient-border">
+            <Card className="glass-panel gradient-border card-arc watchlist-card">
               <Card.Body className="p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <div className="text-uppercase text-muted small">Watchlist</div>
-                    <h5 className="mb-0 text-light">Stay on top</h5>
+                    <div className="text-uppercase section-sub small">Watchlist</div>
+                    <h5 className="section-heading mb-0">Stay on top</h5>
                   </div>
-                  <span className="stat-chip"><Plus size={14} /> Add from Trade</span>
+                  <span className="pill-ghost"><Plus size={14} /> Add from Trade</span>
                 </div>
                 <div className="watchlist-empty">
                   Create a curated set of tickers to track intraday moves, news, and alerts.
@@ -158,41 +189,46 @@ const Dashboard = () => {
               </Card.Body>
             </Card>
 
-            <Card className="glass-panel gradient-border">
+            <Card className="glass-panel gradient-border card-arc news-card">
               <Card.Body className="p-4">
-                <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex justify-content-between align-items-center">
                   <div>
-                    <div className="text-uppercase text-muted small">News</div>
-                    <h5 className="mb-0 text-light">Market headlines</h5>
+                    <div className="text-uppercase section-sub small">News</div>
+                    <h5 className="section-heading mb-0">Market headlines</h5>
+                    <div className="section-sub">Fresh stories across your followed tickers.</div>
                   </div>
                   <span className="pill-gradient small">Realtime</span>
                 </div>
-                <NewsCard
-                  category="general"
-                  pageSize={5}
-                  title="Market News"
-                  description="Latest market headlines and financial news."
-                  wrapInCard={false}
-                />
+                <div className="news-shell mt-3">
+                  <NewsCard
+                    category="general"
+                    pageSize={5}
+                    title="Market News"
+                    description="Latest market headlines and financial news."
+                    wrapInCard={false}
+                  />
+                </div>
               </Card.Body>
             </Card>
           </Col>
 
-          <Col xs={12} xl={4}>
-            <Card className="glass-panel gradient-border positions-card h-100">
+          <Col xs={12} xl={4} className="d-flex flex-column gap-4">
+            
+
+            <Card className="glass-panel gradient-border card-arc positions-card">
               <Card.Body className="p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <div className="text-uppercase text-muted small">Holdings</div>
-                    <h4 className="text-light mb-0">Positions</h4>
+                    <div className="text-uppercase section-sub small">Holdings</div>
+                    <h4 className="section-heading mb-0">Positions</h4>
                   </div>
                   <span className="pill-gradient small">{positionCount} assets</span>
                 </div>
                 <div className="d-flex justify-content-between align-items-center mb-3">
-                  <span className="text-muted">Cash on hand</span>
+                  <span className="section-sub">Cash on hand</span>
                   <span className="fw-semibold text-light">{formattedCashBalance}</span>
                 </div>
-                <div className="d-grid gap-2">
+                <div className="positions-scroller d-grid gap-2">
                   {positions && Object.keys(positions).length > 0 ? (
                     Object.entries(positions).map(([ticker, count]) => (
                       <Link
@@ -203,7 +239,7 @@ const Dashboard = () => {
                         <div className="position-row d-flex justify-content-between align-items-center">
                           <div>
                             <div className="fw-bold">{ticker}</div>
-                            <div className="text-muted small mb-0">{count} shares</div>
+                            <div className="small mb-0" style={{ color: "rgba(223, 227, 255, 0.8)" }}>{count} shares</div>
                           </div>
                           <div className="text-end">
                             <div className="fw-semibold">

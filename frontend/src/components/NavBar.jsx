@@ -90,15 +90,9 @@ export default function NavBar() {
           <span className="brand-logo shadow-sm">TW</span>
           <span>
             <div className="fw-bold fs-5">TRD Wars</div>
-            <div className="brand-subtitle small">Trade. Learn. Compete.</div>
           </span>
         </Link>
-        <div className="d-flex align-items-center gap-2 mt-3">
-          <span className="pill-gradient small">Live</span>
-          <span className="stat-chip py-1 px-2">
-            <Zap size={14} className="text-warning" /> Market pulse
-          </span>
-        </div>
+     
       </div>
 
       <div className="mb-3">
@@ -160,34 +154,30 @@ export default function NavBar() {
         </ul>
       </div>
 
-      <div className="mt-auto pt-3 nav-footer position-relative">
+      <div className="mt-auto pt-3 nav-footer position-relative w-100">
         {auth ? (
-          <div className="d-flex align-items-center justify-content-between p-2 w-100">
-            <Link
-              className="d-flex align-items-center p-2 text-decoration-none"
-              to="/account"
-              onClick={onLinkClick}
-            >
-              <div className="me-3">
+          <div>
+            <div className="nav-user-block">
+              <Link
+                className="d-flex align-items-center gap-3 text-decoration-none flex-grow-1"
+                to="/account"
+                onClick={onLinkClick}
+              >
                 <img
                   src="https://placehold.co/40x40/007bff/ffffff?text=TW"
                   alt="User Avatar"
-                  className="rounded-circle"
+                  className="avatar"
                 />
-              </div>
-              <div>
-                <div className="fw-semibold text-light">{auth.name}</div>
-                <div className="text-muted small">{auth.email}</div>
-              </div>
-            </Link>
-
-            <div className="d-flex justify-content-center mt-4">
+                <div className="text-light">
+                  <div className="fw-semibold">{auth.name}</div>
+                  <div className="small" style={{ color: "rgba(255,255,255,0.7)" }}>{auth.email}</div>
+                </div>
+              </Link>
+            </div>
+            <div className="d-flex justify-content-center mt-3">
               <Motion.button
-                className="btn btn-danger btn-medium w-10 fw-medium text-white"
-                style={{
-                  borderRadius: "12px",
-                }}
-                whileTap={{ scale: 0.9 }}
+                className="btn btn-danger nav-logout-btn text-white"
+                whileTap={{ scale: 0.92 }}
                 onClick={() => {
                   handleLogout();
                   if (onLinkClick) onLinkClick();
@@ -280,7 +270,7 @@ export default function NavBar() {
           </ul>
         )}
 
-        {q && loading && <div className="small text-muted mt-1">Searching...</div>}
+        {q && loading && <div className="small text-white text-center mt-1">Searching...</div>}
       </div>
     )
   }
