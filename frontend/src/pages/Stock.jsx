@@ -63,29 +63,29 @@ const Stock = () => {
       .catch((err) => console.error("Failed to load accounts", err));
   }, []);
 
-const refreshHoldings = useCallback(() => {
-  if (!accountId) return;
-  if (!ticker) return;
+  const refreshHoldings = useCallback(() => {
+    if (!accountId) return;
+    if (!ticker) return;
 
-  loadAccount(accountId)
-    .then((response) => response.data)
-    .then((data) => {
-      if (!data.holdings) return;
-      setCash(data.cash)
+    loadAccount(accountId)
+      .then((response) => response.data)
+      .then((data) => {
+        if (!data.holdings) return;
+        setCash(data.cash)
 
-      const currHolding = data.holdings.find((h) => h.stockTicker === ticker);
-      if (!currHolding) {
-        setNumHoldingShares(0);
-        setAverageCost(null);
-      } else {
-        setNumHoldingShares(currHolding.shares);
-        setAverageCost(currHolding.averagePrice);
-      }
+        const currHolding = data.holdings.find((h) => h.stockTicker === ticker);
+        if (!currHolding) {
+          setNumHoldingShares(0);
+          setAverageCost(null);
+        } else {
+          setNumHoldingShares(currHolding.shares);
+          setAverageCost(currHolding.averagePrice);
+        }
 
-      console.log(data);
-    })
-    .catch((err) => console.log(err));
-}, [accountId, ticker]); 
+        console.log(data);
+      })
+      .catch((err) => console.log(err));
+  }, [accountId, ticker]); 
   /**
    * Whenever the account or ticker changes, refresh holdings so we can
    * show share count and average cost for the selected symbol.
@@ -153,11 +153,11 @@ const refreshHoldings = useCallback(() => {
     if (quote.d >= 0) {
       setDayChange("positive");
       setDayChangeDollars(`+${formatUSD(quote.d)}`);
-      setDayChangePercent(`+${quote.dp}%`);
+      setDayChangePercent(`${formatPercent(quote.dp)}`);
     } else {
       setDayChange("negative");
       setDayChangeDollars(`${formatUSD(quote.d)}`);
-      setDayChangePercent(`${quote.dp}%`);
+      setDayChangePercent(`${formatPercent(quote.dp)}`);
     }
   }, [quote]);
 
@@ -211,6 +211,13 @@ const refreshHoldings = useCallback(() => {
       currency: "USD",
     }).format(num);
   }
+
+  const formatPercent = (num) => {
+    const roundedNum = Number(num).toFixed(2);
+    let prefix = "";
+    if (num >= 0) prefix = "+";
+    return prefix + roundedNum + "%";
+  };
 
   const formatDateTick = (value) => {
     const dateObj = new Date(value);

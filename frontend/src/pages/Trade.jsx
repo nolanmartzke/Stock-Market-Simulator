@@ -50,6 +50,13 @@ const Trade = () => {
     });
   };
 
+  const formatPercent = (num) => {
+    const roundedNum = Number(num).toFixed(2);
+    let prefix = "";
+    if (num >= 0) prefix = "+";
+    return prefix + roundedNum + "%";
+  };
+
   /** 
    * On mount, grab the authenticated user from localStorage and fetch
    * the first account so subsequent trades know which ID to target.
@@ -180,11 +187,11 @@ const Trade = () => {
       if (quote.d >= 0) {
         setDayChange("positive");
         setDayChangeDollars(`+${formatUSD(quote.d)}`);
-        setDayChangePercent(`+${quote.dp}%`);
+        setDayChangePercent(`${formatPercent(quote.dp)}`);
       } else {
         setDayChange("negative");
         setDayChangeDollars(`${formatUSD(quote.d)}`);
-        setDayChangePercent(`${quote.dp}%`);
+        setDayChangePercent(`${formatPercent(quote.dp)}`);
       }
     }, [quote]);
   
