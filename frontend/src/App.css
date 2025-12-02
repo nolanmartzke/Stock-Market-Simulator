@@ -361,6 +361,19 @@ body {
   box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
 }
 
+.sticky-card {
+  position: sticky;
+  top: 20px;
+  z-index: 3;
+}
+
+@media (max-width: 991.98px) {
+  .sticky-card {
+    position: static;
+    top: auto;
+  }
+}
+
 .pill-gradient {
   background: var(--pill-gradient);
   color: #0b1023;

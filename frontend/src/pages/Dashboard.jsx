@@ -215,7 +215,7 @@ const Dashboard = () => {
           <Col xs={12} xl={4} className="d-flex flex-column gap-4">
             
 
-            <Card className="glass-panel gradient-border card-arc positions-card">
+            <Card className="glass-panel gradient-border card-arc positions-card sticky-card">
               <Card.Body className="p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>

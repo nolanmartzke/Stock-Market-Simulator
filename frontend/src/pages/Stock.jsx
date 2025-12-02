@@ -753,7 +753,7 @@ const refreshHoldings = useCallback(() => {
           </Col>
 
           <Col xs={12} xl={4} className="d-flex flex-column gap-4">
-            <div className="glass-panel gradient-border card-arc p-4">
+            <div className="glass-panel gradient-border card-arc p-4 sticky-card">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="section-heading mb-0">Trade {stockTicker || query}</h5>
                 <span className="pill-ghost">{mode === "buy" ? "Buying" : "Selling"}</span>
