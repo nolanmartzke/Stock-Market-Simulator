@@ -625,31 +625,60 @@ const refreshHoldings = useCallback(() => {
               </div>
             </div>
 
-            { numHoldingShares > 0 && 
-              <div className="glass-panel gradient-border card-arc p-4">
-                <div className="d-flex justify-content-between align-items-center mb-3">
-                  <div>
-                    <div className="text-uppercase section-sub small">Holdings</div>
-                    <h5 className="section-heading mb-0">Position summary</h5>
+            {/* shares, average price and portfolio percentage of this stock */}
+            {numHoldingShares > 0 && (
+
+                  <div className="d-flex flex-column flex-md-row gap-3 w-100">
+                    <div
+                      className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
+                      style={{
+                        backgroundColor: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
+                        <TrendingUp size={24} className="text-success" />
+                        <span> Your Equity</span>
+                      </div>
+                      <h4 className="mb-0 fw-semibold text-white text-center">
+                        {holdingsMarketValue}
+                      </h4>
+                    </div>
+                    <div
+                      className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
+                      style={{
+                        backgroundColor: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
+                        <Layers size={24} className="text-info" />
+                        <span>Shares Held</span>
+                      </div>
+                      <h4 className="mb-0 fw-semibold text-white text-center">
+                        {formattedShareCount} shares
+                      </h4>
+                    </div>
+                    <div
+                      className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
+                      style={{
+                        backgroundColor: "rgba(255,255,255,0.04)",
+                        border: "1px solid rgba(255,255,255,0.08)",
+                      }}
+                    >
+                      <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
+                        <CircleDollarSign
+                          size={24}
+                          className="text-warning"
+                        />
+                        <span>Average Cost</span>
+                      </div>
+                      <h4 className="mb-0 fw-semibold text-white text-center">
+                        {formattedAverageCost}
+                      </h4>
+                    </div>
                   </div>
-                  <span className="pill-ghost">{numHoldingShares > 0 ? `${formattedShareCount} shares` : "No position"}</span>
-                </div>
-                <div className="d-grid gap-2">
-                  <div className="d-flex justify-content-between">
-                    <span className="section-sub">Market value</span>
-                    <span className="text-light fw-semibold">{holdingsMarketValue}</span>
-                  </div>
-                  <div className="d-flex justify-content-between">
-                    <span className="section-sub">Average cost</span>
-                    <span className="text-light fw-semibold">{formattedAverageCost}</span>
-                  </div>
-                  <div className="d-flex justify-content-between">
-                    <span className="section-sub">Shares held</span>
-                    <span className="text-light fw-semibold">{formattedShareCount}</span>
-                  </div>
-                </div>
-              </div>
-            }
+            )}
 
             {profile && (
               <div className="glass-panel gradient-border card-arc p-4">
