@@ -42,7 +42,8 @@ export default function NavBar() {
 
   const navItemsSupport = [
     { name: "Get Started", icon: Zap, link: "/get-started" },
-    { name: "Settings", icon: Settings, link: "/settings" },
+    // TODO: removed settings -- can add back if we find a reason to
+    // { name: "Settings", icon: Settings, link: "/settings" },
   ];
 
   const navItemsAccount = [
