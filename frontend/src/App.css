@@ -459,3 +459,12 @@ body {
 .news-card {
   border-radius: 22px;
 }
+
+/* Account inputs */
+.account-input {
+  color: #f5f7ff !important;
+}
+
+.account-input::placeholder {
+  color: rgba(231, 236, 247, 0.7) !important;
+}

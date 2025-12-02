@@ -389,7 +389,7 @@ export default function History() {
                 <tr>
                   <th style={styles.th}>Ticker</th>
                   <th style={styles.th}>Action</th>
-                  <th style={styles.thRight}>Shares</th>
+                  <th style={styles.thRight}>QUANTITY</th>
                   <th style={styles.thRight}>Price</th>
                   <th style={{ ...styles.th, padding: "0 0 0.75rem 4rem" }}>
                     Timestamp
@@ -421,7 +421,7 @@ export default function History() {
                           ...styles.numeric,
                         }}
                       >
-                        {formatShares(tx.shares)}
+                        {formatShares(tx.shares)} {tx.shares === 1 ? "share" : "shares"}
                       </td>
                       <td
                         style={{
