@@ -460,21 +460,19 @@ const refreshHoldings = useCallback(() => {
           descriptionClassName: "text-white-50",
           style: {
             background:
-              "linear-gradient(135deg, rgba(9,20,45,0.95), rgba(16,80,120,0.9))",
-            color: "#f8fbff",
-            border: "1px solid rgba(255,255,255,0.18)",
-            outline: "2px solid rgba(255,255,255,0.12)",
-            outlineOffset: "2px",
-            boxShadow: "0 18px 55px rgba(0,0,0,0.35)",
-            borderRadius: "14px",
-            backdropFilter: "blur(8px)",
-            fontSize: "28px",
-            lineHeight: "1.45",
-            padding: "14px 10px",
+              "linear-gradient(135deg, rgba(10,15,30,0.95), rgba(20,35,70,0.92))",
+            color: "#f1f5ff",
+            border: "1px solid rgba(255,255,255,0.12)",
+            boxShadow: "0 20px 55px rgba(0,0,0,0.35)",
+            borderRadius: "16px",
+            backdropFilter: "blur(10px)",
+            fontSize: "16px",
+            lineHeight: "1.35",
+            padding: "12px 14px",
             display: "flex",
             alignItems: "center",
             justifyContent: "center",
-            gap: "10px",
+            gap: "8px",
           },
         }}
       />
@@ -872,62 +870,100 @@ const refreshHoldings = useCallback(() => {
       </div>
 
       {/* Public/private confirmation modal */}
-        <Modal
-          show={tradeConfirmModal}
-          onHide={() => setTradeConfirmModal(false)}
-          centered
-          backdrop="static"
-          className="modern-trade-modal"
-        >
-          <Modal.Header
-            closeButton
-            className="bg-dark bg-gradient border-0 text-white px-4 py-3 rounded-top shadow-lg"
+      <Modal
+        show={tradeConfirmModal}
+        onHide={() => setTradeConfirmModal(false)}
+        centered
+        backdrop="static"
+        dialogClassName="modal-dialog-centered"
+        contentClassName="border-0 bg-transparent"
+      >
+
+
+        {/* BODY */}
+        <Modal.Body className="p-4" style={{ background: "#0a0e17", borderRadius: "18px 18px 0 0" }}>
+          <div className="mb-3">
+            <div className="text-uppercase fw-bold" style={{ letterSpacing: "0.04em", fontSize: "0.95rem", color: "#e5e7eb" }}>
+              Please confirm order
+            </div>
+          </div>
+          <div
+            className="p-4 rounded-4"
+            style={{
+              background: "#111726",
+              border: "1px solid rgba(255,255,255,0.05)",
+              boxShadow: "inset 0 0 0 1px rgba(255,255,255,0.03)",
+              textAlign: "left",
+            }}
           >
-            <Modal.Title className="fw-bold text-uppercase">
-              Confirm {ticker} Order
-            </Modal.Title>
-          </Modal.Header>
-
-          <Modal.Body className="bg-dark text-white px-4 py-4 border-top border-secondary-subtle">
-            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
-              <span className="text-uppercase text-white-50 small">Action</span>
-              <span className="fw-semibold text-uppercase text-white">
+            <div className="d-flex align-items-center gap-3 mb-3 flex-wrap">
+              <div
+                className="px-3 py-1 rounded-pill fw-bold text-white"
+                style={{
+                  fontSize: "0.9rem",
+                  background:
+                    mode === "buy"
+                      ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
+                      : "linear-gradient(135deg, #f97316, #ef4444)",
+                  letterSpacing: "0.03em",
+                }}
+              >
                 {mode === "buy" ? "Buy" : "Sell"}
-              </span>
+              </div>
+              <div className="pill-ghost small" style={{ borderRadius: "12px", padding: "6px 10px" }}>
+                {stockTicker || ticker || query}
+              </div>
             </div>
-            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
-              <span className="text-uppercase text-white-50 small">Quantity</span>
-              <span className="fw-semibold text-white">{shares || 0} shares</span>
-            </div>
-            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
-              <span className="text-uppercase text-white-50 small">Order Type</span>
-              <span className="fw-semibold text-white">Market</span>
-            </div>
-            <div className="d-flex justify-content-between align-items-center mb-3 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
-              <span className="text-uppercase text-white-50 small">Market Price</span>
-              <span className="fw-semibold text-white">{formattedPrice}</span>
-            </div>
-            <div className="d-flex justify-content-between align-items-center mb-1 px-3 py-2 rounded-3 bg-black bg-opacity-25 shadow-sm">
-              <span className="text-uppercase text-white-50 small">Total</span>
-              <span className="fw-semibold text-white">{estimatedCostDollars}</span>
-            </div>
-    
-          </Modal.Body>
 
-          <Modal.Footer className="bg-dark border-0 d-flex flex-column flex-sm-row align-items-stretch gap-3 px-4 pb-4">
-            <Button className="w-100 text-uppercase fw-semibold rounded-pill py-2 btn-light"
-              onClick={() => setTradeConfirmModal(false) }>Cancel</Button>
-            <Button
-                className="w-100 text-uppercase fw-bold rounded-pill py-3 shadow-lg"
-                onClick={handleSubmitOrder}
+            <div className="text-light" style={{ fontSize: "1.05rem" }}>
+              {mode === "buy" ? "Buying" : "Selling"} {shares || 0} {shares === 1 ? "share" : "shares"} of{" "}
+              {stockTicker || ticker || query} at {formattedPrice} each.
+            </div>
+
+            <div
+              className="mt-2 fw-semibold"
+              style={{ fontSize: "1.25rem", color: "#f8fafc" }}
             >
-                Place Order
-            </Button>
-          </Modal.Footer>
-               
-        </Modal>
-        
+              Estimated total: {estimatedCostDollars}
+            </div>
+          </div>
+        </Modal.Body>
 
+
+        {/* FOOTER */}
+        <Modal.Footer
+        className="d-flex flex-row gap-3 border-0 p-4"
+        style={{ background: "#0a0e17" }}
+        >
+          <Button
+          className="flex-fill fw-semibold rounded-4 py-2"
+          variant="light"
+          onClick={() => setTradeConfirmModal(false)}
+          style={{
+          background: "#e2e8f0",
+          color: "#0f172a",
+          border: "none",
+          boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+          }}
+          >
+            Cancel
+          </Button>
+
+
+          <Motion.button
+          whileTap={{ scale: 0.96 }}
+          className="flex-fill fw-bold rounded-4 py-2 text-white border-0"
+          onClick={handleSubmitOrder}
+          style={{
+          background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+          boxShadow: "0 10px 30px rgba(14,165,233,0.35)",
+          fontSize: "1rem",
+          }}
+          >
+            Place Order
+          </Motion.button>
+        </Modal.Footer>
+      </Modal>
     </div>
   );
 };
