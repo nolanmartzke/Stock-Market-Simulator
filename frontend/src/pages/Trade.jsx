@@ -31,7 +31,7 @@ const Trade = () => {
   const [ticker, setTicker] = useState("");
   const [orderType, setOrderType] = useState("buy");
   const [selectedStock, setSelectedStock] = useState(null);
-  const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | notEnoughShares | missingRequiredInput
+  const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | notEnoughShares | missingRequiredInput | error
 
   const [dayChange, setDayChange] = useState("positive");
   const [dayChangeDollars, setDayChangeDollars] = useState(0);
@@ -234,6 +234,7 @@ const Trade = () => {
 
     try {
       const quoteRes = await getQuote(ticker);
+      
       const price = quoteRes.data.c;
       const order = {
         action: orderType.toLowerCase(),
@@ -269,9 +270,9 @@ const Trade = () => {
       setReviewButtonStatus("idle");
     } catch (error) {
       console.error("Trade failed:", error);
-      setReviewButtonStatus("missingRequiredInput");
+      setReviewButtonStatus("error");
       setTimeout(() => setReviewButtonStatus("idle"), 1200);
-      toast.error(error.response?.data || "Failed to place order.");
+      toast.error("Failed to place order.");
     }
   }
 
@@ -572,6 +573,7 @@ const Trade = () => {
                             notEnoughBP: "linear-gradient(135deg, #ef4444, #f97316)",
                             notEnoughShares: "linear-gradient(135deg, #ef4444, #f97316)",
                             missingRequiredInput: "linear-gradient(135deg, #ef4444, #f97316)",
+                            error: "linear-gradient(135deg, #ef4444, #f97316)",
                           }[reviewButtonStatus],
                           border: "none",
                           boxShadow: "0 14px 40px rgba(14,165,233,0.25)",
@@ -592,6 +594,8 @@ const Trade = () => {
                               ? "Not enough cash"
                               : reviewButtonStatus === "notEnoughShares"
                               ? "Not enough shares"
+                              : reviewButtonStatus === "error"
+                              ? "Server Error"
                               : "Enter details"}
                             {reviewButtonStatus === "idle" && <ArrowRightCircle className="ms-2" size={16} />}
                           </Motion.span>
