@@ -47,7 +47,7 @@ const Popular = () => {
         try {
           const res = await getQuote(item.ticker);
           results[item.ticker] = res.data;
-        } catch (err) {
+        } catch {
           results[item.ticker] = null;
         }
       }
@@ -124,8 +124,6 @@ const Popular = () => {
               <NewsCard
                 category={activeTopic.category}
                 pageSize={8}
-                heading={`${activeTopic.label} News`}
-                subtitle={activeTopic.hint}
                 wrapInCard={false}
               />
             </div>

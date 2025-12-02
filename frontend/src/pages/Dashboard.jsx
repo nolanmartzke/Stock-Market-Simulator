@@ -87,12 +87,12 @@ const Dashboard = () => {
   const formattedPortfolioValue = formatUSD(portfolioValue);
   const formattedCashBalance = formatUSD(cashBalance);
   const positionCount = positions ? Object.keys(positions).length : 0;
-  const equityValue = positions
-    ? Object.entries(positions).reduce((sum, [ticker, shares]) => {
-        const price = quotes[ticker]?.c ?? 0;
-        return sum + shares * price;
-      }, 0)
-    : 0;
+  // const equityValue = positions
+  //   ? Object.entries(positions).reduce((sum, [ticker, shares]) => {
+  //       const price = quotes[ticker]?.c ?? 0;
+  //       return sum + shares * price;
+  //     }, 0)
+  //   : 0;
   const chartData = [
     { name: "Mon", price: portfolioValue * 0.94 || 11850 },
     { name: "Tue", price: portfolioValue * 0.97 || 12010 },
@@ -203,8 +203,6 @@ const Dashboard = () => {
                   <NewsCard
                     category="general"
                     pageSize={5}
-                    title="Market News"
-                    description="Latest market headlines and financial news."
                     wrapInCard={false}
                   />
                 </div>

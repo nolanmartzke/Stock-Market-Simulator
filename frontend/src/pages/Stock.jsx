@@ -373,7 +373,6 @@ const refreshHoldings = useCallback(() => {
   );
   const estimatedCost = (shares * price).toFixed(2);
   const estimatedCostDollars = formatUSD(estimatedCost);
-  const hour = new Date().getHours();
   const formatCompact = (num) => {
     const n = Number(num);
     if (!n) return "—";
