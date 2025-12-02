@@ -18,9 +18,22 @@ const Dashboard = () => {
   const [positions, setPositions] = useState([]);
   const [quotes, setQuotes] = useState({});
 
-  const dayChange = "positive";
-  const dayChangeDollars = "$0.00";
-  const dayChangePercent = "0%";
+  const formatUSD = (num) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+  }).format(num);
+
+  const formatPercent = (num) => {
+    const roundedNum = Number(num).toFixed(2);
+    let prefix = "";
+    if (num >= 0) prefix = "+";
+    return prefix + roundedNum + "%";
+  };
+
+  const change = "positive";
+  const changeDollars = formatUSD(portfolioValue-10000); // start balance is always $10,000
+  const changePercent = formatPercent((portfolioValue-10000)/10000 * 100);
 
   useEffect(() => {
     if (!auth) return;
@@ -71,18 +84,8 @@ const Dashboard = () => {
 
   }, [positions, quotes, cashBalance]);
 
-  const formatUSD = (num) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(num);
-
-  const formatPercent = (num) => {
-    const roundedNum = Number(num).toFixed(2);
-    let prefix = "";
-    if (num >= 0) prefix = "+";
-    return prefix + roundedNum + "%";
-  };
+  
+  
 
   const formattedPortfolioValue = formatUSD(portfolioValue);
   const formattedCashBalance = formatUSD(cashBalance);
@@ -114,14 +117,14 @@ const Dashboard = () => {
               <div className="d-flex align-items-center gap-5">
                 <h1 className="display-5 mb-0 text-light">{formattedPortfolioValue}</h1>
 
-                <div className={`metric-pill ${dayChange === "positive" ? "positive" : "negative"}`}>
-                  {dayChange === "positive" ? (
+                <div className={`metric-pill ${change === "positive" ? "positive" : "negative"}`}>
+                  {change === "positive" ? (
                     <ArrowUp size={16} />
                   ) : (
                     <ArrowDown size={16} />
                   )}
-                  <span>{dayChangeDollars}</span>
-                  <span className="opacity-75">({dayChangePercent})</span>
+                  <span>{changeDollars}</span>
+                  <span className="opacity-75">({changePercent})</span>
                 </div>
               </div>
             </div>
