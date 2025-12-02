@@ -101,8 +101,7 @@ const Dashboard = () => {
     { name: "Fri", price: portfolioValue * 1.02 || 12300 },
   ];
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 4 ? "Good night" : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : hour < 22 ? "Good evening" : "Good night";
 
   return (
     <Container fluid className="dashboard-page py-4">
