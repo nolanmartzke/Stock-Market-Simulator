@@ -14,7 +14,10 @@ export default function NewsCard({
   category = 'general',
   pageSize = 10,
   heading = 'Related News',
-  subtitle = 'Top headlines related to popular stocks.'
+  subtitle = 'Top headlines related to popular stocks.',
+  title,
+  description,
+  wrapInCard = true
 }) {
   const [news, setNews] = useState([])
   const [loading, setLoading] = useState(false)
@@ -49,6 +52,8 @@ export default function NewsCard({
 
   const total = news.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
+  const cardHeading = heading || title || 'Related News';
+  const cardSubtitle = subtitle || description || 'Top headlines related to popular stocks.';
 
   useEffect(() => {
     if (page > totalPages) setPage(1)
@@ -57,12 +62,10 @@ export default function NewsCard({
   const startIdx = (page - 1) * pageSize;
   const pageItems = news.slice(startIdx, startIdx + pageSize);
 
-  return (
-    <div>
-      <div className="card">
-        <div className="card-body">
-          <h5 className="card-title mb-1">{heading}</h5>
-          <p className="text-muted small mb-3">{subtitle}</p>
+  const content = (
+    <>
+      <h5 className="card-title mb-1">{cardHeading}</h5>
+      <p className="text-muted small mb-3">{cardSubtitle}</p>
 
       {loading && <div className="text-center py-3">Loading news...</div>}
       {error && <div className="text-danger">Error loading news.</div>}
@@ -71,49 +74,31 @@ export default function NewsCard({
         <div className="text-muted">No news available.</div>
       )}
 
-          {!loading && (
-            <ul className="list-unstyled">
-              {pageItems.map((item) => (
-                <li key={item.id} className="mb-3">
-                  <a href={item.url} target="_blank" rel="noreferrer" className="d-flex text-decoration-none text-dark">
-                    {item.image ? (
-                      <img src={item.image} alt="thumb" style={{ width: 84, height: 56, objectFit: 'cover' }} className="me-3 rounded" />
-                    ) : (
-                      <div style={{ width: 84, height: 56 }} className="me-3 bg-light rounded" />
-                    )}
+      {!loading && (
+        <ul className="list-unstyled">
+          {pageItems.map((item) => (
+            <li key={item.id || item.url} className="mb-3">
+              <a href={item.url} target="_blank" rel="noreferrer" className="d-flex text-decoration-none text-dark">
+                {item.image ? (
+                  <img src={item.image} alt="thumb" style={{ width: 84, height: 56, objectFit: 'cover' }} className="me-3 rounded" />
+                ) : (
+                  <div style={{ width: 84, height: 56 }} className="me-3 bg-light rounded" />
+                )}
 
-                    <div>
-                      <div className="fw-semibold">{item.headline}</div>
-                      <div className="text-muted small">{item.source} • {formatDate(item.datetime)}</div>
-                    </div>
-                  </a>
-                </li>
-              ))}
-            </ul>
-          )}
-
-          {/* Pagination controls */}
-          {totalPages > 1 && (
-            <div className="d-flex justify-content-between align-items-center mt-2">
-              <div className="small text-muted">Showing {startIdx + 1}-{Math.min(startIdx + pageSize, total)} of {total}</div>
-              <div>
-                <div className="fw-semibold">{item.headline}</div>
-                <div className="text-muted small">
-                  {item.source} • {formatDate(item.datetime)}
+                <div>
+                  <div className="fw-semibold">{item.headline}</div>
+                  <div className="text-muted small">{item.source} • {formatDate(item.datetime)}</div>
                 </div>
-              </div>
-            </a>
-          </li>
-        ))}
-      </ul>
+              </a>
+            </li>
+          ))}
+        </ul>
+      )}
 
       {/* Pagination controls */}
       {totalPages > 1 && (
         <div className="d-flex justify-content-between align-items-center mt-2">
-          <div className="small text-muted">
-            Showing {startIdx + 1}-{Math.min(startIdx + pageSize, total)} of{" "}
-            {total}
-          </div>
+          <div className="small text-muted">Showing {startIdx + 1}-{Math.min(startIdx + pageSize, total)} of {total}</div>
           <div>
             <nav>
               <ul className="pagination pagination-sm mb-0">
@@ -143,9 +128,7 @@ export default function NewsCard({
                   );
                 })}
                 <li
-                  className={`page-item ${
-                    page === totalPages ? "disabled" : ""
-                  }`}
+                  className={`page-item ${page === totalPages ? "disabled" : ""}`}
                 >
                   <button
                     className="page-link"
@@ -164,10 +147,8 @@ export default function NewsCard({
 
   if (wrapInCard) {
     return (
-      <div>
-        <div className="card">
-          <div className="card-body">{content}</div>
-        </div>
+      <div className="card">
+        <div className="card-body">{content}</div>
       </div>
     );
   }

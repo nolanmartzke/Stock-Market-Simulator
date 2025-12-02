@@ -5,6 +5,7 @@ import { useAuth } from "../context/AuthContext";
 import { loadDashboard } from '../api/AccountApi';
 import { Link } from "react-router-dom"; 
 import { getQuote } from '../api/StockApi';
+import NewsCard from '../components/NewsCard';
 
 
 const Dashboard = () => {
