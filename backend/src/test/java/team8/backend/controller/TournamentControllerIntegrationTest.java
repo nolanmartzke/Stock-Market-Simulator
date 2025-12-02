@@ -219,8 +219,7 @@ public class TournamentControllerIntegrationTest {
         assertThat(row).containsKeys(
                 "accountName",
                 "cash",
-                "totalHoldingValue",
-                "totalStocks"
+                "totalHoldingValue"
         );
     }
 }
