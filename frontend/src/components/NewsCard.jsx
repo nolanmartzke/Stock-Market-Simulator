@@ -11,21 +11,22 @@ function formatDate(unix) {
 }
 
 export default function NewsCard({
-  category = "general",
+  category = 'general',
   pageSize = 10,
-  title = "Related News",
-  description = "Top headlines related to popular stocks.",
-  wrapInCard = true,
+  heading = 'Related News',
+  subtitle = 'Top headlines related to popular stocks.'
 }) {
-  const [news, setNews] = useState([]);
-  const [loading, setLoading] = useState(false);
-  const [error, setError] = useState(null);
-  const [page, setPage] = useState(1);
+  const [news, setNews] = useState([])
+  const [loading, setLoading] = useState(false)
+  const [error, setError] = useState(null)
+  const [page, setPage] = useState(1)
 
   useEffect(() => {
-    let mounted = true;
-    setLoading(true);
-    setError(null);
+    let mounted = true
+    setLoading(true)
+    setError(null)
+    setNews([]) // clear existing so old articles don't flash during category switches
+    setPage(1)
     getNews(category)
       .then((res) => {
         if (!mounted) return;
@@ -56,10 +57,12 @@ export default function NewsCard({
   const startIdx = (page - 1) * pageSize;
   const pageItems = news.slice(startIdx, startIdx + pageSize);
 
-  const content = (
-    <>
-      {title && <h5 className="card-title">{title}</h5>}
-      {description && <p className="text-muted">{description}</p>}
+  return (
+    <div>
+      <div className="card">
+        <div className="card-body">
+          <h5 className="card-title mb-1">{heading}</h5>
+          <p className="text-muted small mb-3">{subtitle}</p>
 
       {loading && <div className="text-center py-3">Loading news...</div>}
       {error && <div className="text-danger">Error loading news.</div>}
@@ -68,32 +71,31 @@ export default function NewsCard({
         <div className="text-muted">No news available.</div>
       )}
 
-      <ul className="list-unstyled">
-        {pageItems.map((item) => (
-          <li key={item.id} className="mb-3">
-            <a
-              href={item.url}
-              target="_blank"
-              rel="noreferrer"
-              className={`d-flex text-decoration-none ${
-                wrapInCard ? "text-dark" : ""
-              }`}
-              style={wrapInCard ? {} : { color: "white" }}
-            >
-              {item.image ? (
-                <img
-                  src={item.image}
-                  alt="thumb"
-                  style={{ width: 84, height: 56, objectFit: "cover" }}
-                  className="me-3 rounded"
-                />
-              ) : (
-                <div
-                  style={{ width: 84, height: 56 }}
-                  className="me-3 bg-light rounded"
-                />
-              )}
+          {!loading && (
+            <ul className="list-unstyled">
+              {pageItems.map((item) => (
+                <li key={item.id} className="mb-3">
+                  <a href={item.url} target="_blank" rel="noreferrer" className="d-flex text-decoration-none text-dark">
+                    {item.image ? (
+                      <img src={item.image} alt="thumb" style={{ width: 84, height: 56, objectFit: 'cover' }} className="me-3 rounded" />
+                    ) : (
+                      <div style={{ width: 84, height: 56 }} className="me-3 bg-light rounded" />
+                    )}
 
+                    <div>
+                      <div className="fw-semibold">{item.headline}</div>
+                      <div className="text-muted small">{item.source} • {formatDate(item.datetime)}</div>
+                    </div>
+                  </a>
+                </li>
+              ))}
+            </ul>
+          )}
+
+          {/* Pagination controls */}
+          {totalPages > 1 && (
+            <div className="d-flex justify-content-between align-items-center mt-2">
+              <div className="small text-muted">Showing {startIdx + 1}-{Math.min(startIdx + pageSize, total)} of {total}</div>
               <div>
                 <div className="fw-semibold">{item.headline}</div>
                 <div className="text-muted small">
