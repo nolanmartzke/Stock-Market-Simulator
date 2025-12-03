@@ -375,13 +375,13 @@ const Trade = () => {
 
                     {query && suggestions && suggestions.length > 0 && (
                       <ul
-                        className="list-group position-absolute w-100 mt-1"
+                        className="list-group position-absolute w-100 mt-1 search-suggestions"
                         style={{ zIndex: 2000 }}
                       >
                         {suggestions.slice(0, 6).map((s) => (
                           <li
                             key={s.symbol}
-                            className="list-group-item list-group-item-action"
+                            className="list-group-item list-group-item-action py-3"
                             style={{ cursor: "pointer" }}
                             onClick={async () => {
                               try {
