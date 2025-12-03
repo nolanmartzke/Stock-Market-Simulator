@@ -63,29 +63,29 @@ const Stock = () => {
       .catch((err) => console.error("Failed to load accounts", err));
   }, []);
 
-const refreshHoldings = useCallback(() => {
-  if (!accountId) return;
-  if (!ticker) return;
+  const refreshHoldings = useCallback(() => {
+    if (!accountId) return;
+    if (!ticker) return;
 
-  loadAccount(accountId)
-    .then((response) => response.data)
-    .then((data) => {
-      if (!data.holdings) return;
-      setCash(data.cash)
+    loadAccount(accountId)
+      .then((response) => response.data)
+      .then((data) => {
+        if (!data.holdings) return;
+        setCash(data.cash)
 
-      const currHolding = data.holdings.find((h) => h.stockTicker === ticker);
-      if (!currHolding) {
-        setNumHoldingShares(0);
-        setAverageCost(null);
-      } else {
-        setNumHoldingShares(currHolding.shares);
-        setAverageCost(currHolding.averagePrice);
-      }
+        const currHolding = data.holdings.find((h) => h.stockTicker === ticker);
+        if (!currHolding) {
+          setNumHoldingShares(0);
+          setAverageCost(null);
+        } else {
+          setNumHoldingShares(currHolding.shares);
+          setAverageCost(currHolding.averagePrice);
+        }
 
-      console.log(data);
-    })
-    .catch((err) => console.log(err));
-}, [accountId, ticker]); 
+        console.log(data);
+      })
+      .catch((err) => console.log(err));
+  }, [accountId, ticker]); 
   /**
    * Whenever the account or ticker changes, refresh holdings so we can
    * show share count and average cost for the selected symbol.
@@ -153,11 +153,11 @@ const refreshHoldings = useCallback(() => {
     if (quote.d >= 0) {
       setDayChange("positive");
       setDayChangeDollars(`+${formatUSD(quote.d)}`);
-      setDayChangePercent(`+${quote.dp}%`);
+      setDayChangePercent(`${formatPercent(quote.dp)}`);
     } else {
       setDayChange("negative");
       setDayChangeDollars(`${formatUSD(quote.d)}`);
-      setDayChangePercent(`${quote.dp}%`);
+      setDayChangePercent(`${formatPercent(quote.dp)}`);
     }
   }, [quote]);
 
@@ -211,6 +211,13 @@ const refreshHoldings = useCallback(() => {
       currency: "USD",
     }).format(num);
   }
+
+  const formatPercent = (num) => {
+    const roundedNum = Number(num).toFixed(2);
+    let prefix = "";
+    if (num >= 0) prefix = "+";
+    return prefix + roundedNum + "%";
+  };
 
   const formatDateTick = (value) => {
     const dateObj = new Date(value);
@@ -373,7 +380,6 @@ const refreshHoldings = useCallback(() => {
   );
   const estimatedCost = (shares * price).toFixed(2);
   const estimatedCostDollars = formatUSD(estimatedCost);
-  const hour = new Date().getHours();
   const formatCompact = (num) => {
     const n = Number(num);
     if (!n) return "—";
@@ -754,7 +760,7 @@ const refreshHoldings = useCallback(() => {
           </Col>
 
           <Col xs={12} xl={4} className="d-flex flex-column gap-4">
-            <div className="glass-panel gradient-border card-arc p-4">
+            <div className="glass-panel gradient-border card-arc p-4 sticky-card">
               <div className="d-flex justify-content-between align-items-center mb-3">
                 <h5 className="section-heading mb-0">Trade {stockTicker || query}</h5>
                 <span className="pill-ghost">{mode === "buy" ? "Buying" : "Selling"}</span>
@@ -785,14 +791,14 @@ const refreshHoldings = useCallback(() => {
                   <span className="section-sub">Order type</span>
                   <Form.Select size="sm" className="bg-dark text-light border-0" style={{ width: "auto" }}>
                     <option>Market order</option>
-                    <option>Limit order</option>
+                    {/* <option>Limit order</option> */}
                   </Form.Select>
                 </div>
                 <div className="d-flex justify-content-between align-items-center">
                   <span className="section-sub">Buy In</span>
                   <Form.Select size="sm" className="bg-dark text-light border-0" style={{ width: "auto" }}>
                     <option>Shares</option>
-                    <option>Dollars</option>
+                    {/* <option>Dollars</option> */}
                   </Form.Select>
                 </div>
                 <div className="d-flex justify-content-between align-items-center">

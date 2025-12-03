@@ -165,7 +165,7 @@ export default function NavBar() {
                 onClick={onLinkClick}
               >
                 <img
-                  src="https://placehold.co/40x40/007bff/ffffff?text=TW"
+                  src={`https://placehold.co/40x40/6B8EF0/ffffff?text=${auth.name?.toUpperCase()?.[0]}`}
                   alt="User Avatar"
                   className="avatar"
                 />
@@ -262,7 +262,7 @@ export default function NavBar() {
         </div>
 
         {q && suggestions && suggestions.length > 0 && (
-          <ul className="list-group position-absolute w-100 mt-1" style={{ zIndex: 2000 }}>
+          <ul className="list-group position-absolute w-100 mt-1 search-suggestions" style={{ zIndex: 2000 }}>
             {suggestions.slice(0, 6).map((s) => (
               <li key={s.symbol} className="list-group-item list-group-item-action" style={{ cursor: 'pointer' }} onClick={() => select(s.symbol)}>
                 <strong>{s.symbol}</strong> <span className="text-muted">{s.description}</span>

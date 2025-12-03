@@ -47,7 +47,7 @@ const Popular = () => {
         try {
           const res = await getQuote(item.ticker);
           results[item.ticker] = res.data;
-        } catch (err) {
+        } catch {
           results[item.ticker] = null;
         }
       }
@@ -69,20 +69,22 @@ const Popular = () => {
       }}
     >
       <div className="container-xl py-4">
-        <div className="d-flex flex-wrap align-items-baseline justify-content-between gap-3 mb-3">
-          <div>
-            <div className="text-uppercase small" style={{ letterSpacing: '0.2em', color: 'rgba(232,237,255,0.65)' }}>
-              Discovery
-            </div>
-            <h1 className="mb-0 text-light">Popular</h1>
-            <p className="mb-0" style={{ color: '#aeb8de' }}>
-              Dive into topics, learn whats new, and track current market conditions.
-            </p>
-          </div>
-        </div>
+        
 
         <div className="row g-4 justify-content-center">
           <main className="col-12 col-xl-8 d-flex flex-column gap-3">
+
+            <div className="d-flex flex-wrap align-items-baseline justify-content-between gap-3 mb-3">
+              <div>
+                <div className="text-uppercase small" style={{ letterSpacing: '0.2em', color: 'rgba(232,237,255,0.65)' }}>
+                  Discovery
+                </div>
+                <h1 className="mb-0 text-light">Popular</h1>
+                <p className="mb-0" style={{ color: '#aeb8de' }}>
+                  Dive into topics, learn whats new, and track current market conditions.
+                </p>
+              </div>
+            </div>
        
             <div
               className="p-3 p-md-4"
@@ -122,8 +124,6 @@ const Popular = () => {
               <NewsCard
                 category={activeTopic.category}
                 pageSize={8}
-                heading={`${activeTopic.label} News`}
-                subtitle={activeTopic.hint}
                 wrapInCard={false}
               />
             </div>

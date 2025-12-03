@@ -13,10 +13,6 @@ function formatDate(unix) {
 export default function NewsCard({
   category = 'general',
   pageSize = 10,
-  heading = 'Related News',
-  subtitle = 'Top headlines related to popular stocks.',
-  title,
-  description,
   wrapInCard = true
 }) {
   const [news, setNews] = useState([])
@@ -52,8 +48,6 @@ export default function NewsCard({
 
   const total = news.length;
   const totalPages = Math.max(1, Math.ceil(total / pageSize));
-  const cardHeading = heading || title || 'Related News';
-  const cardSubtitle = subtitle || description || 'Top headlines related to popular stocks.';
 
   useEffect(() => {
     if (page > totalPages) setPage(1)

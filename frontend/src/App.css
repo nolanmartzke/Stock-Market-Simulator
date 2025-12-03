@@ -217,6 +217,40 @@ body {
   background: rgba(92, 99, 255, 0.08);
 }
 
+.search-suggestions {
+  border: 1px solid rgba(255, 255, 255, 0.12);
+  border-radius: 12px;
+  overflow: hidden;
+  background: rgba(11, 13, 28, 0.96);
+  box-shadow: 0 14px 40px rgba(0, 0, 0, 0.35), 0 0 0 1px rgba(92, 99, 255, 0.08);
+}
+
+.search-suggestions .list-group-item {
+  background: transparent;
+  color: #e6ebff;
+  border: 1px solid rgba(255, 255, 255, 0.08);
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+
+.search-suggestions .list-group-item strong {
+  color: #f4f6ff;
+  letter-spacing: 0.02em;
+}
+
+.search-suggestions .list-group-item .text-muted {
+  color: #aeb8de !important;
+}
+
+.search-suggestions .list-group-item:hover {
+  background: rgba(92, 99, 255, 0.12);
+}
+
+.search-suggestions .list-group-item + .list-group-item {
+  margin-top: -1px; /* collapse double borders while keeping separation lines */
+}
+
 .nav-footer {
   border-top: 1px solid var(--nav-border);
   padding-top: 12px;
@@ -359,6 +393,19 @@ body {
   border-color: rgba(99, 102, 241, 0.35);
   transform: translateY(-2px);
   box-shadow: 0 10px 25px rgba(99, 102, 241, 0.15);
+}
+
+.sticky-card {
+  position: sticky;
+  top: 20px;
+  z-index: 3;
+}
+
+@media (max-width: 991.98px) {
+  .sticky-card {
+    position: static;
+    top: auto;
+  }
 }
 
 .pill-gradient {

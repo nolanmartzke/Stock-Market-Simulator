@@ -23,6 +23,8 @@ lint_frontend:
   allow_failure: true
   only:
     - branches
+    - merge_requests
+
 
 # Backend
 lint_backend:
@@ -42,6 +44,8 @@ lint_backend:
   allow_failure: true
   only:
     - branches
+    - merge_requests
+
 
 # Run backend unit tests and collect JUnit reports
 test_backend:

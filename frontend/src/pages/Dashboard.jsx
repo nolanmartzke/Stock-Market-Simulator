@@ -18,9 +18,22 @@ const Dashboard = () => {
   const [positions, setPositions] = useState([]);
   const [quotes, setQuotes] = useState({});
 
-  const dayChange = "positive";
-  const dayChangeDollars = "$0.00";
-  const dayChangePercent = "0%";
+  const formatUSD = (num) =>
+    new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+  }).format(num);
+
+  const formatPercent = (num) => {
+    const roundedNum = Number(num).toFixed(2);
+    let prefix = "";
+    if (num >= 0) prefix = "+";
+    return prefix + roundedNum + "%";
+  };
+
+  const change =  portfolioValue-10000 >= 0? "positive" : "negative";
+  const changeDollars = formatUSD(portfolioValue-10000); // start balance is always $10,000
+  const changePercent = formatPercent((portfolioValue-10000)/10000 * 100);
 
   useEffect(() => {
     if (!auth) return;
@@ -71,28 +84,18 @@ const Dashboard = () => {
 
   }, [positions, quotes, cashBalance]);
 
-  const formatUSD = (num) =>
-    new Intl.NumberFormat("en-US", {
-      style: "currency",
-      currency: "USD",
-    }).format(num);
-
-  const formatPercent = (num) => {
-    const roundedNum = Number(num).toFixed(2);
-    let prefix = "";
-    if (num >= 0) prefix = "+";
-    return prefix + roundedNum + "%";
-  };
+  
+  
 
   const formattedPortfolioValue = formatUSD(portfolioValue);
   const formattedCashBalance = formatUSD(cashBalance);
   const positionCount = positions ? Object.keys(positions).length : 0;
-  const equityValue = positions
-    ? Object.entries(positions).reduce((sum, [ticker, shares]) => {
-        const price = quotes[ticker]?.c ?? 0;
-        return sum + shares * price;
-      }, 0)
-    : 0;
+  // const equityValue = positions
+  //   ? Object.entries(positions).reduce((sum, [ticker, shares]) => {
+  //       const price = quotes[ticker]?.c ?? 0;
+  //       return sum + shares * price;
+  //     }, 0)
+  //   : 0;
   const chartData = [
     { name: "Mon", price: portfolioValue * 0.94 || 11850 },
     { name: "Tue", price: portfolioValue * 0.97 || 12010 },
@@ -101,8 +104,7 @@ const Dashboard = () => {
     { name: "Fri", price: portfolioValue * 1.02 || 12300 },
   ];
   const hour = new Date().getHours();
-  const greeting =
-    hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : "Good evening";
+  const greeting = hour < 4 ? "Good night" : hour < 12 ? "Good morning" : hour < 18 ? "Good afternoon" : hour < 22 ? "Good evening" : "Good night";
 
   return (
     <Container fluid className="dashboard-page py-4">
@@ -115,14 +117,14 @@ const Dashboard = () => {
               <div className="d-flex align-items-center gap-5">
                 <h1 className="display-5 mb-0 text-light">{formattedPortfolioValue}</h1>
 
-                <div className={`metric-pill ${dayChange === "positive" ? "positive" : "negative"}`}>
-                  {dayChange === "positive" ? (
+                <div className={`metric-pill ${change === "positive" ? "positive" : "negative"}`}>
+                  {change === "positive" ? (
                     <ArrowUp size={16} />
                   ) : (
                     <ArrowDown size={16} />
                   )}
-                  <span>{dayChangeDollars}</span>
-                  <span className="opacity-75">({dayChangePercent})</span>
+                  <span>{changeDollars}</span>
+                  <span className="opacity-75">({changePercent})</span>
                 </div>
               </div>
             </div>
@@ -148,7 +150,7 @@ const Dashboard = () => {
                 </div>
                 <div className="flex-grow-1">
                   <ResponsiveContainer width="100%" height="100%">
-                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: -10, bottom: 0 }}>
+                    <AreaChart data={chartData} margin={{ top: 10, right: 10, left: 0, bottom: 0 }}>
                       <defs>
                         <linearGradient id="areaGradient" x1="0" y1="0" x2="0" y2="1">
                           <stop offset="0%" stopColor="#60a5fa" stopOpacity={0.55} />
@@ -203,8 +205,6 @@ const Dashboard = () => {
                   <NewsCard
                     category="general"
                     pageSize={5}
-                    title="Market News"
-                    description="Latest market headlines and financial news."
                     wrapInCard={false}
                   />
                 </div>
@@ -215,16 +215,16 @@ const Dashboard = () => {
           <Col xs={12} xl={4} className="d-flex flex-column gap-4">
             
 
-            <Card className="glass-panel gradient-border card-arc positions-card">
+            <Card className="glass-panel gradient-border card-arc positions-card sticky-card">
               <Card.Body className="p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <div className="text-uppercase section-sub small">Holdings</div>
+                    <div className="text-uppercase section-sub small">Current</div>
                     <h4 className="section-heading mb-0">Positions</h4>
                   </div>
-                  <span className="pill-gradient small">{positionCount} assets</span>
+                  <span className="pill-gradient text-white">{positionCount} assets</span>
                 </div>
-                <div className="d-flex justify-content-between align-items-center mb-3">
+                <div className="d-flex justify-content-between align-items-center m-4">
                   <span className="section-sub">Cash on hand</span>
                   <span className="fw-semibold text-light">{formattedCashBalance}</span>
                 </div>

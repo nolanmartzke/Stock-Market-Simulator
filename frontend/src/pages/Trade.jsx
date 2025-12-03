@@ -31,7 +31,7 @@ const Trade = () => {
   const [ticker, setTicker] = useState("");
   const [orderType, setOrderType] = useState("buy");
   const [selectedStock, setSelectedStock] = useState(null);
-  const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | notEnoughShares | missingRequiredInput
+  const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | notEnoughShares | missingRequiredInput | error
 
   const [dayChange, setDayChange] = useState("positive");
   const [dayChangeDollars, setDayChangeDollars] = useState(0);
@@ -48,6 +48,13 @@ const Trade = () => {
       minimumFractionDigits: 2,
       maximumFractionDigits: 2,
     });
+  };
+
+  const formatPercent = (num) => {
+    const roundedNum = Number(num).toFixed(2);
+    let prefix = "";
+    if (num >= 0) prefix = "+";
+    return prefix + roundedNum + "%";
   };
 
   /** 
@@ -180,11 +187,11 @@ const Trade = () => {
       if (quote.d >= 0) {
         setDayChange("positive");
         setDayChangeDollars(`+${formatUSD(quote.d)}`);
-        setDayChangePercent(`+${quote.dp}%`);
+        setDayChangePercent(`${formatPercent(quote.dp)}`);
       } else {
         setDayChange("negative");
         setDayChangeDollars(`${formatUSD(quote.d)}`);
-        setDayChangePercent(`${quote.dp}%`);
+        setDayChangePercent(`${formatPercent(quote.dp)}`);
       }
     }, [quote]);
   
@@ -234,6 +241,7 @@ const Trade = () => {
 
     try {
       const quoteRes = await getQuote(ticker);
+      
       const price = quoteRes.data.c;
       const order = {
         action: orderType.toLowerCase(),
@@ -269,9 +277,9 @@ const Trade = () => {
       setReviewButtonStatus("idle");
     } catch (error) {
       console.error("Trade failed:", error);
-      setReviewButtonStatus("missingRequiredInput");
+      setReviewButtonStatus("error");
       setTimeout(() => setReviewButtonStatus("idle"), 1200);
-      toast.error(error.response?.data || "Failed to place order.");
+      toast.error("Failed to place order.");
     }
   }
 
@@ -367,13 +375,13 @@ const Trade = () => {
 
                     {query && suggestions && suggestions.length > 0 && (
                       <ul
-                        className="list-group position-absolute w-100 mt-1"
+                        className="list-group position-absolute w-100 mt-1 search-suggestions"
                         style={{ zIndex: 2000 }}
                       >
                         {suggestions.slice(0, 6).map((s) => (
                           <li
                             key={s.symbol}
-                            className="list-group-item list-group-item-action"
+                            className="list-group-item list-group-item-action py-3"
                             style={{ cursor: "pointer" }}
                             onClick={async () => {
                               try {
@@ -572,6 +580,7 @@ const Trade = () => {
                             notEnoughBP: "linear-gradient(135deg, #ef4444, #f97316)",
                             notEnoughShares: "linear-gradient(135deg, #ef4444, #f97316)",
                             missingRequiredInput: "linear-gradient(135deg, #ef4444, #f97316)",
+                            error: "linear-gradient(135deg, #ef4444, #f97316)",
                           }[reviewButtonStatus],
                           border: "none",
                           boxShadow: "0 14px 40px rgba(14,165,233,0.25)",
@@ -592,6 +601,8 @@ const Trade = () => {
                               ? "Not enough cash"
                               : reviewButtonStatus === "notEnoughShares"
                               ? "Not enough shares"
+                              : reviewButtonStatus === "error"
+                              ? "Server Error"
                               : "Enter details"}
                             {reviewButtonStatus === "idle" && <ArrowRightCircle className="ms-2" size={16} />}
                           </Motion.span>
@@ -642,10 +653,11 @@ const Trade = () => {
                               setOrderType("buy");
                               try {
                                 const quoteRes = await getQuote(holding.stockTicker);
+                                const searchResult = await search(holding.stockTicker);
                                 setQuote(quoteRes.data);
                                 setSelectedStock({
                                   symbol: holding.stockTicker,
-                                  name: holding.stockTicker,
+                                  name: searchResult.data.description,
                                   price: quoteRes.data.c,
                                 });
                               } catch (error) {
@@ -676,9 +688,10 @@ const Trade = () => {
                               try {
                                 const quoteRes = await getQuote(holding.stockTicker);
                                 setQuote(quoteRes.data);
+                                const searchResult = await search(holding.stockTicker);
                                 setSelectedStock({
                                   symbol: holding.stockTicker,
-                                  name: holding.stockTicker,
+                                  name: searchResult.data.description,
                                   price: quoteRes.data.c,
                                 });
                               } catch (error) {
