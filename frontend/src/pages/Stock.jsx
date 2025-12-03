@@ -791,14 +791,14 @@ const Stock = () => {
                   <span className="section-sub">Order type</span>
                   <Form.Select size="sm" className="bg-dark text-light border-0" style={{ width: "auto" }}>
                     <option>Market order</option>
-                    <option>Limit order</option>
+                    {/* <option>Limit order</option> */}
                   </Form.Select>
                 </div>
                 <div className="d-flex justify-content-between align-items-center">
                   <span className="section-sub">Buy In</span>
                   <Form.Select size="sm" className="bg-dark text-light border-0" style={{ width: "auto" }}>
                     <option>Shares</option>
-                    <option>Dollars</option>
+                    {/* <option>Dollars</option> */}
                   </Form.Select>
                 </div>
                 <div className="d-flex justify-content-between align-items-center">
