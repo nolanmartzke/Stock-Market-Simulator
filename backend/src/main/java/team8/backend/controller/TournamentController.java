@@ -35,7 +35,6 @@ public class TournamentController {
     @Autowired
     private AccountRepository accountRepository;
 
-    // --- Create a tournament ---
     @PostMapping
     public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentCreateDTO dto) {
         Tournament tournament = new Tournament();
@@ -49,7 +48,6 @@ public class TournamentController {
         return ResponseEntity.status(HttpStatus.CREATED).body(TournamentDTO.fromEntity(saved));
     }
 
-    // --- Get all tournaments ---
     @GetMapping
     public ResponseEntity<List<TournamentDTO>> getAllTournaments() {
         List<TournamentDTO> dtos = tournamentRepository.findAll()
@@ -59,14 +57,17 @@ public class TournamentController {
         return ResponseEntity.ok(dtos);
     }
 
-    // --- Enter a tournament ---
     @PostMapping("/{tournamentId}/enter")
     @Transactional
-    public ResponseEntity<?> enterTournament(@PathVariable Long tournamentId, @RequestParam Long userId) {
+    public ResponseEntity<?> enterTournament(
+        @PathVariable Long tournamentId,
+        @RequestParam Long userId
+    ) {
         Optional<Tournament> tournamentOpt = tournamentRepository.findById(tournamentId);
         if (tournamentOpt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tournament not found");
 
         Tournament tournament = tournamentOpt.get();
+
         if (tournament.getParticipantCount() >= tournament.getMaxParticipants()) {
             return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("Tournament is full");
         }
@@ -76,19 +77,27 @@ public class TournamentController {
 
         User user = userOpt.get();
 
+        // Check if user already has an account in this tournament
         boolean alreadyEntered = accountRepository.findByUser(user)
                 .stream()
                 .anyMatch(acc -> tournament.equals(acc.getTournament()));
-        if (alreadyEntered) return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already entered this tournament");
 
-        Account tournamentAccount = new Account(user, tournament.getName() + " Account", tournament.getInitialCash());
+        if (alreadyEntered) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User already entered this tournament");
+        }
+
+        // Create tournament-specific account
+        Account tournamentAccount = new Account(
+            user,
+            tournament.getName() + " Account",
+            tournament.getInitialCash()
+        );
         tournament.addAccount(tournamentAccount);
         accountRepository.save(tournamentAccount);
 
         return ResponseEntity.status(HttpStatus.CREATED).body("User entered tournament successfully");
     }
 
-    // --- Get tournament leaderboard ---
     @GetMapping("/{tournamentId}/leaderboard")
     public ResponseEntity<List<TournamentLeaderboardDTO>> getLeaderboard(@PathVariable Long tournamentId) {
         Optional<Tournament> tournamentOpt = tournamentRepository.findById(tournamentId);
@@ -103,15 +112,12 @@ public class TournamentController {
                         acc.getCash(),
                         acc.getHoldings().stream().mapToDouble(h -> h.getShares() * h.getAveragePrice()).sum()
                 ))
-                .sorted((a, b) -> Double.compare(
-                        b.getTotalHoldingValue() + b.getCash(),
-                        a.getTotalHoldingValue() + a.getCash()))
+                .sorted((a,b) -> Double.compare(b.getTotalHoldingValue() + b.getCash(), a.getTotalHoldingValue() + a.getCash()))
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(leaderboard);
     }
 
-    // --- Get all tournaments a user is in ---
     @GetMapping("/user/{userId}")
     public ResponseEntity<List<TournamentDTO>> getTournamentsForUser(@PathVariable Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
