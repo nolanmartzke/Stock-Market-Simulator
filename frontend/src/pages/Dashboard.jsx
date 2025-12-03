@@ -31,7 +31,7 @@ const Dashboard = () => {
     return prefix + roundedNum + "%";
   };
 
-  const change = "positive";
+  const change =  portfolioValue-10000 >= 0? "positive" : "negative";
   const changeDollars = formatUSD(portfolioValue-10000); // start balance is always $10,000
   const changePercent = formatPercent((portfolioValue-10000)/10000 * 100);
 
