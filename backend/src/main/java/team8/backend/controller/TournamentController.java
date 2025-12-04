@@ -43,6 +43,9 @@ public class TournamentController {
         tournament.setInitialCash(dto.getInitialCash() != null ? dto.getInitialCash() : 10000.0);
         tournament.setStartDate(dto.getStartDate() != null ? dto.getStartDate() : LocalDateTime.now());
         tournament.setEndDate(dto.getEndDate() != null ? dto.getEndDate() : LocalDateTime.now().plusDays(7));
+        // image: use provided image URL or fallback to placeholder
+        String placeholder = "https://t4.ftcdn.net/jpg/07/89/04/31/360_F_789043193_1OLl6tlCDc8n0yNxBBxaRKQbWGGboXNw.jpg";
+        tournament.setImage(dto.getImage() != null && !dto.getImage().isBlank() ? dto.getImage() : placeholder);
 
         Tournament saved = tournamentRepository.save(tournament);
         return ResponseEntity.status(HttpStatus.CREATED).body(TournamentDTO.fromEntity(saved));

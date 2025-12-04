@@ -28,6 +28,9 @@ private LocalDateTime startDate;
 @Column(nullable = false)
 private LocalDateTime endDate;
 
+@Column(nullable = true, length = 512)
+private String image;
+
 @OneToMany(mappedBy = "tournament", cascade = CascadeType.ALL, orphanRemoval = true)
 private List<Account> accounts = new ArrayList<>();
 
@@ -41,6 +44,9 @@ public Tournament(String name, int maxParticipants, double initialCash, LocalDat
     this.startDate = startDate;
     this.endDate = endDate;
 }
+
+public String getImage() { return image; }
+public void setImage(String image) { this.image = image; }
 
 // Getters & setters
 public Long getId() { return id; }

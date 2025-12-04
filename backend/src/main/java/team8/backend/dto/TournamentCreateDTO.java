@@ -8,6 +8,7 @@ public class TournamentCreateDTO {
     private Double initialCash;
     private LocalDateTime startDate;
     private LocalDateTime endDate;
+    private String image;
 
     // Getters & Setters
     public String getName() { return name; }
@@ -20,4 +21,6 @@ public class TournamentCreateDTO {
     public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
     public LocalDateTime getEndDate() { return endDate; }
     public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
+    public String getImage() { return image; }
+    public void setImage(String image) { this.image = image; }
 }

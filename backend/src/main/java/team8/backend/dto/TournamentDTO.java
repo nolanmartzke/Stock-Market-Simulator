@@ -11,6 +11,7 @@ private int currentParticipants;
 private LocalDateTime startDate;
 private LocalDateTime endDate;
 private String status;
+private String image;
 
 public TournamentDTO() {}
 
@@ -23,6 +24,8 @@ public static TournamentDTO fromEntity(Tournament t) {
     dto.startDate = t.getStartDate();
     dto.endDate = t.getEndDate();
     dto.status = t.getStatus();
+    String placeholder = "https://t4.ftcdn.net/jpg/07/89/04/31/360_F_789043193_1OLl6tlCDc8n0yNxBBxaRKQbWGGboXNw.jpg";
+    dto.image = t.getImage() != null && !t.getImage().isBlank() ? t.getImage() : placeholder;
     return dto;
 }
 
@@ -42,5 +45,7 @@ public void setCurrentParticipants(int currentParticipants) { this.currentPartic
 public void setStartDate(LocalDateTime startDate) { this.startDate = startDate; }
 public void setEndDate(LocalDateTime endDate) { this.endDate = endDate; }
 public void setStatus(String status) { this.status = status; }
+public String getImage() { return image; }
+public void setImage(String image) { this.image = image; }
 
 }
