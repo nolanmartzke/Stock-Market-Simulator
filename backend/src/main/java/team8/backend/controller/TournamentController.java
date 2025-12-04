@@ -9,6 +9,7 @@ import jakarta.transaction.Transactional;
 import team8.backend.dto.TournamentDTO;
 import team8.backend.dto.TournamentCreateDTO;
 import team8.backend.dto.TournamentLeaderboardDTO;
+import team8.backend.dto.TournamentUpdateDTO;
 import team8.backend.entity.Account;
 import team8.backend.entity.Tournament;
 import team8.backend.entity.User;
@@ -133,5 +134,70 @@ public class TournamentController {
                 .collect(Collectors.toList());
 
         return ResponseEntity.ok(tournaments);
+    }
+
+    @PatchMapping("/{tournamentId}")
+    @Transactional
+    public ResponseEntity<?> updateTournament(
+            @PathVariable Long tournamentId,
+            @RequestBody TournamentUpdateDTO dto
+    ) {
+        Optional<Tournament> opt = tournamentRepository.findById(tournamentId);
+        if (opt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tournament not found");
+        }
+
+        Tournament t = opt.get();
+
+        if (dto.getName() != null) t.setName(dto.getName());
+        if (dto.getMaxParticipants() != null) t.setMaxParticipants(dto.getMaxParticipants());
+        if (dto.getStartDate() != null) t.setStartDate(dto.getStartDate());
+        if (dto.getEndDate() != null) t.setEndDate(dto.getEndDate());
+
+        Tournament saved = tournamentRepository.save(t);
+        return ResponseEntity.ok(TournamentDTO.fromEntity(saved));
+    }
+
+    @DeleteMapping("/{tournamentId}")
+    @Transactional
+    public ResponseEntity<?> deleteTournament(@PathVariable Long tournamentId) {
+        Optional<Tournament> opt = tournamentRepository.findById(tournamentId);
+        if (opt.isEmpty()) {
+            return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tournament not found");
+        }
+
+        tournamentRepository.delete(opt.get());
+        return ResponseEntity.ok("Tournament deleted successfully");
+    }
+
+    @DeleteMapping("/{tournamentId}/leave")
+    @Transactional
+    public ResponseEntity<?> leaveTournament(
+            @PathVariable Long tournamentId,
+            @RequestParam Long userId
+    ) {
+        Optional<Tournament> tOpt = tournamentRepository.findById(tournamentId);
+        if (tOpt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tournament not found");
+
+        Optional<User> uOpt = userRepository.findById(userId);
+        if (uOpt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("User not found");
+
+        Tournament tournament = tOpt.get();
+        User user = uOpt.get();
+
+        // Find account for this tournament
+        Account account = accountRepository.findByUser(user)
+                .stream()
+                .filter(acc -> tournament.equals(acc.getTournament()))
+                .findFirst()
+                .orElse(null);
+
+        if (account == null) {
+            return ResponseEntity.status(HttpStatus.BAD_REQUEST).body("User is not in this tournament");
+        }
+
+        accountRepository.delete(account);
+
+        return ResponseEntity.ok("User left the tournament successfully");
     }
 }
