@@ -1,197 +1,325 @@
-import React, { useState } from 'react'
-import { Trophy, TrendingUp, Users, Award, ArrowLeft, Calendar, DollarSign } from 'lucide-react'
-
-// Placeholder tournament data
-const tournaments = [
-  {
-    id: 1,
-    name: 'Top 100 | 251112',
-    status: 'Active',
-    participants: '10,410 / 20,000',
-    prize: '100 winners every week',
-    image: 'https://t3.ftcdn.net/jpg/04/94/65/34/360_F_494653408_L5XoC3iFVyKkVz5K7e9kbmKrv0iDMaNt.jpg',
-    endDate: '2025-12-31',
-    description: '10 Primary + 90 Secondary Users Win!',
-    prizes: [
-      { place: '1st', amount: '60K High Stakes' },
-      { place: '2nd', amount: '20K High Stakes' },
-      { place: '3rd', amount: '10K High Stakes' },
-      { place: '4th-5th', amount: '5K High Stakes' },
-      { place: '6th-10th', amount: '5K High Stakes' },
-      { place: '11-20th', amount: '11-20K Bootcamp Credits' },
-      { place: '21-80th', amount: '$5 HUB CREDITS' },
-      { place: '81-100th', amount: '$5 TTP HUB CREDITS' },
-    ],
-    rules: [
-      'Only one position can be open at any given moment.',
-      'Daily Loss: 5%'
-    ],
-    leaderboard: [
-      { rank: 1, username: 'Nguyen H.', profit: '$11,758.25', flag: '🇻🇳' },
-      { rank: 2, username: 'Miroslav N.', profit: '$11,273.82', flag: '🇷🇸' },
-      { rank: 3, username: 'Brehima B.', profit: '$10,527.31', flag: '🇲🇱' },
-      { rank: 4, username: 'HAIHONG L.', profit: '$9,241.91', flag: '🇨🇳' },
-      { rank: 5, username: 'Trinh N.', profit: '$8,178.51', flag: '🇻🇳' },
-      { rank: 6, username: 'Durga P.', profit: '$8,144.13', flag: '🇮🇳' },
-      { rank: 7, username: 'Thembinkosi M.', profit: '$7,781.63', flag: '🇿🇦' },
-      { rank: 8, username: 'DAN L.', profit: '$7,399.08', flag: '🇨🇳' },
-      { rank: 9, username: 'Serviceindla N.', profit: '$7,326.39', flag: '🇮🇳' },
-      { rank: 10, username: 'Umesh K.', profit: '$7,286.84', flag: '🇮🇳' },
-    ],
-    myRank: '----',
-    myProfit: '----',
-    myPL: '----'
-  },
-  {
-    id: 2,
-    name: 'Winter Championship 2025',
-    status: 'Active',
-    participants: '8,245 / 15,000',
-    prize: 'Weekly prizes + Grand prize',
-    image: 'https://media.istockphoto.com/id/1357434585/photo/two-esport-teams-of-pro-gamers-play-to-compete-in-video-game-on-a-championship-stylish-neon.jpg?s=612x612&w=0&k=20&c=tGBVvXpGtO2mJ3itmE_FnKiXDg65ilt51GT8xCB4vmo=',
-    endDate: '2025-12-15',
-    description: 'Compete for the ultimate trading title!',
-    prizes: [
-      { place: '1st', amount: '100K Grand Prize' },
-      { place: '2nd', amount: '50K Prize' },
-      { place: '3rd', amount: '25K Prize' },
-      { place: '4th-10th', amount: '10K Each' },
-    ],
-    rules: [
-      'Maximum 3 positions open simultaneously.',
-      'Daily Loss: 3%',
-      'Must trade at least 5 days per week'
-    ],
-    leaderboard: [
-      { rank: 1, username: 'TradeMaster99', profit: '$24,532.10', flag: '🇺🇸' },
-      { rank: 2, username: 'BullRun2025', profit: '$22,187.45', flag: '🇬🇧' },
-      { rank: 3, username: 'WolfOfWallSt', profit: '$20,945.88', flag: '🇨🇦' },
-      { rank: 4, username: 'DiamondHands', profit: '$19,234.22', flag: '🇦🇺' },
-      { rank: 5, username: 'MarketWizard', profit: '$18,901.55', flag: '🇩🇪' },
-    ],
-    myRank: '----',
-    myProfit: '----',
-    myPL: '----'
-  },
-  {
-    id: 3,
-    name: 'Tech Stock Rally',
-    status: 'Upcoming',
-    participants: '2,134 / 10,000',
-    prize: 'Tech-focused prizes',
-    image: 'https://encrypted-tbn0.gstatic.com/images?q=tbn:ANd9GcSChvu-kYyR4X1pLne6Y8dvmvzMGuA3bNhQRw&s',
-    endDate: '2026-01-15',
-    description: 'Focus on technology sector stocks',
-    prizes: [
-      { place: '1st', amount: '50K Tech Package' },
-      { place: '2nd', amount: '30K Prize' },
-      { place: '3rd', amount: '20K Prize' },
-    ],
-    rules: [
-      'Only tech sector stocks allowed.',
-      'Daily Loss: 4%'
-    ],
-    leaderboard: [],
-    myRank: '----',
-    myProfit: '----',
-    myPL: '----'
-  },
-  {
-    id: 4,
-    name: 'Beginner\'s Challenge',
-    status: 'Inactive',
-    participants: '15,890 / 20,000',
-    prize: 'Learning resources + cash prizes',
-    image: 'https://people.com/thmb/7Ilgu4KlGRFVuG2xkw7W6bm241w=/1500x0/filters:no_upscale():max_bytes(150000):strip_icc():focal(665x0:667x2)/NBAs-Larry-OBrien-Championship-Trophy2-2000-307802d941484b30888bc4ee93faf023.jpg',
-    endDate: '2025-11-10',
-    description: 'Perfect for new traders',
-    prizes: [
-      { place: '1st', amount: '10K + Course Bundle' },
-      { place: '2nd', amount: '5K + Course Bundle' },
-      { place: '3rd', amount: '3K + Course Bundle' },
-    ],
-    rules: [
-      'Account age must be less than 6 months.',
-      'Daily Loss: 2%'
-    ],
-    leaderboard: [
-      { rank: 1, username: 'NewbiePro', profit: '$5,432.10', flag: '🇺🇸' },
-      { rank: 2, username: 'FirstTimer', profit: '$4,987.45', flag: '🇬🇧' },
-      { rank: 3, username: 'LearningFast', profit: '$4,654.32', flag: '🇨🇦' },
-    ],
-    myRank: '----',
-    myProfit: '----',
-    myPL: '----'
-  }
-]
+import React, { useState, useEffect } from 'react'
+import { Trophy, TrendingUp, Users, Award, ArrowLeft, Calendar, DollarSign, Plus } from 'lucide-react'
+import { useAuth } from '../context/AuthContext'
+import { 
+  getAllTournaments, 
+  createTournament, 
+  enterTournament, 
+  getTournamentLeaderboard,
+  getUserTournaments 
+} from '../api/TournamentApi'
 
 const Tournament = () => {
+  const { auth } = useAuth()
+  const [tournaments, setTournaments] = useState([])
   const [selectedTournament, setSelectedTournament] = useState(null)
+  const [leaderboard, setLeaderboard] = useState([])
+  const [userTournaments, setUserTournaments] = useState(new Set())
+  const [loading, setLoading] = useState(true)
+  const [showCreateModal, setShowCreateModal] = useState(false)
+  const [createForm, setCreateForm] = useState({
+    name: '',
+    maxParticipants: 100,
+    initialCash: 10000,
+    startDate: '',
+    endDate: '',
+    image: ''
+  })
+
+  useEffect(() => {
+    fetchTournaments()
+    if (auth) {
+      fetchUserTournaments()
+    }
+  }, [auth])
+
+  useEffect(() => {
+    if (selectedTournament) {
+      fetchLeaderboard(selectedTournament.id)
+    }
+  }, [selectedTournament])
+
+  const fetchTournaments = async () => {
+    try {
+      setLoading(true)
+      const response = await getAllTournaments()
+      setTournaments(response.data || [])
+    } catch (error) {
+      console.error('Failed to fetch tournaments:', error)
+      setTournaments([])
+    } finally {
+      setLoading(false)
+    }
+  }
+
+  const fetchUserTournaments = async () => {
+    try {
+      const response = await getUserTournaments(auth.id)
+      const tournamentIds = new Set(response.data.map(t => t.id))
+      setUserTournaments(tournamentIds)
+    } catch (error) {
+      console.error('Failed to fetch user tournaments:', error)
+    }
+  }
+
+  const fetchLeaderboard = async (tournamentId) => {
+    try {
+      const response = await getTournamentLeaderboard(tournamentId)
+      const formattedLeaderboard = response.data.map((entry, index) => ({
+        rank: index + 1,
+        username: entry.accountName,
+        profit: `$${(entry.cash + entry.totalHoldingValue).toFixed(2)}`,
+        flag: '🏆'
+      }))
+      setLeaderboard(formattedLeaderboard)
+    } catch (error) {
+      console.error('Failed to fetch leaderboard:', error)
+      setLeaderboard([])
+    }
+  }
+
+  const handleCreateTournament = async (e) => {
+    e.preventDefault()
+    try {
+      // Build tournament data - only include dates if provided
+      const tournamentData = {
+        name: createForm.name,
+        maxParticipants: createForm.maxParticipants,
+        initialCash: createForm.initialCash
+      }
+      // Include image URL if provided
+      if (createForm.image) {
+        tournamentData.image = createForm.image
+      }
+      
+      // Only add dates if they're provided
+      if (createForm.startDate) {
+        tournamentData.startDate = createForm.startDate
+      }
+      if (createForm.endDate) {
+        tournamentData.endDate = createForm.endDate
+      }
+      
+      console.log('Sending tournament data:', tournamentData)
+      await createTournament(tournamentData)
+      setShowCreateModal(false)
+      setCreateForm({
+        name: '',
+        maxParticipants: 100,
+        initialCash: 10000,
+        startDate: '',
+        endDate: '',
+        image: ''
+      })
+      await fetchTournaments()
+      alert('Tournament created successfully!')
+    } catch (error) {
+      console.error('Failed to create tournament:', error)
+      console.error('Error response:', error.response)
+      const errorMsg = error.response?.data || error.message || 'Unknown error'
+      alert(`Failed to create tournament: ${errorMsg}`)
+    }
+  }
+
+  const handleEnterTournament = async (tournamentId) => {
+    if (!auth) {
+      alert('Please log in to enter tournaments')
+      return
+    }
+
+    try {
+      await enterTournament(tournamentId, auth.id)
+      await fetchTournaments()
+      await fetchUserTournaments()
+      if (selectedTournament && selectedTournament.id === tournamentId) {
+        await fetchLeaderboard(tournamentId)
+      }
+      alert('Successfully entered tournament!')
+    } catch (error) {
+      console.error('Failed to enter tournament:', error)
+      const errorMsg = error.response?.data || 'Failed to enter tournament'
+      alert(errorMsg)
+    }
+  }
+
+  const isUserInTournament = (tournamentId) => {
+    return userTournaments.has(tournamentId)
+  }
 
   // Tournament List View
   if (!selectedTournament) {
     return (
       <div className="container-fluid py-4">
         <div className="container">
-          <div className="mb-4">
-            <h2 className="h3 fw-bold mb-2">
-              <Trophy className="me-2 text-warning" size={24} />
-              Tournaments
-            </h2>
-            <p className="mb-0" style={{ color: '#aeb8de' }}>Compete with traders worldwide and win amazing prizes</p>
+          <div className="d-flex justify-content-between align-items-center mb-4">
+            <div>
+              <h2 className="h3 fw-bold mb-2">
+                <Trophy className="me-2 text-warning" size={24} />
+                Tournaments
+              </h2>
+              <p className="mb-0" style={{ color: '#aeb8de' }}>Compete with traders worldwide and win amazing prizes</p>
+            </div>
+            {auth && (
+              <button 
+                className="btn btn-primary"
+                onClick={() => setShowCreateModal(true)}
+              >
+                <Plus size={20} className="me-2" />
+                Create Tournament
+              </button>
+            )}
           </div>
 
-          <div className="row g-4">
-            {tournaments.map((tournament) => (
-              <div key={tournament.id} className="col-12 col-md-6 col-lg-4">
-                <div 
-                  className="card h-100 shadow-sm hover-shadow transition" 
-                  style={{ cursor: 'pointer' }}
-                  onClick={() => setSelectedTournament(tournament)}
-                >
-                  <img 
-                    src={tournament.image} 
-                    className="card-img-top" 
-                    alt={tournament.name}
-                    style={{ height: '180px', objectFit: 'cover' }}
-                  />
-                  <div className="card-body">
-                    <div className="d-flex justify-content-between align-items-start mb-2">
-                      <h5 className="card-title mb-0">{tournament.name}</h5>
-                      <span className={`badge ${
-                        tournament.status === 'Active' ? 'bg-success' : 
-                        tournament.status === 'Upcoming' ? 'bg-primary' : 
-                        'bg-secondary'
-                      }`}>
-                        {tournament.status}
-                      </span>
+          {loading ? (
+            <div className="text-center py-5">
+              <div className="spinner-border text-primary" role="status">
+                <span className="visually-hidden">Loading...</span>
+              </div>
+            </div>
+          ) : (
+            <div className="row g-4">
+              {tournaments.map((tournament) => (
+                <div key={tournament.id} className="col-12 col-md-6 col-lg-4">
+                  <div 
+                    className="card h-100 shadow-sm hover-shadow transition" 
+                    style={{ cursor: 'pointer' }}
+                    onClick={() => setSelectedTournament(tournament)}
+                  >
+                    <img 
+                      src={tournament.image} 
+                      className="card-img-top" 
+                      alt={tournament.name}
+                      style={{ height: '180px', objectFit: 'cover' }}
+                    />
+                    <div className="card-body">
+                      <div className="d-flex justify-content-between align-items-start mb-2">
+                        <h5 className="card-title mb-0">{tournament.name}</h5>
+                        <span className={`badge ${
+                          tournament.status === 'Active' ? 'bg-success' : 
+                          tournament.status === 'Upcoming' ? 'bg-primary' : 
+                          'bg-secondary'
+                        }`}>
+                          {tournament.status || 'Active'}
+                        </span>
+                      </div>
+                      {isUserInTournament(tournament.id) && (
+                        <span className="badge bg-info mb-2">Joined</span>
+                      )}
+                      
+                      <div className="d-flex flex-column gap-2 small">
+                        <div className="d-flex align-items-center text-muted">
+                          <Users size={16} className="me-2" />
+                          <span>{tournament.currentParticipants || 0} / {tournament.maxParticipants || 0}</span>
+                        </div>
+                        <div className="d-flex align-items-center text-muted">
+                          <Calendar size={16} className="me-2" />
+                          <span>Ends: {tournament.endDate ? new Date(tournament.endDate).toLocaleDateString() : 'TBD'}</span>
+                        </div>
+                      </div>
                     </div>
-                    <p className="card-text text-muted small mb-3">{tournament.description}</p>
-                    
-                    <div className="d-flex flex-column gap-2 small">
-                      <div className="d-flex align-items-center text-muted">
-                        <Users size={16} className="me-2" />
-                        <span>{tournament.participants}</span>
-                      </div>
-                      <div className="d-flex align-items-center text-muted">
-                        <Award size={16} className="me-2" />
-                        <span>{tournament.prize}</span>
-                      </div>
-                      <div className="d-flex align-items-center text-muted">
-                        <Calendar size={16} className="me-2" />
-                        <span>Ends: {tournament.endDate}</span>
-                      </div>
+                    <div className="card-footer bg-transparent border-top-0">
+                      <button className="btn btn-primary btn-sm w-100">
+                        View Details
+                      </button>
                     </div>
-                  </div>
-                  <div className="card-footer bg-transparent border-top-0">
-                    <button className="btn btn-primary btn-sm w-100">
-                      View Details
-                    </button>
                   </div>
                 </div>
+              ))}
+            </div>
+          )}
+
+          {/* Create Tournament Modal */}
+          {showCreateModal && (
+            <div className="modal show d-block" style={{ backgroundColor: 'rgba(0,0,0,0.5)' }}>
+              <div className="modal-dialog modal-dialog-centered">
+                <div className="modal-content">
+                  <div className="modal-header">
+                    <h5 className="modal-title">Create New Tournament</h5>
+                    <button 
+                      type="button" 
+                      className="btn-close" 
+                      onClick={() => setShowCreateModal(false)}
+                    ></button>
+                  </div>
+                  <form onSubmit={handleCreateTournament}>
+                    <div className="modal-body">
+                      <div className="mb-3">
+                        <label className="form-label">Tournament Name *</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          value={createForm.name}
+                          onChange={(e) => setCreateForm({...createForm, name: e.target.value})}
+                          required
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Max Participants</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={createForm.maxParticipants}
+                          onChange={(e) => setCreateForm({...createForm, maxParticipants: parseInt(e.target.value)})}
+                          min="2"
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Initial Cash ($)</label>
+                        <input
+                          type="number"
+                          className="form-control"
+                          value={createForm.initialCash}
+                          onChange={(e) => setCreateForm({...createForm, initialCash: parseFloat(e.target.value)})}
+                          min="1000"
+                          step="1000"
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Image URL</label>
+                        <input
+                          type="text"
+                          className="form-control"
+                          placeholder="https://example.com/image.jpg"
+                          value={createForm.image}
+                          onChange={(e) => setCreateForm({...createForm, image: e.target.value})}
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">Start Date</label>
+                        <input
+                          type="datetime-local"
+                          className="form-control"
+                          value={createForm.startDate}
+                          onChange={(e) => setCreateForm({...createForm, startDate: e.target.value})}
+                        />
+                      </div>
+                      <div className="mb-3">
+                        <label className="form-label">End Date</label>
+                        <input
+                          type="datetime-local"
+                          className="form-control"
+                          value={createForm.endDate}
+                          onChange={(e) => setCreateForm({...createForm, endDate: e.target.value})}
+                        />
+                      </div>
+                    </div>
+                    <div className="modal-footer">
+                      <button 
+                        type="button" 
+                        className="btn btn-secondary" 
+                        onClick={() => setShowCreateModal(false)}
+                      >
+                        Cancel
+                      </button>
+                      <button type="submit" className="btn btn-primary">
+                        Create Tournament
+                      </button>
+                    </div>
+                  </form>
+                </div>
               </div>
-            ))}
-          </div>
+            </div>
+          )}
         </div>
       </div>
     )
@@ -222,18 +350,21 @@ const Tournament = () => {
                     selectedTournament.status === 'Upcoming' ? 'bg-primary' : 
                     'bg-secondary'
                   }`}>
-                    {selectedTournament.status}
+                    {selectedTournament.status || 'Active'}
                   </span>
                 </div>
-                <p className="text-muted mb-3">{selectedTournament.description}</p>
                 <div className="d-flex gap-4 flex-wrap">
                   <div className="d-flex align-items-center text-muted">
                     <Users size={18} className="me-2" />
-                    <span><strong>Participants:</strong> {selectedTournament.participants}</span>
+                    <span><strong>Participants:</strong> {selectedTournament.currentParticipants || 0} / {selectedTournament.maxParticipants || 0}</span>
                   </div>
                   <div className="d-flex align-items-center text-muted">
                     <Calendar size={18} className="me-2" />
-                    <span><strong>Ends:</strong> {selectedTournament.endDate}</span>
+                    <span><strong>Ends:</strong> {selectedTournament.endDate ? new Date(selectedTournament.endDate).toLocaleDateString() : 'TBD'}</span>
+                  </div>
+                  <div className="d-flex align-items-center text-muted">
+                    <DollarSign size={18} className="me-2" />
+                    <span><strong>Initial Cash:</strong> ${selectedTournament.initialCash || 10000}</span>
                   </div>
                 </div>
               </div>
@@ -249,43 +380,6 @@ const Tournament = () => {
           </div>
         </div>
 
-        {/* My Stats Cards */}
-        <div className="row g-3 mb-4">
-          <div className="col-md-4">
-            <div className="card shadow-sm">
-              <div className="card-body">
-                <div className="d-flex align-items-center mb-2">
-                  <Trophy className="text-primary me-2" size={20} />
-                  <h6 className="mb-0 text-muted">My Rank</h6>
-                </div>
-                <h3 className="mb-0 fw-bold">{selectedTournament.myRank}</h3>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="card shadow-sm">
-              <div className="card-body">
-                <div className="d-flex align-items-center mb-2">
-                  <TrendingUp className="text-success me-2" size={20} />
-                  <h6 className="mb-0 text-muted">My Profit</h6>
-                </div>
-                <h3 className="mb-0 fw-bold">{selectedTournament.myProfit}</h3>
-              </div>
-            </div>
-          </div>
-          <div className="col-md-4">
-            <div className="card shadow-sm">
-              <div className="card-body">
-                <div className="d-flex align-items-center mb-2">
-                  <DollarSign className="text-warning me-2" size={20} />
-                  <h6 className="mb-0 text-muted">P/L</h6>
-                </div>
-                <h3 className="mb-0 fw-bold">{selectedTournament.myPL}</h3>
-              </div>
-            </div>
-          </div>
-        </div>
-
         <div className="row g-4">
           {/* Leaderboard */}
           <div className="col-lg-8">
@@ -295,18 +389,18 @@ const Tournament = () => {
                   <Trophy className="me-2 text-warning" size={22} />
                   Leaderboard
                 </h4>
-                {selectedTournament.leaderboard.length > 0 ? (
+                {leaderboard.length > 0 ? (
                   <div className="table-responsive">
                     <table className="table table-hover">
                       <thead>
                         <tr>
                           <th>Rank</th>
                           <th>User</th>
-                          <th className="text-end">Profit</th>
+                          <th className="text-end">Total Value</th>
                         </tr>
                       </thead>
                       <tbody>
-                        {selectedTournament.leaderboard.map((entry) => (
+                        {leaderboard.map((entry) => (
                           <tr key={entry.rank}>
                             <td>
                               <span className={`fw-bold ${
@@ -331,47 +425,65 @@ const Tournament = () => {
                 ) : (
                   <div className="text-center text-muted py-5">
                     <Trophy size={48} className="mb-3 opacity-50" />
-                    <p>Leaderboard will be available when tournament starts</p>
+                    <p>No participants yet. Be the first to join!</p>
                   </div>
                 )}
               </div>
             </div>
           </div>
 
-          {/* Prizes & Rules */}
+          {/* Tournament Info & Actions */}
           <div className="col-lg-4">
-            {/* Prizes */}
+            {/* Tournament Info */}
             <div className="card shadow-sm mb-4">
               <div className="card-body p-4">
-                <h5 className="fw-bold mb-3">
-                  <Award className="me-2 text-warning" size={20} />
-                  Prizes
-                </h5>
-                <div className="list-group list-group-flush">
-                  {selectedTournament.prizes.map((prize, index) => (
-                    <div key={index} className="list-group-item px-0 d-flex justify-content-between align-items-center">
-                      <span className="fw-semibold">{prize.place} Place:</span>
-                      <span className="text-muted small">{prize.amount}</span>
-                    </div>
-                  ))}
+                <h5 className="fw-bold mb-3">Tournament Info</h5>
+                <div className="mb-3">
+                  <small className="text-muted">Status</small>
+                  <div className="fw-semibold">{selectedTournament.status || 'Active'}</div>
+                </div>
+                <div className="mb-3">
+                  <small className="text-muted">Start Date</small>
+                  <div className="fw-semibold">
+                    {selectedTournament.startDate 
+                      ? new Date(selectedTournament.startDate).toLocaleString() 
+                      : 'Not set'}
+                  </div>
+                </div>
+                <div className="mb-3">
+                  <small className="text-muted">End Date</small>
+                  <div className="fw-semibold">
+                    {selectedTournament.endDate 
+                      ? new Date(selectedTournament.endDate).toLocaleString() 
+                      : 'Not set'}
+                  </div>
+                </div>
+                <div>
+                  <small className="text-muted">Initial Cash</small>
+                  <div className="fw-semibold">${selectedTournament.initialCash || 10000}</div>
                 </div>
               </div>
             </div>
 
-            {/* Rules */}
-            <div className="card shadow-sm">
-              <div className="card-body p-4">
-                <h5 className="fw-bold mb-3">Rules</h5>
-                <ul className="list-unstyled mb-0">
-                  {selectedTournament.rules.map((rule, index) => (
-                    <li key={index} className="mb-2 text-muted small">
-                      <span className="text-primary me-2">•</span>
-                      {rule}
-                    </li>
-                  ))}
-                </ul>
+            {/* Enter Tournament Button */}
+            {auth && !isUserInTournament(selectedTournament.id) && (
+              <button 
+                className="btn btn-success w-100 mb-3"
+                onClick={() => handleEnterTournament(selectedTournament.id)}
+              >
+                Enter Tournament
+              </button>
+            )}
+            {auth && isUserInTournament(selectedTournament.id) && (
+              <div className="alert alert-success" role="alert">
+                ✓ You are participating in this tournament
               </div>
-            </div>
+            )}
+            {!auth && (
+              <div className="alert alert-info" role="alert">
+                Please log in to enter this tournament
+              </div>
+            )}
           </div>
         </div>
       </div>
