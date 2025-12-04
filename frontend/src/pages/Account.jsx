@@ -1,9 +1,10 @@
 import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
-import { User, LogOut } from "lucide-react";
+import { User, LogOut, Plus } from "lucide-react";
 import { motion as Motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
-import { changeName, changePassword} from "../api/AuthAPI";
+import { changeName, changePassword } from "../api/AuthAPI";
+import { createAccount, getAccounts } from "../api/AccountApi";
 
 /**
  * Account page that shows read-only profile data and placeholder forms
@@ -23,61 +24,78 @@ const Account = () => {
   const [errorMessage, setErrorMessage] = useState("");
   const [passwordButtonStatus, setPasswordButtonStatus] = useState(false);
 
-  const [updatePasswordText, setUpdatePasswordText] = useState("Update password");
+  const [updatePasswordText, setUpdatePasswordText] =
+    useState("Update password");
 
+  const [accounts, setAccounts] = useState([]);
+  const [newAccountName, setNewAccountName] = useState("");
+  const [createAccountStatus, setCreateAccountStatus] = useState("idle");
 
-  useEffect( () => {
+  useEffect(() => {
     setNewName(auth?.name ?? "");
-  }, [auth])
+  }, [auth]);
 
-  useEffect( () => {
+  useEffect(() => {
+    if (!auth?.id) return;
+    getAccounts(auth.id)
+      .then((res) => setAccounts(res.data || []))
+      .catch((err) => console.error("Failed to load accounts", err));
+  }, [auth]);
 
+  function handleCreateAccount() {
+    if (!newAccountName.trim() || !auth?.id) return;
+    setCreateAccountStatus("creating");
+    createAccount(auth.id, newAccountName.trim())
+      .then((res) => {
+        setAccounts((prev) => [...prev, res.data]);
+        setNewAccountName("");
+        setCreateAccountStatus("success");
+        setTimeout(() => setCreateAccountStatus("idle"), 1500);
+      })
+      .catch(() => {
+        setCreateAccountStatus("error");
+        setTimeout(() => setCreateAccountStatus("idle"), 1500);
+      });
+  }
+
+  useEffect(() => {
     setPasswordButtonStatus(false);
 
-    if (!newPassword)
-      setErrorMessage("");
+    if (!newPassword) setErrorMessage("");
     else if (newPassword.length < 8)
       setErrorMessage("Password Must Be Atleast 8 Characters");
     else if (newPasswordConfirm && newPassword != newPasswordConfirm)
       setErrorMessage("Passwords Do Not Match");
     else {
       setErrorMessage("");
-      setPasswordButtonStatus(true)
+      setPasswordButtonStatus(true);
     }
-
-  }, [oldPassword, newPassword, newPasswordConfirm])
-
+  }, [oldPassword, newPassword, newPasswordConfirm]);
 
   function handleNameChange() {
-    changeName(auth.email, newName)
-      .then(res => {
-        if (res.status === 200)
-          login(res.data);
-      })
+    changeName(auth.email, newName).then((res) => {
+      if (res.status === 200) login(res.data);
+    });
   }
 
   function clickedUpdatePassword() {
-
     setUpdatePasswordText("Updating...");
 
     changePassword(auth.email, oldPassword, newPassword)
-      .then(res => {
-        if (res.status === 200){
+      .then((res) => {
+        if (res.status === 200) {
           login(res.data);
           setUpdatePasswordText("Successfully Updated");
         }
       })
-      .catch(err => {
+      .catch((err) => {
         if (err.response?.status === 403)
           setUpdatePasswordText("Wrong Old Password");
-        else
-          setUpdatePasswordText("Error");
+        else setUpdatePasswordText("Error");
       })
       .finally(() => {
         setTimeout(() => setUpdatePasswordText("Update password"), 1500);
-      })
-      
-
+      });
   }
 
   /**
@@ -130,7 +148,13 @@ const Account = () => {
                     <User size={24} />
                   </div>
                   <div>
-                    <div className="text-uppercase small" style={{ letterSpacing: "0.18em", color: "rgba(232,237,255,0.65)" }}>
+                    <div
+                      className="text-uppercase small"
+                      style={{
+                        letterSpacing: "0.18em",
+                        color: "rgba(232,237,255,0.65)",
+                      }}
+                    >
                       Profile
                     </div>
                     <h1 className="h4 mb-0 text-light">Account Settings</h1>
@@ -149,11 +173,19 @@ const Account = () => {
 
               {/* Edit Profile */}
               <div className="mb-4">
-                <div className="text-uppercase small mb-2" style={{ letterSpacing: "0.18em", color: "rgba(232,237,255,0.6)" }}>
+                <div
+                  className="text-uppercase small mb-2"
+                  style={{
+                    letterSpacing: "0.18em",
+                    color: "rgba(232,237,255,0.6)",
+                  }}
+                >
                   Edit Profile
                 </div>
                 <div className="mb-3">
-                  <label className="form-label fw-medium text-light">Name</label>
+                  <label className="form-label fw-medium text-light">
+                    Name
+                  </label>
                   <input
                     className="form-control form-control-lg account-input"
                     style={{
@@ -168,7 +200,9 @@ const Account = () => {
                   />
                 </div>
                 <div className="mb-2">
-                  <label className="form-label fw-medium text-light">Email</label>
+                  <label className="form-label fw-medium text-light">
+                    Email
+                  </label>
                   <input
                     className="form-control form-control-lg account-input"
                     style={{
@@ -202,7 +236,13 @@ const Account = () => {
               <hr className="my-4 text-white-50" />
 
               {/* Change Password */}
-              <div className="text-uppercase small mb-3" style={{ letterSpacing: "0.18em", color: "rgba(232,237,255,0.6)" }}>
+              <div
+                className="text-uppercase small mb-3"
+                style={{
+                  letterSpacing: "0.18em",
+                  color: "rgba(232,237,255,0.6)",
+                }}
+              >
                 Change Password
               </div>
               <div className="row g-3">
@@ -226,7 +266,9 @@ const Account = () => {
                   />
                 </div>
                 <div className="col-md-6">
-                  <label className="form-label fw-medium text-light">New password</label>
+                  <label className="form-label fw-medium text-light">
+                    New password
+                  </label>
                   <input
                     type="password"
                     className="form-control form-control-lg account-input"
@@ -277,13 +319,87 @@ const Account = () => {
                     : "rgba(255,255,255,0.08)",
                   border: "none",
                   color: passwordButtonStatus ? "#0b1023" : "#9aa6d4",
-                  boxShadow: passwordButtonStatus ? "0 14px 40px rgba(99,102,241,0.25)" : "none",
+                  boxShadow: passwordButtonStatus
+                    ? "0 14px 40px rgba(99,102,241,0.25)"
+                    : "none",
                 }}
                 onClick={clickedUpdatePassword}
                 disabled={!passwordButtonStatus}
               >
                 {updatePasswordText}
               </Motion.button>
+
+              <hr className="my-4 text-white-50" />
+
+              {/* Trading Accounts */}
+              <div
+                className="text-uppercase small mb-3"
+                style={{
+                  letterSpacing: "0.18em",
+                  color: "rgba(232,237,255,0.6)",
+                }}
+              >
+                Trading Accounts
+              </div>
+              <div className="mb-3">
+                {accounts.map((acc) => (
+                  <div
+                    key={acc.id}
+                    className="d-flex justify-content-between align-items-center p-3 mb-2 rounded-3"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    <span className="text-light">{acc.name}</span>
+                    <span style={{ color: "#9aa6d4" }}>
+                      $
+                      {acc.cash?.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="d-flex gap-2">
+                <input
+                  className="form-control form-control-lg account-input"
+                  style={{
+                    borderRadius: "14px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.14)",
+                    color: "#f5f7ff",
+                    caretColor: "#f5f7ff",
+                  }}
+                  placeholder="New account name"
+                  value={newAccountName}
+                  onChange={(e) => setNewAccountName(e.target.value)}
+                />
+                <Motion.button
+                  whileTap={{ scale: 0.96 }}
+                  className="btn fw-semibold text-white px-4"
+                  style={{
+                    borderRadius: "14px",
+                    background: newAccountName.trim()
+                      ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
+                      : "rgba(255,255,255,0.08)",
+                    border: "none",
+                  }}
+                  disabled={
+                    !newAccountName.trim() || createAccountStatus === "creating"
+                  }
+                  onClick={handleCreateAccount}
+                >
+                  <Plus size={18} className="me-1" />
+                  {createAccountStatus === "creating"
+                    ? "Creating..."
+                    : createAccountStatus === "success"
+                    ? "Created!"
+                    : createAccountStatus === "error"
+                    ? "Error"
+                    : "Create"}
+                </Motion.button>
+              </div>
 
               <hr className="my-4 text-white-50" />
 

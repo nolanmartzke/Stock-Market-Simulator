@@ -21,5 +21,17 @@ export function trade(accountId, tradeData) {
   return api.post(`/${accountId}/trade`, tradeData);
 }
 
+export function createAccount(userId, name) {
+  return axios.post(
+    `http://localhost:8080/api/users/${userId}/accounts?name=${encodeURIComponent(
+      name
+    )}`
+  );
+}
+
+export function getAccounts(userId) {
+  return api.get("", { params: { userId } });
+}
+
 // Added for read-only Trade History
 export default api;
