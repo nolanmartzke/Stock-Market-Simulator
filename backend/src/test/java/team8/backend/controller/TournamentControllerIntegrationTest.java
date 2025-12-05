@@ -77,24 +77,29 @@ public class TournamentControllerIntegrationTest {
     }
 
     @Test
-    public void testCreateTournament() {
-        Tournament newTournament = new Tournament();
-        newTournament.setName("Spring Showdown");
-        newTournament.setInitialCash(3000.0);
-        newTournament.setMaxParticipants(10);
-        newTournament.setStartDate(LocalDateTime.now());
-        newTournament.setEndDate(LocalDateTime.now().plusDays(7));
+	public void testCreateTournament() {
+		Map<String, Object> dto = new HashMap<>();
+		dto.put("name", "Spring Showdown");
+		dto.put("maxParticipants", 10);
+		dto.put("initialCash", 3000.0);
+		dto.put("startDate", LocalDateTime.now().toString());
+		dto.put("endDate", LocalDateTime.now().plusDays(7).toString());
 
-        ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
-                baseUrl,
-                HttpMethod.POST,
-                new HttpEntity<>(newTournament),
-                new ParameterizedTypeReference<>() {}
-        );
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
 
-        assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
-        assertThat(response.getBody()).containsEntry("name", "Spring Showdown");
-    }
+		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(dto, headers);
+
+		ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+				baseUrl,
+				HttpMethod.POST,
+				entity,
+				new ParameterizedTypeReference<>() {}
+		);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.CREATED);
+		assertThat(response.getBody()).containsEntry("name", "Spring Showdown");
+	}
 
     @Test
     public void testGetAllTournaments() {
@@ -196,7 +201,6 @@ public class TournamentControllerIntegrationTest {
 
     @Test
     public void testGetLeaderboard() {
-        // Enter tournament
         restTemplate.postForEntity(
                 baseUrl + "/" + testTournament.getId() + "/enter?userId=" + testUser.getId(),
                 null,
@@ -215,11 +219,76 @@ public class TournamentControllerIntegrationTest {
 
         Map<String, Object> row = response.getBody().get(0);
 
-        // Required fields in new leaderboard format
         assertThat(row).containsKeys(
                 "accountName",
                 "cash",
                 "totalHoldingValue"
         );
     }
+
+	@Test
+	public void testUpdateTournament() {
+		String url = baseUrl + "/" + testTournament.getId();
+
+		Map<String, Object> body = new HashMap<>();
+		body.put("name", "Updated Name");
+		body.put("maxParticipants", 20);
+
+		HttpHeaders headers = new HttpHeaders();
+		headers.setContentType(MediaType.APPLICATION_JSON);
+
+		HttpEntity<Map<String, Object>> entity = new HttpEntity<>(body, headers);
+
+		ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
+				url,
+				HttpMethod.PATCH,
+				entity,
+				new ParameterizedTypeReference<>() {}
+		);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).containsEntry("name", "Updated Name");
+		assertThat(response.getBody()).containsEntry("maxParticipants", 20);
+	}
+
+	@Test
+	public void testDeleteTournament() {
+		String url = baseUrl + "/" + testTournament.getId();
+
+		ResponseEntity<String> response = restTemplate.exchange(
+				url,
+				HttpMethod.DELETE,
+				null,
+				String.class
+		);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).contains("Tournament deleted successfully");
+
+		assertThat(tournamentRepository.findById(testTournament.getId())).isEmpty();
+	}
+
+	@Test
+	public void testLeaveTournament() {
+		restTemplate.postForEntity(
+				baseUrl + "/" + testTournament.getId() + "/enter?userId=" + testUser.getId(),
+				null,
+				String.class
+		);
+
+		String url = baseUrl + "/" + testTournament.getId() + "/leave?userId=" + testUser.getId();
+
+		ResponseEntity<String> response = restTemplate.exchange(
+				url,
+				HttpMethod.DELETE,
+				null,
+				String.class
+		);
+
+		assertThat(response.getStatusCode()).isEqualTo(HttpStatus.OK);
+		assertThat(response.getBody()).contains("User left the tournament successfully");
+
+		List<Account> accounts = accountRepository.findByUser(testUser);
+		assertThat(accounts).isEmpty();
+	}
 }
