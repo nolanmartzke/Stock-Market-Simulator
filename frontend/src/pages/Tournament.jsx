@@ -27,7 +27,7 @@ const Tournament = () => {
     endDate: '',
     image: ''
   })
-  const { refreshAccounts } = useAccount();
+  const { refreshAccounts, handleSetNewAccountToNewTournament } = useAccount();
 
   useEffect(() => {
     fetchTournaments()
@@ -137,7 +137,7 @@ const Tournament = () => {
       if (selectedTournament && selectedTournament.id === tournamentId) {
         await fetchLeaderboard(tournamentId)
       }
-      refreshAccounts();
+      handleSetNewAccountToNewTournament();
       alert('Successfully entered tournament!')
     } catch (error) {
       console.error('Failed to enter tournament:', error)

@@ -101,7 +101,22 @@ export function AccountProvider({ children }) {
     }
   };
 
+  // Handle account selection change to the most recently entered tournament
+  const handleSetNewAccountToNewTournament = async () => {
+    const freshList = await refreshAccounts(); // get updated accounts
 
+    if (!freshList || freshList.length === 0) return;
+    
+    // Find the highest account ID
+    const highestAccount = freshList.reduce((max, acc) =>
+      acc.id > max.id ? acc : max
+    );
+
+    const highestId = highestAccount.id;
+
+    setSelectedAccountId(highestId);
+    localStorage.setItem("selectedAccountId", String(highestId));
+  };
 
   // Get the currently selected account object
   const selectedAccount =
@@ -115,7 +130,8 @@ export function AccountProvider({ children }) {
         selectedAccount,
         setSelectedAccountId: handleSetAccount,
         loading,
-        refreshAccounts
+        refreshAccounts,
+        handleSetNewAccountToNewTournament
       }}
     >
       {children}

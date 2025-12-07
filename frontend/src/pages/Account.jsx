@@ -14,7 +14,7 @@ import { useAccount } from "../context/AccountContext";
  */
 const Account = () => {
   const { auth, logout, login } = useAuth();
-  const { refreshAccounts, setSelectedAccountId } = useAccount();
+  const { setSelectedAccountId } = useAccount();
 
   const navigate = useNavigate();
 
