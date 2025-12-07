@@ -34,6 +34,7 @@ const Tournament = () => {
     if (auth) {
       fetchUserTournaments()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth])
 
   useEffect(() => {
