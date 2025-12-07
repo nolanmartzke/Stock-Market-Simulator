@@ -188,7 +188,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/{accountId}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable("accountId") Long accountId)
+    public ResponseEntity<Void> deleteAccount(@PathVariable("accountId") Long accountId) {
         Optional<Account> accountOpt = accountRepository.findById(accountId);
         if (accountOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
