@@ -315,7 +315,7 @@ const Dashboard = () => {
                     <h4 className="section-heading mb-0">Positions</h4>
                   </div>
                   <span className="pill-gradient text-white">
-                    {positionCount} assets
+                    {positionCount} {positionCount === 1? "asset" : "assets"}
                   </span>
                 </div>
                 <div className="d-flex justify-content-between align-items-center m-4">
