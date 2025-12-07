@@ -113,7 +113,6 @@ const GetStarted = () => {
                     >
                       <Icon size={22} />
                     </div>
-                    <ArrowRight size={18} style={{ color: '#aeb8de' }} />
                   </div>
                   <h5 className="text-light mb-3">{card.title}</h5>
                   <ul className="mb-0 ps-3" style={{ color: '#cdd7ff' }}>
