@@ -17,10 +17,11 @@ import {
   getProfile,
 } from "../api/StockApi";
 import { useNavigate, Link } from "react-router-dom";
-import api, { loadAccount, trade } from "../api/AccountApi";
+import { loadAccount, trade } from "../api/AccountApi";
 import { Form } from "react-bootstrap";
 import { Toaster, toast } from "sonner";
 import { motion as Motion, AnimatePresence } from "framer-motion";
+import { useAccount } from "../context/AccountContext";
 
 /**
  * Trade page that fetches the user’s first account, supports symbol
@@ -40,8 +41,7 @@ const Trade = () => {
   const [, setHistory] = useState([]);
   const [, setProfile] = useState(null);
 
-  const [accountId, setAccountId] = useState(null);
-  const [accounts, setAccounts] = useState([]);
+  const { selectedAccountId } = useAccount();
 
   const [shares, setShares] = useState(0);
   const [ticker, setTicker] = useState("");
@@ -74,32 +74,13 @@ const Trade = () => {
   };
 
   /**
-   * On mount, grab the authenticated user from localStorage and fetch
-   * the first account so subsequent trades know which ID to target.
-   */
-  useEffect(() => {
-    const authString = localStorage.getItem("auth");
-    if (!authString) return;
-    const auth = JSON.parse(authString);
-    // IMPORTANT: use '' so baseURL '/api/accounts' + '' → '/api/accounts'
-    api
-      .get("", { params: { userId: auth.id } })
-      .then((res) => {
-        const list = Array.isArray(res.data) ? res.data : [];
-        setAccounts(list);
-        if (list.length) setAccountId(list[0].id);
-      })
-      .catch((err) => console.error("Failed to load accounts", err));
-  }, []);
-
-  /**
    * When the selected account changes, load the latest balances/
    * holdings so both the order ticket and recent orders stay in sync.
    */
   useEffect(() => {
-    console.log("useEffect triggered for accountId:", accountId);
-    if (!accountId) return;
-    loadAccount(accountId)
+    console.log("useEffect triggered for accountId:", selectedAccountId);
+    if (!selectedAccountId) return;
+    loadAccount(selectedAccountId)
       .then((res) => {
         setHoldings(res.data.holdings || []);
         setCash(res.data.cash || 0);
@@ -109,7 +90,7 @@ const Trade = () => {
       .finally(() => {
         console.log("Finished loading account");
       });
-  }, [accountId]);
+  }, [selectedAccountId]);
 
   /**
    * Debounce the symbol search box and populate autocomplete results.
@@ -241,7 +222,7 @@ const Trade = () => {
       setTimeout(() => setReviewButtonStatus("idle"), 1200);
       return;
     }
-    if (!accountId) {
+    if (!selectedAccountId) {
       setReviewButtonStatus("missingRequiredInput");
       setTimeout(() => setReviewButtonStatus("idle"), 1200);
       return;
@@ -272,8 +253,8 @@ const Trade = () => {
         return;
       }
 
-      const res = await trade(accountId, order);
-      console.log("Trade placed:", res.data, accountId);
+      const res = await trade(selectedAccountId, order);
+      console.log("Trade placed:", res.data, selectedAccountId);
 
       toast.success(
         `${
@@ -281,7 +262,7 @@ const Trade = () => {
         } ${shares} ${ticker.toUpperCase()} @ ${formatUSD(price)}`
       );
 
-      loadAccount(accountId)
+      loadAccount(selectedAccountId)
         .then((res) => {
           setHoldings(res.data.holdings || []);
           setCash(res.data.cash || 0);
@@ -361,37 +342,6 @@ const Trade = () => {
                 in seconds.
               </p>
             </div>
-            {accounts.length > 1 && (
-              <div>
-                <label
-                  className="text-uppercase small d-block mb-1"
-                  style={{
-                    letterSpacing: "0.16em",
-                    color: "rgba(232,237,255,0.65)",
-                  }}
-                >
-                  Account
-                </label>
-                <select
-                  className="form-select"
-                  style={{
-                    borderRadius: "14px",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.14)",
-                    color: "#f5f7ff",
-                    minWidth: 180,
-                  }}
-                  value={accountId ?? ""}
-                  onChange={(e) => setAccountId(Number(e.target.value))}
-                >
-                  {accounts.map((acc) => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.name}
-                    </option>
-                  ))}
-                </select>
-              </div>
-            )}
           </div>
 
           <div className="row g-3">

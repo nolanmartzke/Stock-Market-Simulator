@@ -10,7 +10,8 @@ import {
 } from "lucide-react";
 import { Container, Row, Col, Card } from "react-bootstrap";
 import { useAuth } from "../context/AuthContext";
-import api, { loadAccount } from "../api/AccountApi";
+import { useAccount } from "../context/AccountContext";
+import { loadAccount } from "../api/AccountApi";
 import { Link } from "react-router-dom";
 import { getQuote } from "../api/StockApi";
 import NewsCard from "../components/NewsCard";
@@ -26,9 +27,8 @@ import {
 
 const Dashboard = () => {
   const { auth } = useAuth();
+  const { selectedAccountId, selectedAccount } = useAccount();
 
-  const [accounts, setAccounts] = useState([]);
-  const [accountId, setAccountId] = useState(null);
   const [portfolioValue, setPortfolioValue] = useState(0);
   const [firstName, setFirstName] = useState("");
   const [cashBalance, setCashBalance] = useState(0);
@@ -55,22 +55,12 @@ const Dashboard = () => {
   useEffect(() => {
     if (!auth) return;
     setFirstName(auth.name.split(" ")[0]);
-
-    // Load accounts list
-    api
-      .get("", { params: { userId: auth.id } })
-      .then((res) => {
-        const list = Array.isArray(res.data) ? res.data : [];
-        setAccounts(list);
-        if (list.length && !accountId) setAccountId(list[0].id);
-      })
-      .catch((err) => console.error("Failed to load accounts", err));
   }, [auth]);
 
   useEffect(() => {
-    if (!accountId) return;
+    if (!selectedAccountId) return;
 
-    loadAccount(accountId)
+    loadAccount(selectedAccountId)
       .then((response) => response.data)
       .then((data) => {
         console.log(data);
@@ -84,7 +74,7 @@ const Dashboard = () => {
         setQuotes({}); // Reset quotes when switching accounts
       })
       .catch((err) => console.log(err));
-  }, [accountId]);
+  }, [selectedAccountId]);
 
   useEffect(() => {
     if (!positions) return;
@@ -177,7 +167,7 @@ const Dashboard = () => {
               <div className="text-gradient fw-semibold fs-2">
                 {greeting}, {firstName || "trader"}.
               </div>
-              {accountId && (
+              {selectedAccount && (
                 <div
                   className="fw-medium"
                   style={{
@@ -187,31 +177,9 @@ const Dashboard = () => {
                 >
                   Viewing:{" "}
                   <span style={{ color: "#60a5fa" }}>
-                    {accounts.find((acc) => acc.id === accountId)?.name ||
-                      "Account"}
+                    {selectedAccount.name || "Account"}
                   </span>
                 </div>
-              )}
-              {accounts.length > 1 && (
-                <select
-                  className="form-select form-select-sm"
-                  style={{
-                    borderRadius: "10px",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.14)",
-                    color: "#f5f7ff",
-                    width: "auto",
-                    minWidth: 160,
-                  }}
-                  value={accountId ?? ""}
-                  onChange={(e) => setAccountId(Number(e.target.value))}
-                >
-                  {accounts.map((acc) => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.name}
-                    </option>
-                  ))}
-                </select>
               )}
             </div>
           </div>
