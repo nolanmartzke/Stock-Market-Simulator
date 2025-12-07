@@ -27,7 +27,7 @@ const Tournament = () => {
     endDate: '',
     image: ''
   })
-  const { refreshAccounts, handleSetNewAccountToNewTournament } = useAccount();
+  const { handleSetNewAccountToNewTournament } = useAccount();
 
   useEffect(() => {
     fetchTournaments()
