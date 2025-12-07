@@ -169,10 +169,10 @@ const Dashboard = () => {
               </div>
               {selectedAccount && (
                 <div
-                  className="fw-medium"
+                  className="fw-medium mt-3"
                   style={{
                     color: "rgba(232,237,255,0.85)",
-                    fontSize: "0.95rem",
+                    fontSize: "1.25rem",
                   }}
                 >
                   Viewing:{" "}

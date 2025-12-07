@@ -41,7 +41,7 @@ const Trade = () => {
   const [, setHistory] = useState([]);
   const [, setProfile] = useState(null);
 
-  const { selectedAccountId } = useAccount();
+  const { selectedAccountId, selectedAccount } = useAccount();
 
   const [shares, setShares] = useState(0);
   const [ticker, setTicker] = useState("");
@@ -342,6 +342,20 @@ const Trade = () => {
                 in seconds.
               </p>
             </div>
+            {selectedAccount && (
+                <div
+                  className="fw-medium mb-3"
+                  style={{
+                    color: "rgba(232,237,255,0.85)",
+                    fontSize: "1.25rem",
+                  }}
+                >
+                  Viewing:{" "}
+                  <span style={{ color: "#60a5fa" }}>
+                    {selectedAccount.name || "Account"}
+                  </span>
+                </div>
+              )}
           </div>
 
           <div className="row g-3">

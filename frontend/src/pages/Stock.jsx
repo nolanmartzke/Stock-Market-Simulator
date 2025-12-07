@@ -58,7 +58,7 @@ const Stock = () => {
   const [mode, setMode] = useState("buy"); // buy or sell
   const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
 
-  const { selectedAccountId } = useAccount();
+  const { selectedAccountId, selectedAccount } = useAccount();
   const [numHoldingShares, setNumHoldingShares] = useState(0);
   const [averageCost, setAverageCost] = useState(0);
 
@@ -976,6 +976,20 @@ const Stock = () => {
                 <small className="section-sub">
                   {formatUSD(cash)} buying power available
                 </small>
+                {selectedAccount && (
+                <div
+                  className="fw-medium mt-2"
+                  style={{
+                    color: "rgba(232,237,255,0.85)",
+                    fontSize: "1.25rem",
+                  }}
+                >
+                  {" "}
+                  <span style={{ color: "#60a5fa" }}>
+                    {selectedAccount.name || "Account"}
+                  </span>
+                </div>
+              )}
               </div>
             </div>
           </Col>
