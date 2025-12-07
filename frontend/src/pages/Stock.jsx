@@ -1,14 +1,34 @@
 import React, { useCallback, useEffect, useMemo, useState } from "react";
-import { ArrowUpRight, ArrowDownRight, TrendingUp, Layers, CircleDollarSign, } from "lucide-react";
-import { ComposedChart, Line, XAxis, YAxis, Tooltip, ResponsiveContainer, Area, } from "recharts";
+import {
+  ArrowUpRight,
+  ArrowDownRight,
+  TrendingUp,
+  Layers,
+  CircleDollarSign,
+} from "lucide-react";
+import {
+  ComposedChart,
+  Line,
+  XAxis,
+  YAxis,
+  Tooltip,
+  ResponsiveContainer,
+  Area,
+} from "recharts";
 import { useParams } from "react-router-dom";
 import { Button, Form, Row, Col, Modal } from "react-bootstrap";
-import { getQuote, getMetrics, search, getHistory, getProfile, } from "../api/StockApi";
-import api, { trade, loadAccount } from "../api/AccountApi";
+import {
+  getQuote,
+  getMetrics,
+  search,
+  getHistory,
+  getProfile,
+} from "../api/StockApi";
+import { trade, loadAccount } from "../api/AccountApi";
+import { useAccount } from "../context/AccountContext";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
 import { Toaster, toast } from "sonner";
-
 
 /**
  * Stock detail page that loads quote data, fundamentals, price history,
@@ -38,40 +58,27 @@ const Stock = () => {
   const [mode, setMode] = useState("buy"); // buy or sell
   const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
 
-  const [accountId, setAccountId] = useState(null);
+  const { selectedAccountId } = useAccount();
   const [numHoldingShares, setNumHoldingShares] = useState(0);
   const [averageCost, setAverageCost] = useState(0);
 
   const [tradeConfirmModal, setTradeConfirmModal] = useState(false);
   const [reviewButtonStatus, setReviewButtonStatus] = useState("idle"); // idle | notEnoughBP | notEnoughShares | missingRequiredInput
-  
+
   /**
    * On mount, resolve the authenticated user’s first brokerage account
    * so subsequent trades can be tied to a concrete account ID.
    */
-  useEffect(() => {
-    const authString = localStorage.getItem("auth");
-    if (!authString) return;
-    const auth = JSON.parse(authString);
-    // IMPORTANT: use '' so baseURL '/api/accounts' + '' → '/api/accounts'
-    api
-      .get("", { params: { userId: auth.id } })
-      .then((res) => {
-        const list = Array.isArray(res.data) ? res.data : [];
-        if (list.length) setAccountId(list[0].id);
-      })
-      .catch((err) => console.error("Failed to load accounts", err));
-  }, []);
 
   const refreshHoldings = useCallback(() => {
-    if (!accountId) return;
+    if (!selectedAccountId) return;
     if (!ticker) return;
 
-    loadAccount(accountId)
+    loadAccount(selectedAccountId)
       .then((response) => response.data)
       .then((data) => {
         if (!data.holdings) return;
-        setCash(data.cash)
+        setCash(data.cash);
 
         const currHolding = data.holdings.find((h) => h.stockTicker === ticker);
         if (!currHolding) {
@@ -85,14 +92,14 @@ const Stock = () => {
         console.log(data);
       })
       .catch((err) => console.log(err));
-  }, [accountId, ticker]); 
+  }, [selectedAccountId, ticker]);
   /**
    * Whenever the account or ticker changes, refresh holdings so we can
    * show share count and average cost for the selected symbol.
    */
   useEffect(() => {
     refreshHoldings();
-  }, [accountId, ticker, query, refreshHoldings]);
+  }, [selectedAccountId, ticker, query, refreshHoldings]);
 
   /**
    * Respond to route changes by loading quotes, metrics, history, and
@@ -204,13 +211,12 @@ const Stock = () => {
    * the component (cash balance, share value, estimated cost, etc.).
    */
   const formatUSD = (num) => {
-    if (!num)
-      num = 0
+    if (!num) num = 0;
     return new Intl.NumberFormat("en-US", {
       style: "currency",
       currency: "USD",
     }).format(num);
-  }
+  };
 
   const formatPercent = (num) => {
     const roundedNum = Number(num).toFixed(2);
@@ -369,7 +375,6 @@ const Stock = () => {
     return `$${formatted}`;
   };
 
-
   const formattedPrice = formatUSD(price);
   const holdingsMarketValue = formatUSD(
     (Number(numHoldingShares) || 0) * (Number(price) || 0)
@@ -402,20 +407,19 @@ const Stock = () => {
     ? `${formatCompact(profile.shareOutstanding)} shares`
     : "—";
 
-
   function handleReviewOrder() {
     if (!shares || shares <= 0) {
-      setReviewButtonStatus("missingRequiredInput")
+      setReviewButtonStatus("missingRequiredInput");
       setTimeout(() => setReviewButtonStatus("idle"), 1000);
       return;
     }
-    if (mode === "buy" && shares * price > cash){
-      setReviewButtonStatus("notEnoughBP")
+    if (mode === "buy" && shares * price > cash) {
+      setReviewButtonStatus("notEnoughBP");
       setTimeout(() => setReviewButtonStatus("idle"), 1500);
       return;
     }
-    if (mode === "sell" && shares > numHoldingShares){
-      setReviewButtonStatus("notEnoughShares")
+    if (mode === "sell" && shares > numHoldingShares) {
+      setReviewButtonStatus("notEnoughShares");
       setTimeout(() => setReviewButtonStatus("idle"), 1500);
       return;
     }
@@ -427,7 +431,6 @@ const Stock = () => {
    * to the backend. On success, refreshes cash and clears the ticket.
    */
   const handleSubmitOrder = async () => {
-
     setTradeConfirmModal(false);
 
     try {
@@ -438,16 +441,16 @@ const Stock = () => {
         price: quote.c,
       };
 
-      const updatedAccount = await trade(accountId, order);
-      
+      const updatedAccount = await trade(selectedAccountId, order);
+
       setCash(updatedAccount.data.cash);
       refreshHoldings();
       console.log(cash);
-      toast.success("Successfully Executed!")
+      toast.success("Successfully Executed!");
       setShares(0);
     } catch (error) {
       console.error(error);
-      toast.error("Failed to execute trade.")
+      toast.error("Failed to execute trade.");
     }
   };
 
@@ -491,7 +494,14 @@ const Stock = () => {
                 <img
                   src={profile.logo}
                   alt={`${stockName} logo`}
-                  style={{ width: 72, height: 72, objectFit: "contain", borderRadius: 16, background: "rgba(255,255,255,0.05)", padding: 8 }}
+                  style={{
+                    width: 72,
+                    height: 72,
+                    objectFit: "contain",
+                    borderRadius: 16,
+                    background: "rgba(255,255,255,0.05)",
+                    padding: 8,
+                  }}
                 />
               ) : null}
               <div>
@@ -499,14 +509,31 @@ const Stock = () => {
                   {stockTicker || query}
                 </div>
                 <h2 className="text-light mb-1">{stockName}</h2>
-                <div className="section-sub">{exchange} • {currency}</div>
+                <div className="section-sub">
+                  {exchange} • {currency}
+                </div>
               </div>
             </div>
             <div className="text-end">
               <div className="display-5 text-light">{formattedPrice}</div>
-              <div className={`metric-pill mt-2 ${dayChange === "positive" ? "positive" : "negative"}`}>
-                <span className="d-inline-flex align-items-center justify-content-center rounded-circle border" style={{ width: 26, height: 26, backgroundColor: "rgba(255,255,255,0.08)" }}>
-                  {dayChange === "positive" ? <ArrowUpRight size={16} /> : <ArrowDownRight size={16} />}
+              <div
+                className={`metric-pill mt-2 ${
+                  dayChange === "positive" ? "positive" : "negative"
+                }`}
+              >
+                <span
+                  className="d-inline-flex align-items-center justify-content-center rounded-circle border"
+                  style={{
+                    width: 26,
+                    height: 26,
+                    backgroundColor: "rgba(255,255,255,0.08)",
+                  }}
+                >
+                  {dayChange === "positive" ? (
+                    <ArrowUpRight size={16} />
+                  ) : (
+                    <ArrowDownRight size={16} />
+                  )}
                 </span>
                 <span>{dayChangeDollars}</span>
                 <span className="opacity-75">({dayChangePercent})</span>
@@ -521,7 +548,9 @@ const Stock = () => {
               <div className="p-4 h-100 d-flex flex-column">
                 <div className="d-flex justify-content-between align-items-center gap-3">
                   <div>
-                    <div className="text-uppercase section-sub small">Price history</div>
+                    <div className="text-uppercase section-sub small">
+                      Price history
+                    </div>
                     <h5 className="section-heading mb-0">Market pulse</h5>
                   </div>
                   <div className="d-flex flex-wrap gap-2">
@@ -534,7 +563,8 @@ const Stock = () => {
                             range === r
                               ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
                               : "rgba(255,255,255,0.08)",
-                          color: range === r ? "#0b1120" : "rgba(232,241,255,0.9)",
+                          color:
+                            range === r ? "#0b1120" : "rgba(232,241,255,0.9)",
                           boxShadow:
                             range === r
                               ? "0 12px 30px rgba(14,165,233,0.35)"
@@ -557,18 +587,42 @@ const Stock = () => {
                       margin={{ top: 20, right: 10, left: -10, bottom: 20 }}
                     >
                       <defs>
-                        <linearGradient id="priceLineGradient" x1="0%" y1="0%" x2="100%" y2="0%">
+                        <linearGradient
+                          id="priceLineGradient"
+                          x1="0%"
+                          y1="0%"
+                          x2="100%"
+                          y2="0%"
+                        >
                           <stop offset="0%" stopColor="#38bdf8" />
                           <stop offset="50%" stopColor="#22c55e" />
                           <stop offset="100%" stopColor="#a855f7" />
                         </linearGradient>
-                        <linearGradient id="priceAreaGradient" x1="0" y1="0" x2="0" y2="1">
+                        <linearGradient
+                          id="priceAreaGradient"
+                          x1="0"
+                          y1="0"
+                          x2="0"
+                          y2="1"
+                        >
                           <stop offset="0%" stopColor="rgba(56,189,248,0.32)" />
                           <stop offset="45%" stopColor="rgba(34,197,94,0.22)" />
                           <stop offset="100%" stopColor="rgba(10,31,54,0)" />
                         </linearGradient>
-                        <filter id="priceShadow" x="-20%" y="-20%" width="140%" height="140%">
-                          <feDropShadow dx="0" dy="10" stdDeviation="12" floodColor="#38bdf8" floodOpacity="0.28" />
+                        <filter
+                          id="priceShadow"
+                          x="-20%"
+                          y="-20%"
+                          width="140%"
+                          height="140%"
+                        >
+                          <feDropShadow
+                            dx="0"
+                            dy="10"
+                            stdDeviation="12"
+                            floodColor="#38bdf8"
+                            floodOpacity="0.28"
+                          />
                         </filter>
                       </defs>
                       <XAxis
@@ -631,64 +685,62 @@ const Stock = () => {
 
             {/* shares, average price and portfolio percentage of this stock */}
             {numHoldingShares > 0 && (
-
-                  <div className="d-flex flex-column flex-md-row gap-3 w-100">
-                    <div
-                      className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
-                      style={{
-                        backgroundColor: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
-                        <TrendingUp size={24} className="text-success" />
-                        <span> Your Equity</span>
-                      </div>
-                      <h4 className="mb-0 fw-semibold text-white text-center">
-                        {holdingsMarketValue}
-                      </h4>
-                    </div>
-                    <div
-                      className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
-                      style={{
-                        backgroundColor: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
-                        <Layers size={24} className="text-info" />
-                        <span>Shares Held</span>
-                      </div>
-                      <h4 className="mb-0 fw-semibold text-white text-center">
-                        {formattedShareCount} shares
-                      </h4>
-                    </div>
-                    <div
-                      className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
-                      style={{
-                        backgroundColor: "rgba(255,255,255,0.04)",
-                        border: "1px solid rgba(255,255,255,0.08)",
-                      }}
-                    >
-                      <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
-                        <CircleDollarSign
-                          size={24}
-                          className="text-warning"
-                        />
-                        <span>Average Cost</span>
-                      </div>
-                      <h4 className="mb-0 fw-semibold text-white text-center">
-                        {formattedAverageCost}
-                      </h4>
-                    </div>
+              <div className="d-flex flex-column flex-md-row gap-3 w-100">
+                <div
+                  className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
+                    <TrendingUp size={24} className="text-success" />
+                    <span> Your Equity</span>
                   </div>
+                  <h4 className="mb-0 fw-semibold text-white text-center">
+                    {holdingsMarketValue}
+                  </h4>
+                </div>
+                <div
+                  className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
+                    <Layers size={24} className="text-info" />
+                    <span>Shares Held</span>
+                  </div>
+                  <h4 className="mb-0 fw-semibold text-white text-center">
+                    {formattedShareCount} shares
+                  </h4>
+                </div>
+                <div
+                  className="flex-fill p-3 rounded-4 d-flex flex-column gap-1"
+                  style={{
+                    backgroundColor: "rgba(255,255,255,0.04)",
+                    border: "1px solid rgba(255,255,255,0.08)",
+                  }}
+                >
+                  <div className="d-flex align-items-center gap-2 text-white-50 text-uppercase small fw-semibold">
+                    <CircleDollarSign size={24} className="text-warning" />
+                    <span>Average Cost</span>
+                  </div>
+                  <h4 className="mb-0 fw-semibold text-white text-center">
+                    {formattedAverageCost}
+                  </h4>
+                </div>
+              </div>
             )}
 
             {profile && (
               <div className="glass-panel gradient-border card-arc p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <div className="text-uppercase section-sub small">Company</div>
+                    <div className="text-uppercase section-sub small">
+                      Company
+                    </div>
                     <h5 className="section-heading mb-0">Profile</h5>
                   </div>
                   <span className="pill-gradient small">Overview</span>
@@ -700,11 +752,15 @@ const Stock = () => {
                   </Col>
                   <Col>
                     <div className="section-sub">Country</div>
-                    <div className="text-light fw-semibold">{profile.country || "—"}</div>
+                    <div className="text-light fw-semibold">
+                      {profile.country || "—"}
+                    </div>
                   </Col>
                   <Col>
                     <div className="section-sub">Market Cap</div>
-                    <div className="text-light fw-semibold">{marketCapDisplay}</div>
+                    <div className="text-light fw-semibold">
+                      {marketCapDisplay}
+                    </div>
                   </Col>
                   <Col>
                     <div className="section-sub">IPO</div>
@@ -716,16 +772,25 @@ const Stock = () => {
                   </Col>
                   <Col>
                     <div className="section-sub">Shares Out.</div>
-                    <div className="text-light fw-semibold">{sharesOutstandingDisplay}</div>
+                    <div className="text-light fw-semibold">
+                      {sharesOutstandingDisplay}
+                    </div>
                   </Col>
                   <Col>
                     <div className="section-sub">Phone</div>
-                    <div className="text-light fw-semibold">{profile.phone || "—"}</div>
+                    <div className="text-light fw-semibold">
+                      {profile.phone || "—"}
+                    </div>
                   </Col>
                   <Col>
                     <div className="section-sub">Website</div>
                     {website ? (
-                      <a href={website} target="_blank" rel="noreferrer" className="text-decoration-none text-light fw-semibold">
+                      <a
+                        href={website}
+                        target="_blank"
+                        rel="noreferrer"
+                        className="text-decoration-none text-light fw-semibold"
+                      >
                         {website}
                       </a>
                     ) : (
@@ -740,7 +805,9 @@ const Stock = () => {
               <div className="glass-panel gradient-border card-arc p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
-                    <div className="text-uppercase section-sub small">Fundamentals</div>
+                    <div className="text-uppercase section-sub small">
+                      Fundamentals
+                    </div>
                     <h5 className="section-heading mb-0">Key metrics</h5>
                   </div>
                   <span className="pill-ghost">Snapshot</span>
@@ -748,8 +815,16 @@ const Stock = () => {
                 <div className="row row-cols-1 row-cols-sm-2 row-cols-lg-3 row-cols-xl-4 g-3">
                   {Object.entries(metrics).map(([name, value]) => (
                     <div key={name} className="col">
-                      <div className="p-3 card-arc" style={{ background: "rgba(255,255,255,0.03)", border: "1px solid rgba(255,255,255,0.06)" }}>
-                        <div className="text-uppercase section-sub small mb-1">{name}</div>
+                      <div
+                        className="p-3 card-arc"
+                        style={{
+                          background: "rgba(255,255,255,0.03)",
+                          border: "1px solid rgba(255,255,255,0.06)",
+                        }}
+                      >
+                        <div className="text-uppercase section-sub small mb-1">
+                          {name}
+                        </div>
                         <div className="text-light fw-semibold">{value}</div>
                       </div>
                     </div>
@@ -762,16 +837,31 @@ const Stock = () => {
           <Col xs={12} xl={4} className="d-flex flex-column gap-4">
             <div className="glass-panel gradient-border card-arc p-4 sticky-card">
               <div className="d-flex justify-content-between align-items-center mb-3">
-                <h5 className="section-heading mb-0">Trade {stockTicker || query}</h5>
-                <span className="pill-ghost">{mode === "buy" ? "Buying" : "Selling"}</span>
+                <h5 className="section-heading mb-0">
+                  Trade {stockTicker || query}
+                </h5>
+                <span className="pill-ghost">
+                  {mode === "buy" ? "Buying" : "Selling"}
+                </span>
               </div>
 
-              <div className="d-flex w-100 rounded-pill px-1 py-1 text-white-50 fw-semibold" style={{ background: "rgba(255,255,255,0.06)" }}>
+              <div
+                className="d-flex w-100 rounded-pill px-1 py-1 text-white-50 fw-semibold"
+                style={{ background: "rgba(255,255,255,0.06)" }}
+              >
                 <button
                   type="button"
                   onClick={() => setMode("buy")}
-                  className={`flex-fill py-2 rounded-pill border-0 transition ${mode === "buy" ? "btn-quick-primary" : ""}`}
-                  style={{ color: mode === "buy" ? "#0b1023" : "#dfe3ff", background: mode === "buy" ? "linear-gradient(135deg, #22c55e, #0ea5e9)" : "transparent" }}
+                  className={`flex-fill py-2 rounded-pill border-0 transition ${
+                    mode === "buy" ? "btn-quick-primary" : ""
+                  }`}
+                  style={{
+                    color: mode === "buy" ? "#0b1023" : "#dfe3ff",
+                    background:
+                      mode === "buy"
+                        ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
+                        : "transparent",
+                  }}
                 >
                   Buy
                 </button>
@@ -779,8 +869,16 @@ const Stock = () => {
                   disabled={numHoldingShares === 0}
                   type="button"
                   onClick={() => setMode("sell")}
-                  className={`flex-fill py-2 rounded-pill border-0 transition ${mode === "sell" ? "btn-quick-primary" : ""}`}
-                  style={{ color: mode === "sell" ? "#0b1023" : "#dfe3ff", background: mode === "sell" ? "linear-gradient(135deg, #ef4444, #f97316)" : "transparent" }}
+                  className={`flex-fill py-2 rounded-pill border-0 transition ${
+                    mode === "sell" ? "btn-quick-primary" : ""
+                  }`}
+                  style={{
+                    color: mode === "sell" ? "#0b1023" : "#dfe3ff",
+                    background:
+                      mode === "sell"
+                        ? "linear-gradient(135deg, #ef4444, #f97316)"
+                        : "transparent",
+                  }}
                 >
                   Sell
                 </button>
@@ -789,14 +887,22 @@ const Stock = () => {
               <div className="mt-4 d-flex flex-column gap-3">
                 <div className="d-flex justify-content-between align-items-center">
                   <span className="section-sub">Order type</span>
-                  <Form.Select size="sm" className="bg-dark text-light border-0" style={{ width: "auto" }}>
+                  <Form.Select
+                    size="sm"
+                    className="bg-dark text-light border-0"
+                    style={{ width: "auto" }}
+                  >
                     <option>Market order</option>
                     {/* <option>Limit order</option> */}
                   </Form.Select>
                 </div>
                 <div className="d-flex justify-content-between align-items-center">
                   <span className="section-sub">Buy In</span>
-                  <Form.Select size="sm" className="bg-dark text-light border-0" style={{ width: "auto" }}>
+                  <Form.Select
+                    size="sm"
+                    className="bg-dark text-light border-0"
+                    style={{ width: "auto" }}
+                  >
                     <option>Shares</option>
                     {/* <option>Dollars</option> */}
                   </Form.Select>
@@ -809,18 +915,26 @@ const Stock = () => {
                     className="no-spin text-end bg-dark text-light border-0"
                     style={{ width: "120px" }}
                     onChange={(e) => setShares(Number(e.target.value))}
-                    onFocus={() => { if (shares === 0) setShares(""); }}
-                    onBlur={() => { if (shares === "") setShares(0); }}
+                    onFocus={() => {
+                      if (shares === 0) setShares("");
+                    }}
+                    onBlur={() => {
+                      if (shares === "") setShares(0);
+                    }}
                     value={shares}
                   />
                 </div>
                 <div className="d-flex justify-content-between align-items-center">
                   <span className="text-success">Market price</span>
-                  <span className="text-light fw-semibold">{formattedPrice}</span>
+                  <span className="text-light fw-semibold">
+                    {formattedPrice}
+                  </span>
                 </div>
                 <div className="d-flex justify-content-between align-items-center">
                   <span className="section-sub">Estimated cost</span>
-                  <span className="text-light fw-semibold">{estimatedCostDollars}</span>
+                  <span className="text-light fw-semibold">
+                    {estimatedCostDollars}
+                  </span>
                 </div>
               </div>
 
@@ -831,8 +945,10 @@ const Stock = () => {
                   background: {
                     idle: "linear-gradient(135deg, #22c55e, #0ea5e9)",
                     notEnoughBP: "linear-gradient(135deg, #ef4444, #f97316)",
-                    notEnoughShares: "linear-gradient(135deg, #ef4444, #f97316)",
-                    missingRequiredInput: "linear-gradient(135deg, #ef4444, #f97316)",
+                    notEnoughShares:
+                      "linear-gradient(135deg, #ef4444, #f97316)",
+                    missingRequiredInput:
+                      "linear-gradient(135deg, #ef4444, #f97316)",
                   }[reviewButtonStatus],
                 }}
                 whileTap={{ scale: 0.97 }}
@@ -845,29 +961,20 @@ const Stock = () => {
                     animate={{ opacity: 1, transition: { duration: 0.1 } }}
                     exit={{ opacity: 0, transition: { duration: 0.1 } }}
                   >
-                    {
-                      reviewButtonStatus === "idle"
-                        ? "Review Order"
-                        : reviewButtonStatus === "notEnoughBP"
-                        ? "Not Enough Cash"
-                        : reviewButtonStatus === "notEnoughShares"
-                        ? "Not Enough Shares"
-                        : "Enter Shares"
-                    }
+                    {reviewButtonStatus === "idle"
+                      ? "Review Order"
+                      : reviewButtonStatus === "notEnoughBP"
+                      ? "Not Enough Cash"
+                      : reviewButtonStatus === "notEnoughShares"
+                      ? "Not Enough Shares"
+                      : "Enter Shares"}
                   </Motion.span>
                 </AnimatePresence>
               </Motion.button>
 
               <div className="text-center mt-3">
-                <small className="section-sub">{formatUSD(cash)} buying power available</small>
-              </div>
-              <div className="d-flex justify-content-center mt-2">
                 <small className="section-sub">
-                  <Form.Select size="sm" className="bg-dark text-light border-0" style={{ display: "inline-block", width: "auto" }}>
-                    <option>Main Account</option>
-                    <option>Account 2</option>
-                    <option>Account 3</option>
-                  </Form.Select>
+                  {formatUSD(cash)} buying power available
                 </small>
               </div>
             </div>
@@ -884,12 +991,20 @@ const Stock = () => {
         dialogClassName="modal-dialog-centered"
         contentClassName="border-0 bg-transparent"
       >
-
-
         {/* BODY */}
-        <Modal.Body className="p-4" style={{ background: "#0a0e17", borderRadius: "18px 18px 0 0" }}>
+        <Modal.Body
+          className="p-4"
+          style={{ background: "#0a0e17", borderRadius: "18px 18px 0 0" }}
+        >
           <div className="mb-3">
-            <div className="text-uppercase fw-bold" style={{ letterSpacing: "0.04em", fontSize: "0.95rem", color: "#e5e7eb" }}>
+            <div
+              className="text-uppercase fw-bold"
+              style={{
+                letterSpacing: "0.04em",
+                fontSize: "0.95rem",
+                color: "#e5e7eb",
+              }}
+            >
               Please confirm order
             </div>
           </div>
@@ -916,13 +1031,17 @@ const Stock = () => {
               >
                 {mode === "buy" ? "Buy" : "Sell"}
               </div>
-              <div className="pill-ghost small" style={{ borderRadius: "12px", padding: "6px 10px" }}>
+              <div
+                className="pill-ghost small"
+                style={{ borderRadius: "12px", padding: "6px 10px" }}
+              >
                 {stockTicker || ticker || query}
               </div>
             </div>
 
             <div className="text-light" style={{ fontSize: "1.05rem" }}>
-              {mode === "buy" ? "Buying" : "Selling"} {shares || 0} {shares === 1 ? "share" : "shares"} of{" "}
+              {mode === "buy" ? "Buying" : "Selling"} {shares || 0}{" "}
+              {shares === 1 ? "share" : "shares"} of{" "}
               {stockTicker || ticker || query} at {formattedPrice} each.
             </div>
 
@@ -935,36 +1054,34 @@ const Stock = () => {
           </div>
         </Modal.Body>
 
-
         {/* FOOTER */}
         <Modal.Footer
-        className="d-flex flex-row gap-3 border-0 p-4"
-        style={{ background: "#0a0e17" }}
+          className="d-flex flex-row gap-3 border-0 p-4"
+          style={{ background: "#0a0e17" }}
         >
           <Button
-          className="flex-fill fw-semibold rounded-4 py-2"
-          variant="light"
-          onClick={() => setTradeConfirmModal(false)}
-          style={{
-          background: "#e2e8f0",
-          color: "#0f172a",
-          border: "none",
-          boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
-          }}
+            className="flex-fill fw-semibold rounded-4 py-2"
+            variant="light"
+            onClick={() => setTradeConfirmModal(false)}
+            style={{
+              background: "#e2e8f0",
+              color: "#0f172a",
+              border: "none",
+              boxShadow: "0 8px 20px rgba(0,0,0,0.2)",
+            }}
           >
             Cancel
           </Button>
 
-
           <Motion.button
-          whileTap={{ scale: 0.96 }}
-          className="flex-fill fw-bold rounded-4 py-2 text-white border-0"
-          onClick={handleSubmitOrder}
-          style={{
-          background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
-          boxShadow: "0 10px 30px rgba(14,165,233,0.35)",
-          fontSize: "1rem",
-          }}
+            whileTap={{ scale: 0.96 }}
+            className="flex-fill fw-bold rounded-4 py-2 text-white border-0"
+            onClick={handleSubmitOrder}
+            style={{
+              background: "linear-gradient(135deg, #22c55e, #0ea5e9)",
+              boxShadow: "0 10px 30px rgba(14,165,233,0.35)",
+              fontSize: "1rem",
+            }}
           >
             Place Order
           </Motion.button>

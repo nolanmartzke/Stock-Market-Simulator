@@ -17,8 +17,10 @@ import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
 import { searchBar } from "../api/StockApi";
 import { useAuth } from "../context/AuthContext";
+import { useAccount } from "../context/AccountContext";
 import { motion as Motion } from "framer-motion";
 import { Offcanvas } from "react-bootstrap";
+import { Wallet } from "lucide-react";
 
 export default function NavBar() {
   // State for mobile menu
@@ -69,6 +71,13 @@ export default function NavBar() {
     "d-flex align-items-center rounded-3 p-3 text-decoration-none nav-link-modern";
 
   const { auth, logout } = useAuth();
+  const {
+    accounts,
+    selectedAccountId,
+    selectedAccount,
+    setSelectedAccountId,
+    loading: accountLoading,
+  } = useAccount();
   const navigate = useNavigate();
 
   const handleLogout = () => {
@@ -93,11 +102,14 @@ export default function NavBar() {
             <div className="fw-bold fs-5">TRD Wars</div>
           </span>
         </Link>
-     
       </div>
 
       <div className="mb-3">
-        <SearchInline onNavigate={() => { if (onLinkClick) onLinkClick(); }} />
+        <SearchInline
+          onNavigate={() => {
+            if (onLinkClick) onLinkClick();
+          }}
+        />
       </div>
 
       <div className="flex-grow-1 position-relative">
@@ -137,7 +149,9 @@ export default function NavBar() {
                     to={item.link}
                     onClick={onLinkClick}
                     className={({ isActive }) =>
-                      `${linkClass} ${isActive ? "active fw-semibold" : ""} w-100`
+                      `${linkClass} ${
+                        isActive ? "active fw-semibold" : ""
+                      } w-100`
                     }
                   >
                     <Icon className="me-3" size={20} />
@@ -158,6 +172,63 @@ export default function NavBar() {
       <div className="mt-auto pt-3 nav-footer position-relative w-100">
         {auth ? (
           <div>
+            {/* Account Switcher */}
+            {!accountLoading && accounts.length > 0 && (
+              <div className="mb-3">
+                <label
+                  className="d-block mb-2 small text-uppercase"
+                  style={{
+                    letterSpacing: "0.1em",
+                    color: "rgba(232,237,255,0.65)",
+                    fontSize: "0.7rem",
+                  }}
+                >
+                  <Wallet
+                    size={12}
+                    className="me-1"
+                    style={{ verticalAlign: "text-bottom" }}
+                  />
+                  Active Account
+                </label>
+                <select
+                  className="form-select form-select-sm w-100"
+                  value={selectedAccountId ?? ""}
+                  onChange={(e) => {
+                    const newAccountId = e.target.value
+                      ? Number(e.target.value)
+                      : null;
+                    setSelectedAccountId(newAccountId);
+                  }}
+                  style={{
+                    borderRadius: "10px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.14)",
+                    color: "#f5f7ff",
+                    fontSize: "0.875rem",
+                    padding: "0.5rem 0.75rem",
+                  }}
+                >
+                  {accounts.map((acc) => (
+                    <option key={acc.id} value={acc.id}>
+                      {acc.name || "Main Account"}
+                    </option>
+                  ))}
+                </select>
+                {selectedAccount && (
+                  <div
+                    className="small mt-2 text-center"
+                    style={{ color: "rgba(232,237,255,0.75)" }}
+                  >
+                    Balance: $
+                    {selectedAccount.cash?.toLocaleString("en-US", {
+                      minimumFractionDigits: 2,
+                      maximumFractionDigits: 2,
+                    }) || "0.00"}
+                  </div>
+                )}
+              </div>
+            )}
+
             <div className="nav-user-block">
               <Link
                 className="d-flex align-items-center gap-3 text-decoration-none flex-grow-1"
@@ -165,16 +236,24 @@ export default function NavBar() {
                 onClick={onLinkClick}
               >
                 <img
-                  src={`https://placehold.co/40x40/6B8EF0/ffffff?text=${auth.name?.toUpperCase()?.[0]}`}
+                  src={`https://placehold.co/40x40/6B8EF0/ffffff?text=${
+                    auth.name?.toUpperCase()?.[0]
+                  }`}
                   alt="User Avatar"
                   className="avatar"
                 />
                 <div className="text-light">
                   <div className="fw-semibold">{auth.name}</div>
-                  <div className="small" style={{ color: "rgba(255,255,255,0.7)" }}>{auth.email}</div>
+                  <div
+                    className="small"
+                    style={{ color: "rgba(255,255,255,0.7)" }}
+                  >
+                    {auth.email}
+                  </div>
                 </div>
               </Link>
             </div>
+
             <div className="d-flex justify-content-center mt-3">
               <Motion.button
                 className="btn btn-danger nav-logout-btn text-white"
@@ -198,7 +277,9 @@ export default function NavBar() {
                     to={item.link}
                     onClick={onLinkClick}
                     className={({ isActive }) =>
-                      `${linkClass} ${isActive ? "active fw-semibold" : ""} w-100`
+                      `${linkClass} ${
+                        isActive ? "active fw-semibold" : ""
+                      } w-100`
                     }
                   >
                     <Icon className="me-3" size={20} />
@@ -214,43 +295,45 @@ export default function NavBar() {
   );
 
   function SearchInline({ onNavigate }) {
-    const [q, setQ] = useState('')
-    const [suggestions, setSuggestions] = useState([])
-    const [loading, setLoading] = useState(false)
-    const timer = useRef(null)
-    const navigate = useNavigate()
+    const [q, setQ] = useState("");
+    const [suggestions, setSuggestions] = useState([]);
+    const [loading, setLoading] = useState(false);
+    const timer = useRef(null);
+    const navigate = useNavigate();
 
     useEffect(() => {
       if (!q || q.length < 1) {
-        setSuggestions([])
-        setLoading(false)
-        return
+        setSuggestions([]);
+        setLoading(false);
+        return;
       }
 
-      setLoading(true)
-      if (timer.current) clearTimeout(timer.current)
+      setLoading(true);
+      if (timer.current) clearTimeout(timer.current);
       timer.current = setTimeout(() => {
         searchBar(q)
           .then((res) => setSuggestions((res.data && res.data.result) || []))
           .catch(() => setSuggestions([]))
-          .finally(() => setLoading(false))
-      }, 300)
+          .finally(() => setLoading(false));
+      }, 300);
 
-      return () => clearTimeout(timer.current)
-    }, [q])
+      return () => clearTimeout(timer.current);
+    }, [q]);
 
     function select(sym) {
-      setQ('')
-      setSuggestions([])
-      navigate(`/stocks/${sym}`)
-      if (onNavigate) onNavigate(sym)
+      setQ("");
+      setSuggestions([]);
+      navigate(`/stocks/${sym}`);
+      if (onNavigate) onNavigate(sym);
     }
 
     return (
       <div className="position-relative">
         <div className="nav-search p-2">
           <div className="input-group">
-            <span className="input-group-text"><Search size={16} /></span>
+            <span className="input-group-text">
+              <Search size={16} />
+            </span>
             <input
               value={q}
               onChange={(e) => setQ(e.target.value)}
@@ -262,18 +345,29 @@ export default function NavBar() {
         </div>
 
         {q && suggestions && suggestions.length > 0 && (
-          <ul className="list-group position-absolute w-100 mt-1 search-suggestions" style={{ zIndex: 2000 }}>
+          <ul
+            className="list-group position-absolute w-100 mt-1 search-suggestions"
+            style={{ zIndex: 2000 }}
+          >
             {suggestions.slice(0, 6).map((s) => (
-              <li key={s.symbol} className="list-group-item list-group-item-action" style={{ cursor: 'pointer' }} onClick={() => select(s.symbol)}>
-                <strong>{s.symbol}</strong> <span className="text-muted">{s.description}</span>
+              <li
+                key={s.symbol}
+                className="list-group-item list-group-item-action"
+                style={{ cursor: "pointer" }}
+                onClick={() => select(s.symbol)}
+              >
+                <strong>{s.symbol}</strong>{" "}
+                <span className="text-muted">{s.description}</span>
               </li>
             ))}
           </ul>
         )}
 
-        {q && loading && <div className="small text-white text-center mt-1">Searching...</div>}
+        {q && loading && (
+          <div className="small text-white text-center mt-1">Searching...</div>
+        )}
       </div>
-    )
+    );
   }
 
   return (
@@ -326,7 +420,9 @@ export default function NavBar() {
         className="nav-shell text-light"
       >
         <Offcanvas.Header closeButton closeVariant="white">
-          <Offcanvas.Title id="mobile-drawer-title" className="text-light">Navigation</Offcanvas.Title>
+          <Offcanvas.Title id="mobile-drawer-title" className="text-light">
+            Navigation
+          </Offcanvas.Title>
         </Offcanvas.Header>
         <Offcanvas.Body className="d-flex flex-column">
           <NavContent onLinkClick={closeMenu} />

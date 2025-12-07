@@ -1,6 +1,5 @@
 import { useEffect, useState } from "react";
-import { useAuth } from "../context/AuthContext";
-import api from "../api/AccountApi";
+import { useAccount } from "../context/AccountContext";
 import { getAccountTransactions } from "../api/TransactionApi";
 
 const dateFormatter = new Intl.DateTimeFormat("en-US", {
@@ -273,40 +272,17 @@ const getPillStyle = (action) => {
 };
 
 export default function History() {
-  const { auth } = useAuth();
-  const userId = auth?.id;
+  const { selectedAccountId, accounts } = useAccount();
 
-  const [accounts, setAccounts] = useState([]);
-  const [accountId, setAccountId] = useState(null);
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
   const [error, setError] = useState(null);
 
   useEffect(() => {
-    if (!userId) return;
-    api
-      .get("", { params: { userId } })
-      .then((res) => {
-        const list = Array.isArray(res.data) ? res.data : [];
-        setAccounts(list);
-        setAccountId((current) => {
-          if ((current ?? null) !== null || !list.length) {
-            return current;
-          }
-          return list[0]?.id ?? null;
-        });
-      })
-      .catch((err) => {
-        console.error("Accounts fetch failed", err);
-        setError("Unable to load accounts.");
-      });
-  }, [userId]);
-
-  useEffect(() => {
-    if (!accountId) return;
+    if (!selectedAccountId) return;
     setLoading(true);
     setError(null);
-    getAccountTransactions(accountId, { page: 0, size: 20 })
+    getAccountTransactions(selectedAccountId, { page: 0, size: 20 })
       .then((res) => {
         const data = res.data;
         setRows(Array.isArray(data) ? data : []);
@@ -317,7 +293,7 @@ export default function History() {
         setRows([]);
       })
       .finally(() => setLoading(false));
-  }, [accountId]);
+  }, [selectedAccountId]);
 
   const hasAccounts = accounts.length > 0;
 
@@ -327,32 +303,6 @@ export default function History() {
         <div style={styles.headerRow}>
           <div>
             <h1 style={styles.title}>Trade History</h1>
-          </div>
-          <div style={styles.selectorGroup}>
-            <label htmlFor="history-account-select" style={styles.label}>
-              Account
-            </label>
-            <select
-              id="history-account-select"
-              style={styles.select}
-              value={accountId ?? ""}
-              onChange={(event) => {
-                const value = event.target.value;
-                setAccountId(value ? Number(value) : null);
-              }}
-              disabled={!hasAccounts || loading}
-            >
-              {accounts.map((account) => (
-                <option key={account.id} value={account.id}>
-                  {account.name || `Account #${account.id}`}
-                </option>
-              ))}
-            </select>
-            {!hasAccounts && (
-              <small style={{ color: "#9a9aa4" }}>
-                Link an account to see its moves.
-              </small>
-            )}
           </div>
         </div>
 
@@ -421,7 +371,8 @@ export default function History() {
                           ...styles.numeric,
                         }}
                       >
-                        {formatShares(tx.shares)} {tx.shares === 1 ? "share" : "shares"}
+                        {formatShares(tx.shares)}{" "}
+                        {tx.shares === 1 ? "share" : "shares"}
                       </td>
                       <td
                         style={{
