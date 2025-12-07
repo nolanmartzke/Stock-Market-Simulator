@@ -64,8 +64,8 @@ public class TournamentController {
     @PostMapping("/{tournamentId}/enter")
     @Transactional
     public ResponseEntity<?> enterTournament(
-        @PathVariable Long tournamentId,
-        @RequestParam Long userId
+        @PathVariable("tournamentId") Long tournamentId,
+        @RequestParam("userId") Long userId
     ) {
         Optional<Tournament> tournamentOpt = tournamentRepository.findById(tournamentId);
         if (tournamentOpt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body("Tournament not found");
@@ -103,7 +103,7 @@ public class TournamentController {
     }
 
     @GetMapping("/{tournamentId}/leaderboard")
-    public ResponseEntity<List<TournamentLeaderboardDTO>> getLeaderboard(@PathVariable Long tournamentId) {
+    public ResponseEntity<List<TournamentLeaderboardDTO>> getLeaderboard(@PathVariable("tournamentId") Long tournamentId) {
         Optional<Tournament> tournamentOpt = tournamentRepository.findById(tournamentId);
         if (tournamentOpt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 
@@ -123,7 +123,7 @@ public class TournamentController {
     }
 
     @GetMapping("/user/{userId}")
-    public ResponseEntity<List<TournamentDTO>> getTournamentsForUser(@PathVariable Long userId) {
+    public ResponseEntity<List<TournamentDTO>> getTournamentsForUser(@PathVariable("userId") Long userId) {
         Optional<User> userOpt = userRepository.findById(userId);
         if (userOpt.isEmpty()) return ResponseEntity.status(HttpStatus.NOT_FOUND).body(null);
 

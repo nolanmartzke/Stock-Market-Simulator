@@ -159,8 +159,8 @@ public class UserController {
 
     @PostMapping("/{userId}/accounts")
     public ResponseEntity<AccountDTO> createAdditionalAccount(
-            @PathVariable Long userId,
-            @RequestParam String name  // frontend sends ?name=MyAccount
+            @PathVariable("userId") Long userId,
+            @RequestParam("name") String name  // frontend sends ?name=MyAccount
     ) {
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
@@ -179,7 +179,7 @@ public class UserController {
     }
 
     @GetMapping("/{userId}/accounts")
-    public ResponseEntity<List<AccountDTO>> getAccountsForUser(@PathVariable Long userId) {
+    public ResponseEntity<List<AccountDTO>> getAccountsForUser(@PathVariable("userId") Long userId) {
 
         Optional<User> optionalUser = userRepository.findById(userId);
         if (optionalUser.isEmpty()) {
