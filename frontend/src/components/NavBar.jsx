@@ -219,7 +219,7 @@ export default function NavBar() {
                     className="small mt-2 text-center"
                     style={{ color: "rgba(232,237,255,0.75)" }}
                   >
-                    Balance: $
+                    Cash Balance: $
                     {selectedAccount.cash?.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,

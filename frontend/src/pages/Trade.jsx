@@ -41,7 +41,7 @@ const Trade = () => {
   const [, setHistory] = useState([]);
   const [, setProfile] = useState(null);
 
-  const { selectedAccountId, selectedAccount } = useAccount();
+  const { selectedAccountId, selectedAccount, refreshAccounts } = useAccount();
 
   const [shares, setShares] = useState(0);
   const [ticker, setTicker] = useState("");
@@ -261,6 +261,7 @@ const Trade = () => {
           orderType === "buy" ? "Bought" : "Sold"
         } ${shares} ${ticker.toUpperCase()} @ ${formatUSD(price)}`
       );
+      refreshAccounts();
 
       loadAccount(selectedAccountId)
         .then((res) => {

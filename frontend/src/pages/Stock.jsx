@@ -58,7 +58,7 @@ const Stock = () => {
   const [mode, setMode] = useState("buy"); // buy or sell
   const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
 
-  const { selectedAccountId, selectedAccount } = useAccount();
+  const { selectedAccountId, selectedAccount, refreshAccounts } = useAccount();
   const [numHoldingShares, setNumHoldingShares] = useState(0);
   const [averageCost, setAverageCost] = useState(0);
 
@@ -448,6 +448,7 @@ const Stock = () => {
       console.log(cash);
       toast.success("Successfully Executed!");
       setShares(0);
+      refreshAccounts();
     } catch (error) {
       console.error(error);
       toast.error("Failed to execute trade.");
