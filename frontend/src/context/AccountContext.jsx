@@ -57,21 +57,51 @@ export function AccountProvider({ children }) {
       });
   }, [auth]);
 
+
+  async function refreshAccounts() {
+    if (!auth?.id) return [];
+
+    try {
+      const res = await getAccounts(auth.id);
+      const list = Array.isArray(res.data) ? res.data : [];
+      setAccounts(list);
+
+      // Fix invalid selection
+      if (selectedAccountId && !list.some(acc => acc.id === selectedAccountId)) {
+        if (list.length > 0) {
+          handleSetAccount(list[0].id);
+        } else {
+          handleSetAccount(null);
+        }
+      }
+
+      return list; // ⬅ return updated list
+    } catch (err) {
+      console.error("Failed to refresh accounts", err);
+      return [];
+    }
+  }
+
+
   // Handle account selection change
-  const handleSetAccount = (accountId) => {
+  const handleSetAccount = async (accountId) => {
     if (!accountId) {
       setSelectedAccountId(null);
       localStorage.removeItem("selectedAccountId");
       return;
     }
 
-    // Validate account exists in our list
-    const accountExists = accounts.some((acc) => acc.id === accountId);
+    const freshList = await refreshAccounts(); // ⬅ gets the updated accounts list
+
+    const accountExists = freshList.some((acc) => acc.id === accountId);
+
     if (accountExists) {
       setSelectedAccountId(accountId);
       localStorage.setItem("selectedAccountId", String(accountId));
     }
   };
+
+
 
   // Get the currently selected account object
   const selectedAccount =
@@ -85,27 +115,7 @@ export function AccountProvider({ children }) {
         selectedAccount,
         setSelectedAccountId: handleSetAccount,
         loading,
-        refreshAccounts: () => {
-          if (auth?.id) {
-            getAccounts(auth.id)
-              .then((res) => {
-                const list = Array.isArray(res.data) ? res.data : [];
-                setAccounts(list);
-                // If current selection is invalid, reset to first
-                if (
-                  selectedAccountId &&
-                  !list.some((acc) => acc.id === selectedAccountId)
-                ) {
-                  if (list.length > 0) {
-                    handleSetAccount(list[0].id);
-                  } else {
-                    handleSetAccount(null);
-                  }
-                }
-              })
-              .catch((err) => console.error("Failed to refresh accounts", err));
-          }
-        },
+        refreshAccounts
       }}
     >
       {children}

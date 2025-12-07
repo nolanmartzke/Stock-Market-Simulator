@@ -5,6 +5,7 @@ import { motion as Motion } from "framer-motion";
 import { useAuth } from "../context/AuthContext";
 import { changeName, changePassword } from "../api/AuthAPI";
 import { createAccount, getAccounts } from "../api/AccountApi";
+import { useAccount } from "../context/AccountContext";
 
 /**
  * Account page that shows read-only profile data and placeholder forms
@@ -13,6 +14,8 @@ import { createAccount, getAccounts } from "../api/AccountApi";
  */
 const Account = () => {
   const { auth, logout, login } = useAuth();
+  const { refreshAccounts, setSelectedAccountId } = useAccount();
+
   const navigate = useNavigate();
 
   const [newName, setNewName] = useState();
@@ -51,6 +54,8 @@ const Account = () => {
         setNewAccountName("");
         setCreateAccountStatus("success");
         setTimeout(() => setCreateAccountStatus("idle"), 1500);
+
+        setSelectedAccountId(res.data.id);
       })
       .catch(() => {
         setCreateAccountStatus("error");
@@ -170,6 +175,81 @@ const Account = () => {
                   Active member
                 </div>
               </div>
+
+              <hr className="my-4 text-white-50" />
+
+              {/* Trading Accounts */}
+              <div
+                className="text-uppercase small mb-3"
+                style={{
+                  letterSpacing: "0.18em",
+                  color: "rgba(232,237,255,0.6)",
+                }}
+              >
+                Trading Accounts
+              </div>
+              <div className="mb-3">
+                {accounts.map((acc) => (
+                  <div
+                    key={acc.id}
+                    className="d-flex justify-content-between align-items-center p-3 mb-2 rounded-3"
+                    style={{
+                      background: "rgba(255,255,255,0.04)",
+                      border: "1px solid rgba(255,255,255,0.08)",
+                    }}
+                  >
+                    <span className="text-light">{acc.name}</span>
+                    <span style={{ color: "#9aa6d4" }}>
+                      $
+                      {acc.cash?.toLocaleString("en-US", {
+                        minimumFractionDigits: 2,
+                      })}
+                    </span>
+                  </div>
+                ))}
+              </div>
+              <div className="d-flex gap-2">
+                <input
+                  className="form-control form-control-lg account-input"
+                  style={{
+                    borderRadius: "14px",
+                    background: "rgba(255,255,255,0.06)",
+                    border: "1px solid rgba(255,255,255,0.14)",
+                    color: "#f5f7ff",
+                    caretColor: "#f5f7ff",
+                  }}
+                  placeholder="New account name"
+                  value={newAccountName}
+                  onChange={(e) => setNewAccountName(e.target.value)}
+                />
+                <Motion.button
+                  whileTap={{ scale: 0.96 }}
+                  className="btn fw-semibold text-white px-4"
+                  style={{
+                    borderRadius: "14px",
+                    background: newAccountName.trim()
+                      ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
+                      : "rgba(255,255,255,0.08)",
+                    border: "none",
+                  }}
+                  disabled={
+                    !newAccountName.trim() || createAccountStatus === "creating"
+                  }
+                  onClick={handleCreateAccount}
+                >
+                  <Plus size={18} className="me-1" />
+                  {createAccountStatus === "creating"
+                    ? "Creating..."
+                    : createAccountStatus === "success"
+                    ? "Created!"
+                    : createAccountStatus === "error"
+                    ? "Error"
+                    : "Create"}
+                </Motion.button>
+              </div>
+
+              <hr className="my-4 text-white-50" />
+
 
               {/* Edit Profile */}
               <div className="mb-4">
@@ -331,77 +411,6 @@ const Account = () => {
 
               <hr className="my-4 text-white-50" />
 
-              {/* Trading Accounts */}
-              <div
-                className="text-uppercase small mb-3"
-                style={{
-                  letterSpacing: "0.18em",
-                  color: "rgba(232,237,255,0.6)",
-                }}
-              >
-                Trading Accounts
-              </div>
-              <div className="mb-3">
-                {accounts.map((acc) => (
-                  <div
-                    key={acc.id}
-                    className="d-flex justify-content-between align-items-center p-3 mb-2 rounded-3"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    <span className="text-light">{acc.name}</span>
-                    <span style={{ color: "#9aa6d4" }}>
-                      $
-                      {acc.cash?.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </div>
-                ))}
-              </div>
-              <div className="d-flex gap-2">
-                <input
-                  className="form-control form-control-lg account-input"
-                  style={{
-                    borderRadius: "14px",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.14)",
-                    color: "#f5f7ff",
-                    caretColor: "#f5f7ff",
-                  }}
-                  placeholder="New account name"
-                  value={newAccountName}
-                  onChange={(e) => setNewAccountName(e.target.value)}
-                />
-                <Motion.button
-                  whileTap={{ scale: 0.96 }}
-                  className="btn fw-semibold text-white px-4"
-                  style={{
-                    borderRadius: "14px",
-                    background: newAccountName.trim()
-                      ? "linear-gradient(135deg, #22c55e, #0ea5e9)"
-                      : "rgba(255,255,255,0.08)",
-                    border: "none",
-                  }}
-                  disabled={
-                    !newAccountName.trim() || createAccountStatus === "creating"
-                  }
-                  onClick={handleCreateAccount}
-                >
-                  <Plus size={18} className="me-1" />
-                  {createAccountStatus === "creating"
-                    ? "Creating..."
-                    : createAccountStatus === "success"
-                    ? "Created!"
-                    : createAccountStatus === "error"
-                    ? "Error"
-                    : "Create"}
-                </Motion.button>
-              </div>
-
-              <hr className="my-4 text-white-50" />
 
               {/* Logout */}
               <Motion.button

@@ -8,6 +8,8 @@ import {
   getTournamentLeaderboard,
   getUserTournaments 
 } from '../api/TournamentApi'
+import { useAccount } from "../context/AccountContext";
+
 
 const Tournament = () => {
   const { auth } = useAuth()
@@ -25,6 +27,7 @@ const Tournament = () => {
     endDate: '',
     image: ''
   })
+  const { refreshAccounts } = useAccount();
 
   useEffect(() => {
     fetchTournaments()
@@ -134,6 +137,7 @@ const Tournament = () => {
       if (selectedTournament && selectedTournament.id === tournamentId) {
         await fetchLeaderboard(tournamentId)
       }
+      refreshAccounts();
       alert('Successfully entered tournament!')
     } catch (error) {
       console.error('Failed to enter tournament:', error)
