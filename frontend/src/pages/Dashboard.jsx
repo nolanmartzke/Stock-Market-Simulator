@@ -142,7 +142,7 @@ const Dashboard = () => {
                 Portfolio
               </div>
 
-              <div className="d-flex align-items-center gap-5">
+              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-5">
                 <h1 className="display-5 mb-0 text-light">
                   {formattedPortfolioValue}
                 </h1>

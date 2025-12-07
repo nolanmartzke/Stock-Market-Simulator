@@ -514,8 +514,8 @@ const Trade = () => {
                       </Link>
                     </div>
 
-                    <div className="d-flex align-items-center gap-5 mt-3 mb-3">
-                      <div className="d-flex flex-fill gap-2">
+                    <div className="d-flex flex-column flex-sm-row align-items-center gap-3 mt-3 mb-3">
+                      <div className="d-flex gap-2 w-100 flex-row">
                         <button
                           className="btn btn-sm fw-semibold text-white"
                           style={{
