@@ -56,6 +56,14 @@ const Tournament = () => {
     }
   }
 
+  const formatUSD = (num) => {
+    if (!num) num = 0;
+    return new Intl.NumberFormat("en-US", {
+      style: "currency",
+      currency: "USD",
+    }).format(num);
+  };
+
   const fetchUserTournaments = async () => {
     try {
       const response = await getUserTournaments(auth.id)
@@ -72,7 +80,7 @@ const Tournament = () => {
       const formattedLeaderboard = response.data.map((entry, index) => ({
         rank: index + 1,
         username: entry.accountName,
-        profit: `$${(entry.cash + entry.totalHoldingValue).toFixed(2)}`,
+        profit: `${formatUSD(entry.cash + entry.totalHoldingValue)}`,
         flag: '🏆'
       }))
       setLeaderboard(formattedLeaderboard)
@@ -149,6 +157,8 @@ const Tournament = () => {
   const isUserInTournament = (tournamentId) => {
     return userTournaments.has(tournamentId)
   }
+
+
 
   // Tournament List View
   if (!selectedTournament) {
@@ -371,7 +381,7 @@ const Tournament = () => {
                   </div>
                   <div className="d-flex align-items-center text-muted">
                     <DollarSign size={18} className="me-2" />
-                    <span><strong>Initial Cash:</strong> ${selectedTournament.initialCash || 10000}</span>
+                    <span><strong>Initial Cash:</strong> {formatUSD(selectedTournament.initialCash || 10000)}</span>
                   </div>
                 </div>
               </div>
@@ -467,7 +477,7 @@ const Tournament = () => {
                 </div>
                 <div>
                   <small className="text-muted">Initial Cash</small>
-                  <div className="fw-semibold">${selectedTournament.initialCash || 10000}</div>
+                  <div className="fw-semibold">{formatUSD(selectedTournament.initialCash || 10000)}</div>
                 </div>
               </div>
             </div>
