@@ -19,7 +19,7 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import { loadAccount, trade } from "../api/AccountApi";
 import { Form } from "react-bootstrap";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useAccount } from "../context/AccountContext";
 
@@ -295,35 +295,6 @@ const Trade = () => {
         color: "#e7ecf7",
       }}
     >
-      <Toaster
-        position="bottom-center"
-        theme="dark"
-        richColors
-        closeButton
-        expand
-        offset={12}
-        toastOptions={{
-          duration: 3200,
-          className: "border-0",
-          descriptionClassName: "text-white-50",
-          style: {
-            background:
-              "linear-gradient(135deg, rgba(10,15,30,0.95), rgba(20,35,70,0.92))",
-            color: "#f1f5ff",
-            border: "1px solid rgba(255,255,255,0.12)",
-            boxShadow: "0 20px 55px rgba(0,0,0,0.35)",
-            borderRadius: "16px",
-            backdropFilter: "blur(10px)",
-            fontSize: "16px",
-            lineHeight: "1.35",
-            padding: "12px 14px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          },
-        }}
-      />
       <div className="container-xl py-4 d-flex flex-column gap-3">
         <div
           className="p-4 p-md-5"
