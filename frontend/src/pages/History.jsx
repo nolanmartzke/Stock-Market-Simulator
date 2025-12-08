@@ -272,7 +272,7 @@ const getPillStyle = (action) => {
 };
 
 export default function History() {
-  const { selectedAccountId, accounts } = useAccount();
+  const { selectedAccountId, accounts, selectedAccount } = useAccount();
 
   const [rows, setRows] = useState([]);
   const [loading, setLoading] = useState(false);
@@ -304,6 +304,20 @@ export default function History() {
           <div>
             <h1 style={styles.title}>Trade History</h1>
           </div>
+          {selectedAccount && (
+                <div
+                  className="fw-medium mb-3"
+                  style={{
+                    color: "rgba(232,237,255,0.85)",
+                    fontSize: "1.25rem",
+                  }}
+                >
+                  Viewing:{" "}
+                  <span style={{ color: "#60a5fa" }}>
+                    {selectedAccount.name || "Account"}
+                  </span>
+                </div>
+              )}
         </div>
 
         {error && (

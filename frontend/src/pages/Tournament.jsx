@@ -8,6 +8,8 @@ import {
   getTournamentLeaderboard,
   getUserTournaments 
 } from '../api/TournamentApi'
+import { useAccount } from "../context/AccountContext";
+
 
 const Tournament = () => {
   const { auth } = useAuth()
@@ -25,12 +27,14 @@ const Tournament = () => {
     endDate: '',
     image: ''
   })
+  const { handleSetNewAccountToNewTournament } = useAccount();
 
   useEffect(() => {
     fetchTournaments()
     if (auth) {
       fetchUserTournaments()
     }
+  // eslint-disable-next-line react-hooks/exhaustive-deps
   }, [auth])
 
   useEffect(() => {
@@ -134,7 +138,7 @@ const Tournament = () => {
       if (selectedTournament && selectedTournament.id === tournamentId) {
         await fetchLeaderboard(tournamentId)
       }
-      alert('Successfully entered tournament!')
+      handleSetNewAccountToNewTournament();
     } catch (error) {
       console.error('Failed to enter tournament:', error)
       const errorMsg = error.response?.data || 'Failed to enter tournament'
@@ -194,17 +198,20 @@ const Tournament = () => {
                     <div className="card-body">
                       <div className="d-flex justify-content-between align-items-start mb-2">
                         <h5 className="card-title mb-0">{tournament.name}</h5>
-                        <span className={`badge ${
-                          tournament.status === 'Active' ? 'bg-success' : 
-                          tournament.status === 'Upcoming' ? 'bg-primary' : 
-                          'bg-secondary'
-                        }`}>
-                          {tournament.status || 'Active'}
-                        </span>
+                        <div>
+                          {isUserInTournament(tournament.id) && (
+                            <span className="badge bg-info mb-2 mx-3 p-2">JOINED</span>
+                          )}
+                          <span className={`badge ${
+                            tournament.status === 'ACTIVE' ? 'bg-success' : 
+                            tournament.status === 'UPCOMING' ? 'bg-primary' : 
+                            'bg-secondary'
+                          }`}>
+                            {tournament.status || 'Active'}
+                          </span>
+                        </div>
                       </div>
-                      {isUserInTournament(tournament.id) && (
-                        <span className="badge bg-info mb-2">Joined</span>
-                      )}
+                      
                       
                       <div className="d-flex flex-column gap-2 small">
                         <div className="d-flex align-items-center text-muted">

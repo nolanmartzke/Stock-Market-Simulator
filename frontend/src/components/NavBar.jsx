@@ -12,6 +12,7 @@ import {
   Menu,
   X,
   TrendingUp,
+  ChevronDown,
 } from "lucide-react";
 import { NavLink, Link, useNavigate, useLocation } from "react-router-dom";
 import React, { useState, useEffect, useRef } from "react";
@@ -97,9 +98,9 @@ export default function NavBar() {
           to="/"
           onClick={onLinkClick}
         >
-          <span className="brand-logo shadow-sm">TW</span>
+          <img src="../../public/twfavicon.svg" alt="Trade Wars Logo" className="brand-logo"/>
           <span>
-            <div className="fw-bold fs-5">TRD Wars</div>
+            <div className="fw-bold fs-4 text-uppercase">Trade Wars</div>
           </span>
         </Link>
       </div>
@@ -113,10 +114,10 @@ export default function NavBar() {
       </div>
 
       <div className="flex-grow-1 position-relative">
-        <h6 className="text-uppercase nav-section-label fw-semibold mb-2">
+        <h6 className="text-uppercase nav-section-label fw-semibold mb-1">
           Main
         </h6>
-        <ul className="nav nav-pills flex-column mb-4">
+        <ul className="nav nav-pills flex-column mb-2">
           {navItemsMain.map((item) => {
             const Icon = item.icon;
             return (
@@ -136,7 +137,7 @@ export default function NavBar() {
           })}
         </ul>
 
-        <h6 className="text-uppercase nav-section-label fw-semibold mb-2">
+        <h6 className="text-uppercase nav-section-label fw-semibold mb-1">
           Support
         </h6>
         <ul className="nav nav-pills flex-column">
@@ -174,52 +175,60 @@ export default function NavBar() {
           <div>
             {/* Account Switcher */}
             {!accountLoading && accounts.length > 0 && (
-              <div className="mb-3">
+              <div className="mt-2 mb-4">
                 <label
-                  className="d-block mb-2 small text-uppercase"
+                  className="d-block mb-2 small text-uppercase text-center"
                   style={{
                     letterSpacing: "0.1em",
                     color: "rgba(232,237,255,0.65)",
-                    fontSize: "0.7rem",
+                    fontSize: "0.9rem",
                   }}
                 >
                   <Wallet
-                    size={12}
+                    size={18}
                     className="me-1"
                     style={{ verticalAlign: "text-bottom" }}
                   />
                   Active Account
                 </label>
-                <select
-                  className="form-select form-select-sm w-100"
-                  value={selectedAccountId ?? ""}
-                  onChange={(e) => {
-                    const newAccountId = e.target.value
-                      ? Number(e.target.value)
-                      : null;
-                    setSelectedAccountId(newAccountId);
-                  }}
-                  style={{
-                    borderRadius: "10px",
-                    background: "rgba(255,255,255,0.06)",
-                    border: "1px solid rgba(255,255,255,0.14)",
-                    color: "#f5f7ff",
-                    fontSize: "0.875rem",
-                    padding: "0.5rem 0.75rem",
-                  }}
-                >
-                  {accounts.map((acc) => (
-                    <option key={acc.id} value={acc.id}>
-                      {acc.name || "Main Account"}
-                    </option>
-                  ))}
-                </select>
+                <div className="account-select-wrapper position-relative">
+                  <select
+                    className={`form-select form-select-sm w-100 account-select text-center ${
+                      accounts.length > 1 ? "has-dropdown" : ""
+                    }`}
+                    style={{
+                      paddingTop: "0.5rem",
+                      paddingBottom: "0.5rem",
+                      fontSize: "1.1rem",
+                    }}
+                    value={selectedAccountId ?? ""}
+                    onChange={(e) => {
+                      const newAccountId = e.target.value
+                        ? Number(e.target.value)
+                        : null;
+                      setSelectedAccountId(newAccountId);
+                    }}
+                  >
+                    {accounts.map((acc) => (
+                      <option key={acc.id} value={acc.id}>
+                        {acc.name || "Main Account"}
+                      </option>
+                    ))}
+                  </select>
+                  {accounts.length > 1 && (
+                    <ChevronDown
+                      size={16}
+                      className="dropdown-indicator"
+                      aria-hidden="true"
+                    />
+                  )}
+                </div>
                 {selectedAccount && (
                   <div
                     className="small mt-2 text-center"
                     style={{ color: "rgba(232,237,255,0.75)" }}
                   >
-                    Balance: $
+                    Cash Balance: $
                     {selectedAccount.cash?.toLocaleString("en-US", {
                       minimumFractionDigits: 2,
                       maximumFractionDigits: 2,
@@ -228,6 +237,8 @@ export default function NavBar() {
                 )}
               </div>
             )}
+
+            <hr className="my-4 text-white-50" />
 
             <div className="nav-user-block">
               <Link

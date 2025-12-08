@@ -188,7 +188,7 @@ public class AccountController {
     }
 
     @DeleteMapping("/{accountId}")
-    public ResponseEntity<Void> deleteAccount(@PathVariable Long accountId) {
+    public ResponseEntity<Void> deleteAccount(@PathVariable("accountId") Long accountId) {
         Optional<Account> accountOpt = accountRepository.findById(accountId);
         if (accountOpt.isEmpty()) {
             return ResponseEntity.notFound().build();
@@ -200,8 +200,8 @@ public class AccountController {
 
     @PatchMapping("/{accountId}/rename")
     public ResponseEntity<AccountDTO> renameAccount(
-            @PathVariable Long accountId,
-            @RequestParam String name
+            @PathVariable("accountId") Long accountId,
+            @RequestParam("name") String name
     ) {
         Optional<Account> accOpt = accountRepository.findById(accountId);
         if (accOpt.isEmpty()) return ResponseEntity.notFound().build();

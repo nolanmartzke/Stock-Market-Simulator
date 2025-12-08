@@ -2,6 +2,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { useAuth } from "./AuthContext";
 import { getAccounts } from "../api/AccountApi";
+import { toast } from "sonner";
 
 export const AccountContext = createContext();
 
@@ -57,20 +58,70 @@ export function AccountProvider({ children }) {
       });
   }, [auth]);
 
+
+  async function refreshAccounts() {
+    if (!auth?.id) return [];
+
+    try {
+      const res = await getAccounts(auth.id);
+      const list = Array.isArray(res.data) ? res.data : [];
+      setAccounts(list);
+
+      // Fix invalid selection
+      if (selectedAccountId && !list.some(acc => acc.id === selectedAccountId)) {
+        if (list.length > 0) {
+          handleSetAccount(list[0].id);
+        } else {
+          handleSetAccount(null);
+        }
+      }
+
+      return list; // ⬅ return updated list
+    } catch (err) {
+      console.error("Failed to refresh accounts", err);
+      return [];
+    }
+  }
+
+
   // Handle account selection change
-  const handleSetAccount = (accountId) => {
+  const handleSetAccount = async (accountId) => {
     if (!accountId) {
       setSelectedAccountId(null);
       localStorage.removeItem("selectedAccountId");
       return;
     }
 
-    // Validate account exists in our list
-    const accountExists = accounts.some((acc) => acc.id === accountId);
+    const freshList = await refreshAccounts(); // ⬅ gets the updated accounts list
+
+    const accountExists = freshList.some((acc) => acc.id === accountId);
+
     if (accountExists) {
+      const account = freshList.find(acc => acc.id === accountId);
+      const accountName = account?.name || `Account ${accountId}`;
+
       setSelectedAccountId(accountId);
+      toast.success(`Switched to: ${accountName}`);
       localStorage.setItem("selectedAccountId", String(accountId));
     }
+  };
+
+  // Handle account selection change to the most recently entered tournament
+  const handleSetNewAccountToNewTournament = async () => {
+    const freshList = await refreshAccounts(); // get updated accounts
+
+    if (!freshList || freshList.length === 0) return;
+    
+    // Find the highest account ID
+    const highestAccount = freshList.reduce((max, acc) =>
+      acc.id > max.id ? acc : max
+    );
+
+    const highestId = highestAccount.id;
+
+    setSelectedAccountId(highestId);
+    toast.success(`Switched to: ${highestAccount.name}`);
+    localStorage.setItem("selectedAccountId", String(highestId));
   };
 
   // Get the currently selected account object
@@ -85,27 +136,8 @@ export function AccountProvider({ children }) {
         selectedAccount,
         setSelectedAccountId: handleSetAccount,
         loading,
-        refreshAccounts: () => {
-          if (auth?.id) {
-            getAccounts(auth.id)
-              .then((res) => {
-                const list = Array.isArray(res.data) ? res.data : [];
-                setAccounts(list);
-                // If current selection is invalid, reset to first
-                if (
-                  selectedAccountId &&
-                  !list.some((acc) => acc.id === selectedAccountId)
-                ) {
-                  if (list.length > 0) {
-                    handleSetAccount(list[0].id);
-                  } else {
-                    handleSetAccount(null);
-                  }
-                }
-              })
-              .catch((err) => console.error("Failed to refresh accounts", err));
-          }
-        },
+        refreshAccounts,
+        handleSetNewAccountToNewTournament
       }}
     >
       {children}

@@ -19,7 +19,7 @@ import {
 import { useNavigate, Link } from "react-router-dom";
 import { loadAccount, trade } from "../api/AccountApi";
 import { Form } from "react-bootstrap";
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 import { useAccount } from "../context/AccountContext";
 
@@ -41,7 +41,7 @@ const Trade = () => {
   const [, setHistory] = useState([]);
   const [, setProfile] = useState(null);
 
-  const { selectedAccountId } = useAccount();
+  const { selectedAccountId, selectedAccount, refreshAccounts } = useAccount();
 
   const [shares, setShares] = useState(0);
   const [ticker, setTicker] = useState("");
@@ -261,6 +261,7 @@ const Trade = () => {
           orderType === "buy" ? "Bought" : "Sold"
         } ${shares} ${ticker.toUpperCase()} @ ${formatUSD(price)}`
       );
+      refreshAccounts();
 
       loadAccount(selectedAccountId)
         .then((res) => {
@@ -294,35 +295,6 @@ const Trade = () => {
         color: "#e7ecf7",
       }}
     >
-      <Toaster
-        position="bottom-center"
-        theme="dark"
-        richColors
-        closeButton
-        expand
-        offset={12}
-        toastOptions={{
-          duration: 3200,
-          className: "border-0",
-          descriptionClassName: "text-white-50",
-          style: {
-            background:
-              "linear-gradient(135deg, rgba(10,15,30,0.95), rgba(20,35,70,0.92))",
-            color: "#f1f5ff",
-            border: "1px solid rgba(255,255,255,0.12)",
-            boxShadow: "0 20px 55px rgba(0,0,0,0.35)",
-            borderRadius: "16px",
-            backdropFilter: "blur(10px)",
-            fontSize: "16px",
-            lineHeight: "1.35",
-            padding: "12px 14px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          },
-        }}
-      />
       <div className="container-xl py-4 d-flex flex-column gap-3">
         <div
           className="p-4 p-md-5"
@@ -342,6 +314,20 @@ const Trade = () => {
                 in seconds.
               </p>
             </div>
+            {selectedAccount && (
+                <div
+                  className="fw-medium mb-3"
+                  style={{
+                    color: "rgba(232,237,255,0.85)",
+                    fontSize: "1.25rem",
+                  }}
+                >
+                  Viewing:{" "}
+                  <span style={{ color: "#60a5fa" }}>
+                    {selectedAccount.name || "Account"}
+                  </span>
+                </div>
+              )}
           </div>
 
           <div className="row g-3">
@@ -499,8 +485,8 @@ const Trade = () => {
                       </Link>
                     </div>
 
-                    <div className="d-flex align-items-center gap-5 mt-3 mb-3">
-                      <div className="d-flex flex-fill gap-2">
+                    <div className="d-flex flex-column flex-sm-row align-items-center gap-3 mt-3 mb-3">
+                      <div className="d-flex gap-2 w-100 flex-row">
                         <button
                           className="btn btn-sm fw-semibold text-white"
                           style={{

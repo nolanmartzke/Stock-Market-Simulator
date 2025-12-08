@@ -28,7 +28,7 @@ import { trade, loadAccount } from "../api/AccountApi";
 import { useAccount } from "../context/AccountContext";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 /**
  * Stock detail page that loads quote data, fundamentals, price history,
@@ -58,7 +58,7 @@ const Stock = () => {
   const [mode, setMode] = useState("buy"); // buy or sell
   const [shares, setShares] = useState(0); // number of shares user wants to buy/sell
 
-  const { selectedAccountId } = useAccount();
+  const { selectedAccountId, selectedAccount, refreshAccounts } = useAccount();
   const [numHoldingShares, setNumHoldingShares] = useState(0);
   const [averageCost, setAverageCost] = useState(0);
 
@@ -448,6 +448,7 @@ const Stock = () => {
       console.log(cash);
       toast.success("Successfully Executed!");
       setShares(0);
+      refreshAccounts();
     } catch (error) {
       console.error(error);
       toast.error("Failed to execute trade.");
@@ -456,36 +457,6 @@ const Stock = () => {
 
   return (
     <div className="dashboard-page">
-      <Toaster
-        position="bottom-center"
-        theme="dark"
-        richColors
-        closeButton
-        expand
-        offset={12}
-        toastOptions={{
-          duration: 3200,
-          className: "border-0",
-          descriptionClassName: "text-white-50",
-          style: {
-            background:
-              "linear-gradient(135deg, rgba(10,15,30,0.95), rgba(20,35,70,0.92))",
-            color: "#f1f5ff",
-            border: "1px solid rgba(255,255,255,0.12)",
-            boxShadow: "0 20px 55px rgba(0,0,0,0.35)",
-            borderRadius: "16px",
-            backdropFilter: "blur(10px)",
-            fontSize: "16px",
-            lineHeight: "1.35",
-            padding: "12px 14px",
-            display: "flex",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: "8px",
-          },
-        }}
-      />
-
       <div className="container-xl py-4 d-flex flex-column gap-4">
         <div className="glass-panel gradient-border card-arc p-4 p-lg-5">
           <div className="d-flex flex-wrap justify-content-between align-items-start gap-4">
@@ -976,6 +947,20 @@ const Stock = () => {
                 <small className="section-sub">
                   {formatUSD(cash)} buying power available
                 </small>
+                {selectedAccount && (
+                <div
+                  className="fw-medium mt-2"
+                  style={{
+                    color: "rgba(232,237,255,0.85)",
+                    fontSize: "1.25rem",
+                  }}
+                >
+                  {" "}
+                  <span style={{ color: "#60a5fa" }}>
+                    {selectedAccount.name || "Account"}
+                  </span>
+                </div>
+              )}
               </div>
             </div>
           </Col>

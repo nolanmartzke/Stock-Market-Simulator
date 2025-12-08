@@ -138,7 +138,7 @@ body {
   justify-content: center;
   color: #0b1023;
   font-weight: 800;
-  box-shadow: 0 10px 24px rgba(92, 99, 255, 0.35);
+  box-shadow: 0 10px 24px rgba(92, 99, 255, 0.8);
 }
 
 .brand-subtitle {
@@ -255,6 +255,39 @@ body {
   border-top: 1px solid var(--nav-border);
   padding-top: 12px;
   margin-top: 8px;
+}
+
+.account-select-wrapper {
+  position: relative;
+}
+
+.account-select {
+  background: linear-gradient(135deg, rgba(23, 19, 56, 0.9), rgba(37, 32, 88, 0.9)) !important;
+  border: 1px solid rgba(142, 126, 255, 0.7) !important;
+  color: #fdfbff !important;
+  border-radius: 10px;
+  font-size: 0.9rem;
+  padding: 0.55rem 0.95rem;
+  box-shadow: 0 10px 24px rgba(94, 92, 255, 0.2), 0 0 0 1px rgba(255, 255, 255, 0.05) inset;
+}
+
+.account-select:focus {
+  border-color: rgba(162, 150, 255, 0.95) !important;
+  box-shadow: 0 0 0 0.12rem rgba(120, 104, 255, 0.35), 0 12px 30px rgba(94, 92, 255, 0.35);
+}
+
+.account-select.has-dropdown {
+  appearance: none;
+  padding-right: 2.5rem;
+}
+
+.dropdown-indicator {
+  position: absolute;
+  right: 14px;
+  top: 50%;
+  transform: translateY(-50%);
+  color: #f0e9ff;
+  pointer-events: none;
 }
 
 .nav-user-block {

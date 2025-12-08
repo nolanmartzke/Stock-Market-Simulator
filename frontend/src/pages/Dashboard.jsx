@@ -142,7 +142,7 @@ const Dashboard = () => {
                 Portfolio
               </div>
 
-              <div className="d-flex align-items-center gap-5">
+              <div className="d-flex flex-column flex-sm-row align-items-start align-items-sm-center gap-5">
                 <h1 className="display-5 mb-0 text-light">
                   {formattedPortfolioValue}
                 </h1>
@@ -169,10 +169,10 @@ const Dashboard = () => {
               </div>
               {selectedAccount && (
                 <div
-                  className="fw-medium"
+                  className="fw-medium mt-3"
                   style={{
                     color: "rgba(232,237,255,0.85)",
-                    fontSize: "0.95rem",
+                    fontSize: "1.25rem",
                   }}
                 >
                   Viewing:{" "}
@@ -261,7 +261,7 @@ const Dashboard = () => {
               </Card.Body>
             </Card>
 
-            <Card className="glass-panel gradient-border card-arc watchlist-card">
+            {/* <Card className="glass-panel gradient-border card-arc watchlist-card">
               <Card.Body className="p-4">
                 <div className="d-flex justify-content-between align-items-center mb-3">
                   <div>
@@ -279,7 +279,7 @@ const Dashboard = () => {
                   and alerts.
                 </div>
               </Card.Body>
-            </Card>
+            </Card> */}
 
             <Card className="glass-panel gradient-border card-arc news-card">
               <Card.Body className="p-4">
@@ -315,7 +315,7 @@ const Dashboard = () => {
                     <h4 className="section-heading mb-0">Positions</h4>
                   </div>
                   <span className="pill-gradient text-white">
-                    {positionCount} assets
+                    {positionCount} {positionCount === 1? "asset" : "assets"}
                   </span>
                 </div>
                 <div className="d-flex justify-content-between align-items-center m-4">
