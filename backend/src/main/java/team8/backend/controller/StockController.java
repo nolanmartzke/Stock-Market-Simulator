@@ -2,11 +2,14 @@ package team8.backend.controller;
 
 import java.net.URI;
 import java.text.DecimalFormat;
-import java.util.HashMap;
-import java.util.Map;
 import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
+import java.util.concurrent.atomic.AtomicInteger;
 
-
+import jakarta.annotation.PostConstruct;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.core.ParameterizedTypeReference;
 import org.springframework.http.HttpMethod;
@@ -42,6 +45,52 @@ public class StockController {
     private String MASSIVE_API_KEY;
 
     private final RestTemplate restTemplate = new RestTemplate();
+    private final List<String> finnhubKeys = new ArrayList<>();
+    private final AtomicInteger finnhubKeyIndex = new AtomicInteger(0);
+    private final List<String> massiveKeys = new ArrayList<>();
+    private final AtomicInteger massiveKeyIndex = new AtomicInteger(0);
+
+
+    // Allow multiple keys separated by ":" to spread requests across keys
+    @PostConstruct
+    public void initFinnhubKeys() {
+        if (FINNHUB_API_KEY == null || FINNHUB_API_KEY.isBlank()) {
+            return;
+        }
+        for (String key : FINNHUB_API_KEY.split(":")) {
+            if (key != null && !key.isBlank()) {
+                finnhubKeys.add(key.trim());
+            }
+        }
+    }
+
+    @PostConstruct
+    public void initMassiveKeys() {
+        if (MASSIVE_API_KEY == null || MASSIVE_API_KEY.isBlank()) {
+            return;
+        }
+        for (String key : MASSIVE_API_KEY.split(":")) {
+            if (key != null && !key.isBlank()) {
+                massiveKeys.add(key.trim());
+            }
+        }
+    }
+
+    private String nextFinnhubKey() {
+        if (finnhubKeys.isEmpty()) {
+            return FINNHUB_API_KEY;
+        }
+        int index = Math.floorMod(finnhubKeyIndex.getAndIncrement(), finnhubKeys.size());
+        return finnhubKeys.get(index);
+    }
+
+    private String nextMassiveKey() {
+        if (massiveKeys.isEmpty()) {
+            return MASSIVE_API_KEY;
+        }
+        int index = Math.floorMod(massiveKeyIndex.getAndIncrement(), massiveKeys.size());
+        return massiveKeys.get(index);
+    }
 
     /**
      * Search Finnhub for a stock symbol by query (returns the first matching result).
@@ -52,11 +101,12 @@ public class StockController {
     @GetMapping("/search")
     public ResponseEntity<Map<String, Object>> searchStock(@RequestParam(name = "query") String query) {
         String baseUrl = "https://finnhub.io/api/v1/search";
+        String token = nextFinnhubKey();
 
         URI url = UriComponentsBuilder.fromUriString(baseUrl)
             .queryParam("q", query.toUpperCase())
             .queryParam("exchange", "US")
-            .queryParam("token", FINNHUB_API_KEY)
+            .queryParam("token", token)
             .build().toUri();
 
         // ensures return is in JSON format
@@ -79,7 +129,7 @@ public class StockController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         JsonNode firstResult = resultNode.get(0);
-        System.out.println(firstResult);
+        System.out.println("Search Result: " + firstResult);
 
         Map<String, Object> firstResultMap = mapper.convertValue(firstResult, new TypeReference<Map<String, Object>>() {});
         return ResponseEntity.ok(firstResultMap);
@@ -95,11 +145,12 @@ public class StockController {
     @GetMapping("/searchbar")
     public ResponseEntity<Map<String, Object>> searchBar(@RequestParam(name = "query") String query) {
         String baseUrl = "https://finnhub.io/api/v1/search";
+        String token = nextFinnhubKey();
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl)
             .queryParam("q", query)
             .queryParam("exchange", "US")
-            .queryParam("token", FINNHUB_API_KEY);
+            .queryParam("token", token);
         URI url = builder.build().toUri();
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -147,10 +198,11 @@ public class StockController {
         @RequestParam(name = "minId", required = false, defaultValue = "0") long minId) {
 
         String baseUrl = "https://finnhub.io/api/v1/news";
+        String token = nextFinnhubKey();
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl)
                 .queryParam("category", category)
-                .queryParam("token", FINNHUB_API_KEY);
+                .queryParam("token", token);
         if (minId > 0) builder.queryParam("minId", minId);
 
         URI url = builder.build().toUri();
@@ -189,17 +241,18 @@ public class StockController {
     @GetMapping("/quote")
     public ResponseEntity<Map<String, Object>> getQuote(@RequestParam(name = "ticker") String ticker) {
         String baseUrl = "https://finnhub.io/api/v1/quote";
+        String token = nextFinnhubKey();
 
         URI url = UriComponentsBuilder.fromUriString(baseUrl)
             .queryParam("symbol", ticker.toUpperCase())
-            .queryParam("token", FINNHUB_API_KEY)
+            .queryParam("token", token)
             .build().toUri();
 
         // ensures return is in JSON format
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange( 
             url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {}
         );
-        System.out.println(response.getBody());
+        System.out.println(ticker + ": " + response.getBody());
 
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
@@ -220,6 +273,7 @@ public class StockController {
         @RequestParam(name = "cusip", required = false) String cusip) {
 
         String baseUrl = "https://finnhub.io/api/v1/stock/profile2";
+        String token = nextFinnhubKey();
 
         UriComponentsBuilder builder = UriComponentsBuilder.fromUriString(baseUrl);
         if (symbol != null && !symbol.isBlank()) {
@@ -234,7 +288,7 @@ public class StockController {
             return ResponseEntity.badRequest().body(err);
         }
 
-        builder.queryParam("token", FINNHUB_API_KEY);
+        builder.queryParam("token", token);
         URI url = builder.build().toUri();
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange(
@@ -263,10 +317,11 @@ public class StockController {
     @GetMapping("/metrics")
     public ResponseEntity<Map<String, Object>> getMetrics(@RequestParam(name = "ticker") String ticker) {
         String baseUrl = "https://finnhub.io/api/v1/stock/metric";
+        String token = nextFinnhubKey();
 
         URI url = UriComponentsBuilder.fromUriString(baseUrl)
             .queryParam("symbol", ticker.toUpperCase())
-            .queryParam("token", FINNHUB_API_KEY)
+            .queryParam("token", token)
             .queryParam("metric", "all")
             .build().toUri();
         
@@ -310,7 +365,6 @@ public class StockController {
                 filteredMetrics.put(entry.getValue(), formatted);
             }
         }
-        System.out.println(filteredMetrics);
 
         return ResponseEntity.ok(filteredMetrics);
     }
@@ -329,6 +383,7 @@ public class StockController {
         @RequestParam(name = "ticker") String ticker,
         @RequestParam(name = "range", required = false) String range) {
         String baseUrl = "https://api.massive.com/v2/aggs";
+        String apiKey = nextMassiveKey();
 
         String multiplier = "1";
         String timespan = "day";
@@ -350,10 +405,8 @@ public class StockController {
             .queryParam("adjusted", "true")
             .queryParam("sort", "asc")
             .queryParam("limit", "5000")
-            .queryParam("apiKey", MASSIVE_API_KEY)
+            .queryParam("apiKey", apiKey)
             .build().toUri();
-
-        System.out.println("ddd57: " + url);
 
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange( 
             url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {}
