@@ -112,7 +112,7 @@ public class TournamentController {
         List<TournamentLeaderboardDTO> leaderboard = tournament.getAccounts()
                 .stream()
                 .map(acc -> new TournamentLeaderboardDTO(
-                        acc.getName(),
+                        acc.getUser().getName(),
                         acc.getCash(),
                         acc.getHoldings().stream().mapToDouble(h -> h.getShares() * h.getAveragePrice()).sum()
                 ))
