@@ -129,7 +129,7 @@ public class StockController {
             return ResponseEntity.status(HttpStatus.NOT_FOUND).build();
 
         JsonNode firstResult = resultNode.get(0);
-        System.out.println(firstResult);
+        System.out.println("Search Result: " + firstResult);
 
         Map<String, Object> firstResultMap = mapper.convertValue(firstResult, new TypeReference<Map<String, Object>>() {});
         return ResponseEntity.ok(firstResultMap);
@@ -252,7 +252,7 @@ public class StockController {
         ResponseEntity<Map<String, Object>> response = restTemplate.exchange( 
             url, HttpMethod.GET, null, new ParameterizedTypeReference<Map<String, Object>>() {}
         );
-        System.out.println(response.getBody());
+        System.out.println(ticker + ": " + response.getBody());
 
         return ResponseEntity.status(response.getStatusCode()).body(response.getBody());
     }
@@ -365,7 +365,6 @@ public class StockController {
                 filteredMetrics.put(entry.getValue(), formatted);
             }
         }
-        System.out.println(filteredMetrics);
 
         return ResponseEntity.ok(filteredMetrics);
     }

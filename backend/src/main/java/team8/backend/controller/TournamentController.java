@@ -1,16 +1,16 @@
 package team8.backend.controller;
 
+import jakarta.transaction.Transactional;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpStatus;
 import org.springframework.http.ResponseEntity;
 import org.springframework.web.bind.annotation.*;
-
-import jakarta.transaction.Transactional;
-import team8.backend.dto.TournamentDTO;
 import team8.backend.dto.TournamentCreateDTO;
+import team8.backend.dto.TournamentDTO;
 import team8.backend.dto.TournamentLeaderboardDTO;
 import team8.backend.dto.TournamentUpdateDTO;
 import team8.backend.entity.Account;
+import team8.backend.entity.Holding;
 import team8.backend.entity.Tournament;
 import team8.backend.entity.User;
 import team8.backend.repository.AccountRepository;
@@ -18,8 +18,11 @@ import team8.backend.repository.TournamentRepository;
 import team8.backend.repository.UserRepository;
 
 import java.time.LocalDateTime;
+import java.util.HashMap;
 import java.util.List;
+import java.util.Map;
 import java.util.Optional;
+import java.util.Set;
 import java.util.stream.Collectors;
 
 @RestController
@@ -35,6 +38,9 @@ public class TournamentController {
 
     @Autowired
     private AccountRepository accountRepository;
+
+    @Autowired
+    private StockController stockController;
 
     @PostMapping
     public ResponseEntity<TournamentDTO> createTournament(@RequestBody TournamentCreateDTO dto) {
@@ -109,12 +115,25 @@ public class TournamentController {
 
         Tournament tournament = tournamentOpt.get();
 
+        // Collect all unique tickers and fetch current prices
+        Set<String> tickers = tournament.getAccounts().stream()
+                .flatMap(acc -> acc.getHoldings().stream())
+                .map(Holding::getStockTicker)
+                .collect(Collectors.toSet());
+        Map<String, Double> livePrices = fetchCurrentPrices(tickers);
+
         List<TournamentLeaderboardDTO> leaderboard = tournament.getAccounts()
                 .stream()
                 .map(acc -> new TournamentLeaderboardDTO(
                         acc.getUser().getName(),
                         acc.getCash(),
-                        acc.getHoldings().stream().mapToDouble(h -> h.getShares() * h.getAveragePrice()).sum()
+                        acc.getHoldings().stream()
+                                .mapToDouble(h -> {
+                                    String ticker = h.getStockTicker().toUpperCase();
+                                    double price = livePrices.getOrDefault(ticker, h.getAveragePrice());
+                                    return h.getShares() * price;
+                                })
+                                .sum()
                 ))
                 .sorted((a,b) -> Double.compare(b.getTotalHoldingValue() + b.getCash(), a.getTotalHoldingValue() + a.getCash()))
                 .collect(Collectors.toList());
@@ -202,5 +221,26 @@ public class TournamentController {
         accountRepository.delete(account);
 
         return ResponseEntity.ok("User left the tournament successfully");
+    }
+
+    /**
+     * Fetch live prices for all currently held stocks across all users in a tournament
+     */
+    private Map<String, Double> fetchCurrentPrices(Set<String> tickers) {
+        Map<String, Double> prices = new HashMap<>();
+        if (tickers == null || tickers.isEmpty()) return prices;
+
+        for (String ticker : tickers) {
+            try {
+                ResponseEntity<Map<String, Object>> resp = stockController.getQuote(ticker);
+                if (resp.getStatusCode().is2xxSuccessful() && resp.getBody() != null) {
+                    Object current = resp.getBody().get("c");
+                    prices.put(ticker.toUpperCase(), ((Number) current).doubleValue());
+                }
+            } catch (Exception ex) {
+                // Ignores errors, will fall back to average purchase price
+            }
+        }
+        return prices;
     }
 }
