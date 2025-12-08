@@ -139,7 +139,6 @@ const Tournament = () => {
         await fetchLeaderboard(tournamentId)
       }
       handleSetNewAccountToNewTournament();
-      alert('Successfully entered tournament!')
     } catch (error) {
       console.error('Failed to enter tournament:', error)
       const errorMsg = error.response?.data || 'Failed to enter tournament'

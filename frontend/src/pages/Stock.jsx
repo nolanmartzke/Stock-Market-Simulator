@@ -28,7 +28,7 @@ import { trade, loadAccount } from "../api/AccountApi";
 import { useAccount } from "../context/AccountContext";
 import { motion as Motion, AnimatePresence } from "framer-motion";
 
-import { Toaster, toast } from "sonner";
+import { toast } from "sonner";
 
 /**
  * Stock detail page that loads quote data, fundamentals, price history,

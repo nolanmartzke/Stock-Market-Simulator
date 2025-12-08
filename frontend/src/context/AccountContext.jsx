@@ -2,6 +2,7 @@
 import { createContext, useState, useEffect, useContext } from "react";
 import { useAuth } from "./AuthContext";
 import { getAccounts } from "../api/AccountApi";
+import { toast } from "sonner";
 
 export const AccountContext = createContext();
 
@@ -96,7 +97,11 @@ export function AccountProvider({ children }) {
     const accountExists = freshList.some((acc) => acc.id === accountId);
 
     if (accountExists) {
+      const account = freshList.find(acc => acc.id === accountId);
+      const accountName = account?.name || `Account ${accountId}`;
+
       setSelectedAccountId(accountId);
+      toast.success(`Switched to: ${accountName}`);
       localStorage.setItem("selectedAccountId", String(accountId));
     }
   };
@@ -115,6 +120,7 @@ export function AccountProvider({ children }) {
     const highestId = highestAccount.id;
 
     setSelectedAccountId(highestId);
+    toast.success(`Switched to: ${highestAccount.name}`);
     localStorage.setItem("selectedAccountId", String(highestId));
   };
 
