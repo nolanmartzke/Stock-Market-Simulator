@@ -90,7 +90,7 @@ const Dashboard = () => {
           .catch((err) => console.log(err));
       }
     }
-  }, [positions, quotes]);
+  }, [positions]);
 
   useEffect(() => {
     if (!positions || !quotes) return;
