@@ -175,17 +175,17 @@ export default function NavBar() {
           <div>
             {/* Account Switcher */}
             {!accountLoading && accounts.length > 0 && (
-              <div className="mb-4">
+              <div className="mt-2 mb-4">
                 <label
                   className="d-block mb-2 small text-uppercase text-center"
                   style={{
                     letterSpacing: "0.1em",
                     color: "rgba(232,237,255,0.65)",
-                    fontSize: "0.8rem",
+                    fontSize: "0.9rem",
                   }}
                 >
                   <Wallet
-                    size={16}
+                    size={18}
                     className="me-1"
                     style={{ verticalAlign: "text-bottom" }}
                   />
