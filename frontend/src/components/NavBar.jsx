@@ -98,9 +98,9 @@ export default function NavBar() {
           to="/"
           onClick={onLinkClick}
         >
-          <span className="brand-logo shadow-sm">TW</span>
+          <img src="../../public/twfavicon.svg" alt="Trade Wars Logo" className="brand-logo"/>
           <span>
-            <div className="fw-bold fs-5">TRD Wars</div>
+            <div className="fw-bold fs-4 text-uppercase">Trade Wars</div>
           </span>
         </Link>
       </div>

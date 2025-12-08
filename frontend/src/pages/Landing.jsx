@@ -31,8 +31,8 @@ export default function Landing() {
         <Container fluid className="px-4 px-lg-5">
           {/* Brand */}
           <Navbar.Brand as={Link} to="/" className="fw-bold fs-3">
-            <span className="me-2 text-danger">TRD</span>
-            <span className="text-light">Wars</span>
+            <span className="me-2 text-danger text-uppercase">Trade</span>
+            <span className="text-light text-uppercase">Wars</span>
           </Navbar.Brand>
 
           {/* Mobile toggle */}
@@ -114,20 +114,19 @@ export default function Landing() {
           <div className="container py-5">
             <div className="row align-items-center">
               {/* Left column: Copy + CTAs */}
-              <div className="col-lg-6 mb-5 mb-lg-0">
+              <div className="col-lg-8 mb-5 mb-lg-0">
                 {/* Badge */}
                 <span className="badge text-bg-danger mb-3">Get Started Now</span>
 
                 {/* Headline with fade-in-up spans */}
                 <h1 id="hero-heading" className="display-3 fw-bold mb-4">
-                  <span className="fade-in-up d-block">Practice trading.</span>
-                  <span className="fade-in-up d2 d-block">Zero risk.</span>
-                  <span className="fade-in-up d3 d-block">Real learning.</span>
+                  <span className="fade-in-up d-block">Compete in tournaments.</span>
+                  <span className="fade-in-up d3 d-block">Level up your skills.</span>
                 </h1>
 
                 {/* Supporting text */}
                 <p className="lead mb-4 fade-in-up d4 text-muted-on-dark">
-                  Create an account, log in, and explore the interface.
+                  Create an account, log in, and start trading.
                 </p>
 
                 {/* CTAs */}
@@ -182,7 +181,7 @@ export default function Landing() {
                   How it works
                 </h2>
                 <p className="text-muted">
-                  Get started in two steps. Trading features coming soon.
+                  Get started signed up and start trading right away
                 </p>
               </div>
             </div>
@@ -205,7 +204,7 @@ export default function Landing() {
                       Create your account
                     </Card.Title>
                     <Card.Text className="text-muted mb-3">
-                      Sign up with your email and choose a secure password.
+                      Sign up to start competing.
                     </Card.Text>
                     <Button
                       as={Link}
@@ -228,16 +227,16 @@ export default function Landing() {
                 >
                   <Card.Body className="text-center p-4">
                     <div
-                      className="rounded-circle bg-danger bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3"
+                      className="rounded-circle bg-success bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3"
                       style={{ width: "60px", height: "60px" }}
                     >
-                      <span className="fs-4 fw-bold text-danger">2</span>
+                      <span className="fs-4 fw-bold text-success">2</span>
                     </div>
                     <Card.Title as="h3" className="fw-bold text-dark">
-                      Log in
+                      Enter Tournaments
                     </Card.Title>
                     <Card.Text className="text-muted mb-3">
-                      Access your account and explore the interface.
+                     Join tournaments to be able compare your performance with other users!
                     </Card.Text>
                     <Button
                       as={Link}
@@ -260,24 +259,24 @@ export default function Landing() {
                 >
                   <Card.Body className="text-center p-4">
                     <div
-                      className="rounded-circle bg-secondary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3"
+                      className="rounded-circle bg-primary bg-opacity-10 d-inline-flex align-items-center justify-content-center mb-3"
                       style={{ width: "60px", height: "60px" }}
                     >
-                      <span className="fs-4 fw-bold text-secondary">3</span>
+                      <span className="fs-4 fw-bold text-primary">3</span>
                     </div>
                     <Card.Title as="h3" className="fw-bold text-dark">
-                      Practice trading
+                      Start Trading
                     </Card.Title>
                     <Card.Text className="text-muted mb-3">
-                      Trading features are in development.
+                      Make smart trades, grow your portfolio, and beat your opponents!
                     </Card.Text>
                     <Button
-                      variant="outline-secondary"
+                      variant="outline-success"
                       size="sm"
-                      disabled
+                      to="/dashboard"
                       style={{ borderRadius: "12px" }}
                     >
-                      Coming soon
+                      Trade Now
                     </Button>
                   </Card.Body>
                 </Card>

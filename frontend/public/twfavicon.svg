@@ -1,0 +1,8 @@
+<svg width="256" height="256" viewBox="0 0 256 256" xmlns="http://www.w3.org/2000/svg">
+
+  <!-- Dark background -->
+  <rect width="256" height="256" rx="48" fill="#0B0F1E"></rect>
+
+  <!-- CHART LINE (thick, simplified, no glow) -->
+  <polyline points="48,176 96,120 144,152 208,80" fill="none" stroke="#5BC9FF" stroke-width="22" stroke-linecap="round" stroke-linejoin="round"></polyline>
+</svg>

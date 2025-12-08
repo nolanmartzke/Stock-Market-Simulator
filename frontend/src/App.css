@@ -138,7 +138,7 @@ body {
   justify-content: center;
   color: #0b1023;
   font-weight: 800;
-  box-shadow: 0 10px 24px rgba(92, 99, 255, 0.35);
+  box-shadow: 0 10px 24px rgba(92, 99, 255, 0.8);
 }
 
 .brand-subtitle {
