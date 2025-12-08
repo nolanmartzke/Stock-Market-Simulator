@@ -31,7 +31,7 @@ const Account = () => {
     useState("Update password");
 
   const [accounts, setAccounts] = useState([]);
-  const [newAccountName, setNewAccountName] = useState("");
+ const [newAccountName, setNewAccountName] = useState("");
   const [createAccountStatus, setCreateAccountStatus] = useState("idle");
 
   useEffect(() => {
@@ -111,6 +111,7 @@ const Account = () => {
     logout();
     navigate("/");
   };
+  const { selectedAccountId } = useAccount();
 
   // Guard: wait for auth state before rendering the account shell.
   if (!auth) return null;
@@ -190,22 +191,47 @@ const Account = () => {
               </div>
               <div className="mb-3">
                 {accounts.map((acc) => (
-                  <div
-                    key={acc.id}
-                    className="d-flex justify-content-between align-items-center p-3 mb-2 rounded-3"
-                    style={{
-                      background: "rgba(255,255,255,0.04)",
-                      border: "1px solid rgba(255,255,255,0.08)",
-                    }}
-                  >
-                    <span className="text-light">{acc.name}</span>
-                    <span style={{ color: "#9aa6d4" }}>
-                      $
-                      {acc.cash?.toLocaleString("en-US", {
-                        minimumFractionDigits: 2,
-                      })}
-                    </span>
-                  </div>
+                  (() => {
+                    const accountId = Number(acc.id);
+                    const isSelected = accountId === selectedAccountId;
+                    const hoverProps = isSelected ? 
+                      { whileHover: { scale: 1.01, boxShadow: "0 12px 28px rgba(34,197,94,0.25)", },}
+                      : 
+                      { whileHover: { scale: 1.01, background: "rgba(255,255,255,0.06)", borderColor: "rgba(99,102,241,0.6)", boxShadow: "0 10px 24px rgba(0,0,0,0.25)",},};
+
+                    return (
+                      <Motion.div
+                        key={acc.id}
+                        className="d-flex justify-content-between align-items-center p-3 mb-2 rounded-3"
+                        style={{
+                          background: isSelected? "linear-gradient(135deg, rgba(34,197,94,0.35), rgba(14,165,233,0.28))" : "rgba(255,255,255,0.04)",
+                          border: isSelected? "1px solid rgba(34,197,94,0.9)" : "1px solid rgba(255,255,255,0.12)",
+                          boxShadow: isSelected? "0 10px 28px rgba(14,165,233,0.25)" : "none",
+                          cursor: "pointer",
+                          transition: "all 0.2s ease",
+                        }}
+                        {...hoverProps}
+                        whileTap={{ scale: 0.985 }}
+                        onClick={() => setSelectedAccountId(accountId)}
+                        role="button"
+                        tabIndex={0}
+                        onKeyDown={(e) => {
+                          if (e.key === "Enter" || e.key === " ") {
+                            e.preventDefault();
+                            setSelectedAccountId(accountId);
+                          }
+                        }}
+                      >
+                        <span className="text-light">{acc.name || "Main Account"}</span>
+                        <span style={{ color: "#9aa6d4" }}>
+                          $
+                          {acc.cash?.toLocaleString("en-US", {
+                            minimumFractionDigits: 2,
+                          })}
+                        </span>
+                      </Motion.div>
+                    );
+                  })()
                 ))}
               </div>
               <div className="d-flex gap-2">
